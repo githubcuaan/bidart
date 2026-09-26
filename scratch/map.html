@@ -1,0 +1,923 @@
+<!doctype html>
+<html class="dark" lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_tab" name="shell-type" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100vw;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+          background-color: #0f131d;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4edea3",
+              "on-secondary-fixed-variant": "#653e00",
+              "on-primary-container": "#00422b",
+              "on-tertiary-container": "#00367a",
+              "on-primary-fixed-variant": "#005236",
+              error: "#ffb4ab",
+              "on-tertiary": "#002e6a",
+              "tertiary-container": "#71a1ff",
+              "tertiary-fixed": "#d8e2ff",
+              tertiary: "#adc6ff",
+              "tertiary-fixed-dim": "#adc6ff",
+              "on-tertiary-fixed-variant": "#004395",
+              "on-primary-fixed": "#002113",
+              "surface-container-high": "#262a35",
+              "on-background": "#dfe2f1",
+              "error-container": "#93000a",
+              surface: "#0f131d",
+              "on-surface-variant": "#bbcabf",
+              "secondary-fixed": "#ffddb8",
+              "on-error-container": "#ffdad6",
+              "inverse-primary": "#006c49",
+              "primary-container": "#10b981",
+              "surface-tint": "#4edea3",
+              "surface-variant": "#313540",
+              "surface-dim": "#0f131d",
+              "surface-bright": "#353944",
+              "secondary-fixed-dim": "#ffb95f",
+              "inverse-surface": "#dfe2f1",
+              "surface-container": "#1c1f2a",
+              "on-error": "#690005",
+              "on-secondary-fixed": "#2a1700",
+              "primary-fixed": "#6ffbbe",
+              "outline-variant": "#3c4a42",
+              "on-primary": "#003824",
+              background: "#0f131d",
+              "surface-container-low": "#171b26",
+              "on-secondary": "#472a00",
+              "inverse-on-surface": "#2c303b",
+              "on-secondary-container": "#5b3800",
+              "surface-container-lowest": "#0a0e18",
+              "primary-fixed-dim": "#4edea3",
+              "on-tertiary-fixed": "#001a42",
+              "secondary-container": "ee9800",
+              "on-surface": "#dfe2f1",
+              "surface-container-highest": "#313540",
+              outline: "#86948a",
+              secondary: "#ffb95f",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-lg": "1.5rem",
+              "space-md": "1rem",
+              "gutter-desktop": "1.5rem",
+              "space-sm": "0.5rem",
+              "space-xs": "0.25rem",
+              margin: "1rem",
+              "margin-tablet": "1.5rem",
+              "space-xl": "2rem",
+              "margin-desktop": "2.5rem",
+              gutter: "1rem",
+            },
+            fontFamily: {
+              "label-md": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "display-score": ["Plus Jakarta Sans"],
+              "display-score-mobile": ["Plus Jakarta Sans"],
+              "headline-lg-mobile": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "headline-sm": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "title-md": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "label-lg": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "label-md": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "30px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "display-score": [
+                "72px",
+                {
+                  lineHeight: "76px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+              "display-score-mobile": [
+                "56px",
+                {
+                  lineHeight: "60px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                {
+                  lineHeight: "34px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "26px", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "title-md": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+              "label-sm": [
+                "10px",
+                {
+                  lineHeight: "14px",
+                  letterSpacing: "0.05em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-lg": [
+                "14px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"
+  >
+    <header
+      class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl pt-safe shadow-[0_1px_12px_rgba(0,0,0,0.4)]"
+    >
+      <div class="h-16 px-margin flex items-center justify-between">
+        <div class="flex items-center gap-space-sm">
+          <img
+            alt="Bida Pro Logo"
+            class="h-8 w-auto object-contain"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1WSXDlGUdQSHHjkbnAyty2f_3f3Tj_7_8X-CZimUtqpejSLWxS3Q1OZ7yGEdavBV0Z1xA71awQzxVd5hdChUYAsXxYY_EwVy_2CXGHRWdn4GyjLBCis7gL-RusEeTzuzN5DxB0oqguKIYorsoUHpgK01wMme5JB0-rUgeGWcm-6cnEVZw1yQFNUMsaz67zFBTcFbH_VkOr_k4yiq1oyze5FQCVVAC-Bc3T40mBORWsWp_ZB3XqSjcTUXYY9"
+          />
+          <div class="flex flex-col">
+            <span
+              class="text-label-sm font-label-sm tracking-wider uppercase text-primary"
+              >Bida Bắn Đền</span
+            ><span
+              class="text-title-md font-title-md text-on-surface tracking-tight leading-tight"
+              >Clb Quán</span
+            >
+          </div>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <div
+            class="flex items-center gap-space-xs bg-surface-container-high/80 px-space-xs py-0.5 rounded-full"
+          >
+            <span
+              class="px-1.5 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary/20 text-secondary uppercase tracking-wider"
+              >Hạng B+</span
+            ><img
+              alt="Profile"
+              class="w-8 h-8 rounded-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDObMpE0l9sLsWV_lRERZ-6C7VChBrhpelglls--U-rkQ4eQVSmMPZpi1R70fsEJQG3kEzaQrQSvmqSdEn7Ukxhk1KYnl3-xCzv-Gy7LUhApUejXOUlg_udK4Pn4yDD6ddSbHnfuuDSaSfRH4yhqtlGoLT2_0g1Tbw_gwdBOA58lqGC3UW0YU60B_GONUOCDgzRRyL_B2pu0SXXlya4dZRwVTQzHKkJ4d3r3BrpZaB41g3pWZGLcJI4-w"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <main
+      class="flex flex-col relative w-full pt-16 pb-28 bg-surface min-h-screen"
+    >
+      <div class="flex flex-col w-full relative">
+        <!-- Top Search & Quick Filters (Floating Floating Glass Header) -->
+        <div
+          class="px-margin pt-space-sm pb-space-xs flex flex-col gap-space-sm z-30"
+        >
+          <!-- Search Bar with Quick Compass Button -->
+          <div
+            class="flex items-center gap-space-xs bg-surface-container-high/90 backdrop-blur-md rounded-xl p-space-xs shadow-lg"
+          >
+            <div class="flex items-center pl-space-sm text-primary">
+              <span class="material-symbols-outlined text-[22px]">search</span>
+            </div>
+            <input
+              class="w-full bg-transparent text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/60 focus:outline-none px-space-xs py-1"
+              id="club-search-input"
+              placeholder="Tìm quán bida, CLB, đường..."
+              type="text"
+            />
+            <button
+              aria-label="Định vị hiện tại"
+              class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary active:scale-95 transition-transform"
+              id="locate-btn"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[20px]"
+                >my_location</span
+              >
+            </button>
+          </div>
+          <!-- Horizontal Scrollable Tag Filters -->
+          <div
+            class="flex items-center gap-space-xs overflow-x-auto no-scrollbar py-0.5"
+            id="filter-bar"
+          >
+            <button
+              class="filter-chip active flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md shrink-0 shadow-md transition-all"
+            >
+              <span class="material-symbols-outlined text-[16px]">near_me</span>
+              <span>Gần nhất</span>
+            </button>
+            <button
+              class="filter-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high/80 text-on-surface font-label-md text-label-md shrink-0 transition-all hover:bg-surface-bright"
+            >
+              <span class="material-symbols-outlined text-[16px]"
+                >sports_cricket</span
+              >
+              <span>Bàn Rasson</span>
+            </button>
+            <button
+              class="filter-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high/80 text-on-surface font-label-md text-label-md shrink-0 transition-all hover:bg-surface-bright"
+            >
+              <span class="material-symbols-outlined text-[16px]">stars</span>
+              <span>Bàn Aileex King</span>
+            </button>
+            <button
+              class="filter-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high/80 text-on-surface font-label-md text-label-md shrink-0 transition-all hover:bg-surface-bright"
+            >
+              <span
+                class="w-2 h-2 rounded-full bg-primary animate-pulse"
+              ></span>
+              <span>Còn bàn trống</span>
+            </button>
+            <button
+              class="filter-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high/80 text-on-surface font-label-md text-label-md shrink-0 transition-all hover:bg-surface-bright"
+            >
+              <span class="material-symbols-outlined text-[16px]"
+                >schedule</span
+              >
+              <span>Mở 24/7</span>
+            </button>
+          </div>
+        </div>
+        <!-- Interactive Map Canvas Visual -->
+        <div
+          class="relative w-full h-[400px] overflow-hidden my-space-xs rounded-xl shadow-inner bg-surface-container-lowest"
+        >
+          <!-- Map Canvas (Styled Vector Dark Theme simulation with road grids) -->
+          <div
+            class="w-full h-full bg-cover bg-center"
+            data-location="Cau Giay, Hanoi, Vietnam"
+            style="
+              background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuCERyvt4DZja4efBSYIygOV4kHA-24KBQEowc4uKDXwAHDJPLitMlsJ9EV98U--HEB4FfDp01lcE4vGYPsr_clh9pz7wNko5An_89EIy1zp2cvl3uXZPWwEMufAQZIQ_hbeqosZo_CGvB7PSL4pSJYVzyW9K3cfbU0prw9BBnOpSxev5Mxel9MS2-anJI6HGtLANtDf21w2hkpyk1CVzkZCv9x0E9_hV7olx89IP7QhkaqQHOwC4NPxLg&quot;);
+            "
+          >
+            <!-- Ambient Dark Grid Graphic Layer -->
+            <div
+              class="absolute inset-0 bg-surface-container-lowest/80 backdrop-brightness-75 flex flex-col justify-between p-space-md pointer-events-none"
+            >
+              <svg
+                class="w-full h-full opacity-35"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <pattern
+                    height="48"
+                    id="grid"
+                    patternUnits="userSpaceOnUse"
+                    width="48"
+                  >
+                    <path
+                      d="M 48 0 L 0 0 0 48"
+                      fill="none"
+                      stroke="#262a35"
+                      stroke-width="1"
+                    ></path>
+                  </pattern>
+                </defs>
+                <rect fill="url(#grid)" height="100%" width="100%"></rect>
+                <!-- Arterial roads simulation -->
+                <path
+                  d="M -10 120 Q 180 140 420 110"
+                  fill="none"
+                  stroke="#313540"
+                  stroke-width="12"
+                ></path>
+                <path
+                  d="M 160 -20 Q 180 200 240 450"
+                  fill="none"
+                  stroke="#313540"
+                  stroke-width="14"
+                ></path>
+                <path
+                  d="M -20 280 L 450 320"
+                  fill="none"
+                  stroke="#262a35"
+                  stroke-width="8"
+                ></path>
+                <!-- Traffic glowing line -->
+                <path
+                  d="M 160 -20 Q 180 200 240 450"
+                  fill="none"
+                  opacity="0.4"
+                  stroke="#4edea3"
+                  stroke-dasharray="8 6"
+                  stroke-width="2"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <!-- Map Compass & View Switch Controls -->
+          <div class="absolute top-3 right-3 flex flex-col gap-2 z-20">
+            <button
+              class="w-9 h-9 rounded-lg bg-surface-container-high/90 text-on-surface flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+            >
+              <span class="material-symbols-outlined text-[20px]">layers</span>
+            </button>
+            <button
+              class="w-9 h-9 rounded-lg bg-surface-container-high/90 text-on-surface flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+            >
+              <span class="material-symbols-outlined text-[20px]">add</span>
+            </button>
+            <button
+              class="w-9 h-9 rounded-lg bg-surface-container-high/90 text-on-surface flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+            >
+              <span class="material-symbols-outlined text-[20px]">remove</span>
+            </button>
+          </div>
+          <!-- User Radar Pulse (Current Location) -->
+          <div
+            class="absolute top-[68%] left-[26%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none z-10"
+          >
+            <div class="relative flex items-center justify-center">
+              <span
+                class="absolute w-12 h-12 rounded-full bg-primary/25 animate-ping"
+              ></span>
+              <span
+                class="absolute w-7 h-7 rounded-full bg-primary/40 animate-pulse"
+              ></span>
+              <span
+                class="w-4 h-4 rounded-full bg-primary shadow-[0_0_12px_#4edea3]"
+              ></span>
+            </div>
+            <div
+              class="mt-1 px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-primary font-label-sm text-[9px] uppercase tracking-wider shadow"
+            >
+              Vị trí của bạn
+            </div>
+          </div>
+          <!-- PIN 1: Legend Billiards (Selected Pin) -->
+          <div
+            class="club-pin active absolute top-[36%] left-[58%] -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex flex-col items-center group transition-transform hover:scale-105"
+            id="pin-legend"
+            onclick="selectClub('legend')"
+          >
+            <!-- Floating Label -->
+            <div
+              class="mb-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.6)]"
+            >
+              <span class="w-2 h-2 rounded-full bg-primary"></span>
+              <span
+                class="font-label-md text-label-md text-primary font-bold whitespace-nowrap"
+                >Legend • Rasson</span
+              >
+            </div>
+            <!-- 9-Ball Luminous Emblem Pin -->
+            <div
+              class="relative w-11 h-11 rounded-full bg-gradient-to-tr from-surface-container-lowest via-surface-container-high to-surface-bright flex items-center justify-center shadow-[0_0_20px_rgba(78,222,163,0.7)]"
+            >
+              <!-- 9 Ball Visual Stripe -->
+              <div
+                class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shadow-inner relative overflow-hidden"
+              >
+                <div
+                  class="absolute inset-x-0 h-3 bg-on-secondary-fixed opacity-90 top-2.5"
+                ></div>
+                <div
+                  class="w-4 h-4 rounded-full bg-on-secondary flex items-center justify-center z-10 shadow-sm"
+                >
+                  <span class="text-[9px] font-extrabold text-on-surface"
+                    >9</span
+                  >
+                </div>
+              </div>
+              <!-- Active Halo Pointer -->
+              <div
+                class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-surface-container-lowest rotate-45"
+              ></div>
+            </div>
+          </div>
+          <!-- PIN 2: Arena Pool Club -->
+          <div
+            class="club-pin absolute top-[24%] left-[22%] -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 flex flex-col items-center group opacity-85 hover:opacity-100 transition-all hover:scale-105"
+            id="pin-arena"
+            onclick="selectClub('arena')"
+          >
+            <div
+              class="mb-1 flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm shadow"
+            >
+              <span
+                class="font-label-sm text-label-sm text-on-surface whitespace-nowrap"
+                >Arena Pool Club</span
+              >
+            </div>
+            <!-- 8-ball disc Pin -->
+            <div
+              class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center shadow-md"
+            >
+              <div
+                class="w-6 h-6 rounded-full bg-surface-container-lowest flex items-center justify-center"
+              >
+                <span class="text-[10px] font-bold text-on-surface">8</span>
+              </div>
+            </div>
+          </div>
+          <!-- PIN 3: King Billiards Center -->
+          <div
+            class="club-pin absolute top-[52%] left-[82%] -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 flex flex-col items-center group opacity-85 hover:opacity-100 transition-all hover:scale-105"
+            id="pin-king"
+            onclick="selectClub('king')"
+          >
+            <div
+              class="mb-1 flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm shadow"
+            >
+              <span
+                class="font-label-sm text-label-sm text-on-surface whitespace-nowrap"
+                >King Billiards</span
+              >
+            </div>
+            <!-- Solid 1-ball disc Pin (Gold) -->
+            <div
+              class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shadow-md"
+            >
+              <div
+                class="w-4 h-4 rounded-full bg-surface-container-lowest flex items-center justify-center"
+              >
+                <span class="text-[9px] font-bold text-secondary">1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Club Detail Bottom Sheet Card -->
+        <div class="px-margin pb-space-sm -mt-2 z-20">
+          <div
+            class="bg-surface-container/95 backdrop-blur-xl rounded-2xl p-space-md shadow-[0_8px_30px_rgba(0,0,0,0.5)] flex flex-col gap-space-sm transition-all duration-300"
+            id="club-detail-sheet"
+          >
+            <!-- Top Row: Thumbnail + Club Identity & Rating -->
+            <div class="flex items-start gap-space-sm">
+              <img
+                class="w-20 h-20 rounded-xl object-cover shrink-0 shadow-md"
+                data-alt="A modern luxury pool club interior with professional Rasson Chronos tables under sharp downward LED canopy lights, sleek matte black cue racks, tournament green baize, and dark sports lounge ambiance"
+                id="club-thumbnail"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-T4fHlSEADH-4-LNz8K2oNGCfIWUAsSN05je43IDJdq4v8V4UzylopnNhJqz69v3646mQCD0mN00immpsrXWd9fT7UDsgDXQ6ScSYTJ_vpSN-o6_CzJ1WhSOqUgJG9zcsN8BPkj11SuTfMzeMt2X3fgHlyCAbSp0yH1OF4b4PmuzBze7KDC0eGrPktpudulMehH81YWbKH5nernEDcvapIKhSfUonlI1aJSKoQ0lBTCj4Dg7HAJkqnw"
+              />
+              <div class="flex flex-col min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-1">
+                  <span
+                    class="px-2 py-0.5 rounded bg-primary/20 text-primary font-label-sm text-label-sm uppercase tracking-wide"
+                    id="club-tag"
+                  >
+                    Đang chọn • CLB Tiêu Chuẩn
+                  </span>
+                  <button
+                    aria-label="Lưu vào danh sách yêu thích"
+                    class="text-on-surface-variant hover:text-error transition-colors p-1"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >bookmark</span
+                    >
+                  </button>
+                </div>
+                <h2
+                  class="font-title-md text-title-md text-on-surface font-bold truncate mt-1"
+                  id="club-name"
+                >
+                  Legend Billiards Club
+                </h2>
+                <p
+                  class="text-body-md text-body-md text-on-surface-variant truncate"
+                  id="club-address"
+                >
+                  18 Hoàng Đạo Thúy, Trung Hòa, Cầu Giấy
+                </p>
+                <div
+                  class="flex items-center gap-space-sm mt-1 text-label-md font-label-md"
+                >
+                  <div class="flex items-center gap-0.5 text-secondary">
+                    <span
+                      class="material-symbols-outlined text-[15px]"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span class="font-bold" id="club-rating">4.9</span>
+                    <span
+                      class="text-on-surface-variant text-[11px] font-normal"
+                      id="club-reviews"
+                      >(240)</span
+                    >
+                  </div>
+                  <span class="text-outline-variant">•</span>
+                  <div class="flex items-center gap-1 text-primary">
+                    <span class="material-symbols-outlined text-[15px]"
+                      >directions_car</span
+                    >
+                    <span id="club-distance">850m (4 phút)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Live Table Status Banner -->
+            <div
+              class="bg-surface-container-high rounded-xl p-space-sm flex items-center justify-between gap-space-sm shadow-sm"
+            >
+              <div class="flex items-center gap-space-sm min-w-0">
+                <div
+                  class="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0"
+                >
+                  <span class="material-symbols-outlined text-[20px]"
+                    >table_restaurant</span
+                  >
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span
+                    class="text-label-sm font-label-sm text-on-surface-variant uppercase"
+                    >Trạng thái bàn trực tiếp</span
+                  >
+                  <span
+                    class="text-label-md font-label-md text-on-surface truncate"
+                    id="club-table-status"
+                  >
+                    Còn <strong class="text-primary">5 bàn trống</strong> (3 bàn
+                    Rasson Chronos, 2 bàn Min)
+                  </span>
+                </div>
+              </div>
+              <span
+                class="shrink-0 px-2 py-1 rounded-full bg-primary/20 text-primary text-[11px] font-bold flex items-center gap-1"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"
+                ></span>
+                Live
+              </span>
+            </div>
+            <!-- Price & Amenities Tags -->
+            <div class="flex flex-col gap-space-xs pt-1">
+              <div class="flex items-center justify-between">
+                <span
+                  class="text-label-sm font-label-sm text-on-surface-variant"
+                  >Giá dịch vụ:</span
+                >
+                <span
+                  class="text-label-md font-label-md text-secondary font-bold"
+                  id="club-price"
+                  >80.000đ - 120.000đ / giờ</span
+                >
+              </div>
+              <!-- Amenities Chips Grid -->
+              <div class="flex flex-wrap gap-1.5 mt-1" id="club-amenities">
+                <span
+                  class="px-2 py-0.5 rounded-md bg-surface-container-low text-on-surface-variant text-label-sm font-label-sm flex items-center gap-1"
+                >
+                  <span
+                    class="material-symbols-outlined text-[13px] text-primary"
+                    >ac_unit</span
+                  >
+                  Điều hòa 100%
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded-md bg-surface-container-low text-on-surface-variant text-label-sm font-label-sm flex items-center gap-1"
+                >
+                  <span
+                    class="material-symbols-outlined text-[13px] text-primary"
+                    >local_parking</span
+                  >
+                  Chỗ để ô tô
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded-md bg-surface-container-low text-on-surface-variant text-label-sm font-label-sm flex items-center gap-1"
+                >
+                  <span
+                    class="material-symbols-outlined text-[13px] text-primary"
+                    >verified</span
+                  >
+                  Cơ chuẩn quốc tế
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded-md bg-surface-container-low text-on-surface-variant text-label-sm font-label-sm flex items-center gap-1"
+                >
+                  <span
+                    class="material-symbols-outlined text-[13px] text-primary"
+                    >fastfood</span
+                  >
+                  Đồ ăn nhẹ
+                </span>
+              </div>
+            </div>
+            <!-- 2 Fast Action Buttons -->
+            <div class="grid grid-cols-12 gap-space-xs pt-space-xs">
+              <!-- Navigation Route Button -->
+              <button
+                class="col-span-4 h-12 rounded-xl bg-surface-container-high active:bg-surface-bright text-on-surface font-label-md text-label-md flex items-center justify-center gap-1.5 transition-transform active:scale-[0.98] shadow-sm"
+                onclick="openNavigationRoute()"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[20px] text-primary"
+                  >turn_right</span
+                >
+                <span>Chỉ đường</span>
+              </button>
+              <!-- Primary Booking / Challenge Action Button -->
+              <button
+                class="col-span-8 h-12 rounded-xl bg-primary text-on-primary font-headline-sm text-body-lg font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-[0_8px_20px_rgba(78,222,163,0.35)] hover:brightness-110"
+                onclick="reserveTable()"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[22px]">bolt</span>
+                <span>Đặt bàn / Hẹn kèo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Club Community Preview Floating Card -->
+        <div class="px-margin pb-space-sm flex flex-col gap-space-xs">
+          <div class="flex items-center justify-between">
+            <span
+              class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider"
+              >Kèo đang mở gần quán này</span
+            >
+            <span
+              class="text-label-sm font-label-sm text-primary font-bold cursor-pointer"
+              >Xem tất cả (8)</span
+            >
+          </div>
+          <!-- Matchmaking Card Preview -->
+          <div
+            class="bg-surface-container-low rounded-xl p-space-sm flex items-center justify-between gap-space-sm shadow-sm"
+          >
+            <div class="flex items-center gap-space-sm">
+              <div class="relative">
+                <img
+                  class="w-10 h-10 rounded-full object-cover shadow"
+                  data-alt="Close up face profile of an Asian young male pool player with black cap focused on shooting"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBj1YZBdoWvh7N91AuIW4n2pbZfo5M39_gr5gLNjtVqoBB6Dg41nI5Y3a67lx-ECNWkocEfs3z95rO33QcqAwhCzx1o9FgCEVIaW8k2qdsxSopswJfRdW9P6B1koGQXWU6PqCAmj8mVoI1uAOGM2RPsw3cv6kQh82LF10qaiavly616YKR8WjBTTkZkawDtN4vmIGyNwcFwh9Lh80uSBeMA-pZUHPgPLS5yL7gHcraLVtC60twKubmAjg"
+                />
+                <span
+                  class="absolute -bottom-1 -right-1 px-1 rounded bg-secondary text-on-secondary-fixed text-[8px] font-bold"
+                >
+                  B+
+                </span>
+              </div>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-1">
+                  <span class="font-label-md text-label-md text-on-surface"
+                    >Vinh "Tay Trái"</span
+                  >
+                  <span
+                    class="text-[10px] text-on-surface-variant font-label-sm"
+                    >• Rank B+</span
+                  >
+                </div>
+                <span
+                  class="text-label-sm font-label-sm text-on-surface-variant"
+                  >9-Ball Solo • Chấp 1 ván • Đang có mặt</span
+                >
+              </div>
+            </div>
+            <button
+              class="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-primary font-label-sm text-label-sm font-bold transition-all shrink-0"
+            >
+              Vào bắt kèo
+            </button>
+          </div>
+        </div>
+      </div>
+      <script>
+        // Simulated Interactive Club Data
+        const CLUBS_DATA = {
+          legend: {
+            name: "Legend Billiards Club",
+            address: "18 Hoàng Đạo Thúy, Trung Hòa, Cầu Giấy",
+            rating: "4.9",
+            reviews: "(240)",
+            distance: "850m (4 phút)",
+            tableStatus:
+              'Còn <strong class="text-primary">5 bàn trống</strong> (3 bàn Rasson Chronos, 2 bàn Min)',
+            price: "80.000đ - 120.000đ / giờ",
+            tag: "Đang chọn • CLB Tiêu Chuẩn",
+            amenities: [
+              "Điều hòa 100%",
+              "Chỗ để ô tô",
+              "Cơ chuẩn quốc tế",
+              "Đồ ăn nhẹ",
+            ],
+          },
+          arena: {
+            name: "Arena Pool Club - Trần Duy Hưng",
+            address: "128 Trần Duy Hưng, Trung Hòa, Cầu Giấy",
+            rating: "4.8",
+            reviews: "(168)",
+            distance: "1.2km (7 phút)",
+            tableStatus:
+              'Còn <strong class="text-secondary">2 bàn trống</strong> (Aileex King Kong)',
+            price: "70.000đ - 100.000đ / giờ",
+            tag: "Đang mở cửa • Sôi nổi",
+            amenities: [
+              "Chuyên pool 9 bóng",
+              "Quầy bar mocktail",
+              "Trọng tài hỗ trợ",
+            ],
+          },
+          king: {
+            name: "King Billiards Center - Duy Tân",
+            address: "88 Duy Tân, Dịch Vọng Hậu, Cầu Giấy",
+            rating: "4.7",
+            reviews: "(92)",
+            distance: "1.8km (10 phút)",
+            tableStatus:
+              'Còn <strong class="text-primary">8 bàn trống</strong> (Bàn tiêu chuẩn)',
+            price: "60.000đ - 90.000đ / giờ",
+            tag: "Không gian rộng 500m²",
+            amenities: ["Bãi đỗ ô tô miễn phí", "Mở 24/7", "Phòng VIP riêng"],
+          },
+        };
+
+        function selectClub(clubId) {
+          const club = CLUBS_DATA[clubId];
+          if (!club) return;
+
+          // Update Bottom Sheet UI Elements
+          document.getElementById("club-name").textContent = club.name;
+          document.getElementById("club-address").textContent = club.address;
+          document.getElementById("club-rating").textContent = club.rating;
+          document.getElementById("club-reviews").textContent = club.reviews;
+          document.getElementById("club-distance").textContent = club.distance;
+          document.getElementById("club-table-status").innerHTML =
+            club.tableStatus;
+          document.getElementById("club-price").textContent = club.price;
+          document.getElementById("club-tag").textContent = club.tag;
+
+          // Update pins state styles
+          document.querySelectorAll(".club-pin").forEach((pin) => {
+            pin.classList.remove("active", "scale-105");
+            pin.classList.add("opacity-85");
+          });
+
+          const activePin = document.getElementById("pin-" + clubId);
+          if (activePin) {
+            activePin.classList.add("active", "scale-105");
+            activePin.classList.remove("opacity-85");
+          }
+
+          // Micro subtle bounce effect on bottom sheet
+          const sheet = document.getElementById("club-detail-sheet");
+          sheet.classList.add("scale-[0.99]");
+          setTimeout(() => {
+            sheet.classList.remove("scale-[0.99]");
+          }, 120);
+        }
+
+        function openNavigationRoute() {
+          alert(
+            "Khởi động ứng dụng Bản đồ: Đang tìm tuyến đường tối ưu đến " +
+              document.getElementById("club-name").textContent,
+          );
+        }
+
+        function reserveTable() {
+          alert(
+            "Đang kết nối lễ tân quán " +
+              document.getElementById("club-name").textContent +
+              " để giữ bàn & ghép trận!",
+          );
+        }
+
+        // Handle Quick Filter Toggle
+        document.querySelectorAll(".filter-chip").forEach((chip) => {
+          chip.addEventListener("click", function () {
+            document.querySelectorAll(".filter-chip").forEach((c) => {
+              c.classList.remove("bg-primary", "text-on-primary");
+              c.classList.add(
+                "bg-surface-container-high/80",
+                "text-on-surface",
+              );
+            });
+            this.classList.remove(
+              "bg-surface-container-high/80",
+              "text-on-surface",
+            );
+            this.classList.add("bg-primary", "text-on-primary");
+          });
+        });
+
+        // Re-center location button click simulation
+        document.getElementById("locate-btn")?.addEventListener("click", () => {
+          alert("Đã định vị lại vị trí hiện tại của bạn tại Cầu Giấy, Hà Nội.");
+        });
+      </script>
+    </main>
+    <nav
+      class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]"
+      data-active-classes="text-primary fill-1"
+    >
+      <div class="grid grid-cols-4 h-20 items-center px-space-xs">
+        <a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="van-dau"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]"
+            >sports_score</span
+          ><span class="text-label-sm font-label-sm">Ván đấu</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="tao-phong"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">add_circle</span
+          ><span class="text-label-sm font-label-sm">Tạo phòng</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="tim-keo"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">bolt</span
+          ><span class="text-label-sm font-label-sm">Tìm kèo</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="clb-quan"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">location_on</span
+          ><span class="text-label-sm font-label-sm">CLB Quán</span></a
+        >
+      </div>
+    </nav>
+  </body>
+</html>

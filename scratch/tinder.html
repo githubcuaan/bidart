@@ -1,0 +1,741 @@
+<!doctype html>
+<html class="dark" lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_tab" name="shell-type" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100vw;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+          background-color: #0f131d;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4edea3",
+              "on-secondary-fixed-variant": "#653e00",
+              "on-primary-container": "#00422b",
+              "on-tertiary-container": "#00367a",
+              "on-primary-fixed-variant": "#005236",
+              error: "#ffb4ab",
+              "on-tertiary": "#002e6a",
+              "tertiary-container": "#71a1ff",
+              "tertiary-fixed": "#d8e2ff",
+              tertiary: "#adc6ff",
+              "tertiary-fixed-dim": "#adc6ff",
+              "on-tertiary-fixed-variant": "#004395",
+              "on-primary-fixed": "#002113",
+              "surface-container-high": "#262a35",
+              "on-background": "#dfe2f1",
+              "error-container": "#93000a",
+              surface: "#0f131d",
+              "on-surface-variant": "#bbcabf",
+              "secondary-fixed": "#ffddb8",
+              "on-error-container": "#ffdad6",
+              "inverse-primary": "#006c49",
+              "primary-container": "#10b981",
+              "surface-tint": "#4edea3",
+              "surface-variant": "#313540",
+              "surface-dim": "#0f131d",
+              "surface-bright": "#353944",
+              "secondary-fixed-dim": "#ffb95f",
+              "inverse-surface": "#dfe2f1",
+              "surface-container": "#1c1f2a",
+              "on-error": "#690005",
+              "on-secondary-fixed": "#2a1700",
+              "primary-fixed": "#6ffbbe",
+              "outline-variant": "#3c4a42",
+              "on-primary": "#003824",
+              background: "#0f131d",
+              "surface-container-low": "#171b26",
+              "on-secondary": "#472a00",
+              "inverse-on-surface": "#2c303b",
+              "on-secondary-container": "#5b3800",
+              "surface-container-lowest": "#0a0e18",
+              "primary-fixed-dim": "#4edea3",
+              "on-tertiary-fixed": "#001a42",
+              "secondary-container": "ee9800",
+              "on-surface": "#dfe2f1",
+              "surface-container-highest": "#313540",
+              outline: "#86948a",
+              secondary: "#ffb95f",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-lg": "1.5rem",
+              "space-md": "1rem",
+              "gutter-desktop": "1.5rem",
+              "space-sm": "0.5rem",
+              "space-xs": "0.25rem",
+              margin: "1rem",
+              "margin-tablet": "1.5rem",
+              "space-xl": "2rem",
+              "margin-desktop": "2.5rem",
+              gutter: "1rem",
+            },
+            fontFamily: {
+              "label-md": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "display-score": ["Plus Jakarta Sans"],
+              "display-score-mobile": ["Plus Jakarta Sans"],
+              "headline-lg-mobile": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "headline-sm": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "title-md": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "label-lg": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "label-md": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "30px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "display-score": [
+                "72px",
+                {
+                  lineHeight: "76px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+              "display-score-mobile": [
+                "56px",
+                {
+                  lineHeight: "60px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                {
+                  lineHeight: "34px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "26px", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "title-md": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+              "label-sm": [
+                "10px",
+                {
+                  lineHeight: "14px",
+                  letterSpacing: "0.05em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-lg": [
+                "14px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"
+  >
+    <header
+      class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl pt-safe shadow-[0_1px_12px_rgba(0,0,0,0.4)]"
+    >
+      <div class="h-16 px-margin flex items-center justify-between">
+        <div class="flex items-center gap-space-sm">
+          <img
+            alt="Bida Pro Logo"
+            class="h-8 w-auto object-contain"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1WSXDlGUdQSHHjkbnAyty2f_3f3Tj_7_8X-CZimUtqpejSLWxS3Q1OZ7yGEdavBV0Z1xA71awQzxVd5hdChUYAsXxYY_EwVy_2CXGHRWdn4GyjLBCis7gL-RusEeTzuzN5DxB0oqguKIYorsoUHpgK01wMme5JB0-rUgeGWcm-6cnEVZw1yQFNUMsaz67zFBTcFbH_VkOr_k4yiq1oyze5FQCVVAC-Bc3T40mBORWsWp_ZB3XqSjcTUXYY9"
+          />
+          <div class="flex flex-col">
+            <span
+              class="text-label-sm font-label-sm tracking-wider uppercase text-primary"
+              >Bida Bắn Đền</span
+            ><span
+              class="text-title-md font-title-md text-on-surface tracking-tight leading-tight"
+              >Tìm Kèo</span
+            >
+          </div>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <div
+            class="flex items-center gap-space-xs bg-surface-container-high/80 px-space-xs py-0.5 rounded-full"
+          >
+            <span
+              class="px-1.5 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary/20 text-secondary uppercase tracking-wider"
+              >Hạng B+</span
+            ><img
+              alt="Profile"
+              class="w-8 h-8 rounded-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDObMpE0l9sLsWV_lRERZ-6C7VChBrhpelglls--U-rkQ4eQVSmMPZpi1R70fsEJQG3kEzaQrQSvmqSdEn7Ukxhk1KYnl3-xCzv-Gy7LUhApUejXOUlg_udK4Pn4yDD6ddSbHnfuuDSaSfRH4yhqtlGoLT2_0g1Tbw_gwdBOA58lqGC3UW0YU60B_GONUOCDgzRRyL_B2pu0SXXlya4dZRwVTQzHKkJ4d3r3BrpZaB41g3pWZGLcJI4-w"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <main
+      class="flex flex-col relative w-full pt-16 pb-28 bg-surface min-h-screen"
+    >
+      <div class="flex flex-col w-full px-margin pb-6 gap-space-md">
+        <!-- Top Quick Filters & Match Radar Header -->
+        <div class="flex flex-col gap-space-xs">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-3 w-3">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex rounded-full h-3 w-3 bg-primary"
+                ></span>
+              </span>
+              <span class="font-title-md text-title-md text-on-surface"
+                >Radar Ghép Kèo</span
+              >
+              <span
+                class="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm uppercase"
+                >Trực Tiếp</span
+              >
+            </div>
+            <button
+              class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant active:scale-95 transition-transform"
+              id="radar-refresh-btn"
+            >
+              <span class="material-symbols-outlined text-[18px] text-primary"
+                >tune</span
+              >
+              <span class="font-label-sm text-label-sm">Bộ lọc</span>
+            </button>
+          </div>
+          <!-- Filter chips scrollable -->
+          <div
+            class="flex items-center gap-space-xs overflow-x-auto no-scrollbar py-1"
+          >
+            <div
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface whitespace-nowrap shadow-sm"
+            >
+              <span class="material-symbols-outlined text-[16px] text-primary"
+                >near_me</span
+              >
+              <span class="font-label-md text-label-md">Q. Cầu Giấy (3km)</span>
+            </div>
+            <div
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface whitespace-nowrap shadow-sm"
+            >
+              <span class="material-symbols-outlined text-[16px] text-secondary"
+                >military_tech</span
+              >
+              <span class="font-label-md text-label-md">Hạng C → A</span>
+            </div>
+            <div
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface whitespace-nowrap shadow-sm"
+            >
+              <span class="material-symbols-outlined text-[16px] text-tertiary"
+                >sports_cricket</span
+              >
+              <span class="font-label-md text-label-md">9 Bi / Bắn Đền</span>
+            </div>
+          </div>
+        </div>
+        <!-- Tinder Card Stack Container -->
+        <div class="relative w-full aspect-[3/4.4] max-h-[560px]">
+          <!-- Background Ghost Card 2 (Bottom) -->
+          <div
+            class="absolute inset-x-3 bottom-0 top-4 rounded-xl bg-surface-container-lowest opacity-40 shadow-sm scale-95 origin-bottom pointer-events-none"
+          ></div>
+          <!-- Background Ghost Card 1 (Middle) -->
+          <div
+            class="absolute inset-x-1.5 bottom-1 top-2 rounded-xl bg-surface-container-low opacity-80 shadow-md scale-[0.98] origin-bottom pointer-events-none"
+          ></div>
+          <!-- Primary Active Player Card (Top interactive) -->
+          <div
+            class="relative z-10 w-full h-full rounded-xl overflow-hidden bg-surface-container shadow-2xl flex flex-col justify-end transition-transform duration-300"
+            id="active-player-card"
+          >
+            <!-- Player Full-size Photo with Gradient Scrim -->
+            <img
+              alt="Cơ thủ Đức Cơ Điên"
+              class="absolute inset-0 w-full h-full object-cover object-top select-none pointer-events-none"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDObMpE0l9sLsWV_lRERZ-6C7VChBrhpelglls--U-rkQ4eQVSmMPZpi1R70fsEJQG3kEzaQrQSvmqSdEn7Ukxhk1KYnl3-xCzv-Gy7LUhApUejXOUlg_udK4Pn4yDD6ddSbHnfuuDSaSfRH4yhqtlGoLT2_0g1Tbw_gwdBOA58lqGC3UW0YU60B_GONUOCDgzRRyL_B2pu0SXXlya4dZRwVTQzHKkJ4d3r3BrpZaB41g3pWZGLcJI4-w"
+            />
+            <!-- Multi-tier Atmospheric Glow Overlays -->
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/60 to-transparent pointer-events-none"
+            ></div>
+            <div
+              class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-surface-container-lowest/70 to-transparent pointer-events-none"
+            ></div>
+            <!-- Live Match Compatibility Tag -->
+            <div
+              class="absolute top-4 left-4 flex items-center gap-1.5 bg-surface-container-lowest/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg"
+            >
+              <span
+                class="material-symbols-outlined text-[16px] text-primary"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >local_fire_department</span
+              >
+              <span
+                class="font-label-sm text-label-sm text-primary uppercase tracking-wide"
+                >Độ hợp cạ: 94%</span
+              >
+            </div>
+            <!-- Quick Cue Details Pin -->
+            <div
+              class="absolute top-4 right-4 flex items-center gap-1 bg-surface-container-lowest/80 backdrop-blur-md px-2.5 py-1.5 rounded-full shadow-lg"
+            >
+              <span class="material-symbols-outlined text-[16px] text-secondary"
+                >verified</span
+              >
+              <span class="font-label-sm text-label-sm text-on-surface"
+                >Đã xác minh</span
+              >
+            </div>
+            <!-- Swipe Status Indicators (Revealed via gestures / buttons) -->
+            <div
+              class="absolute top-16 right-6 -rotate-12 px-4 py-2 rounded-xl bg-primary text-on-primary font-headline-md text-headline-md uppercase tracking-wider shadow-lg opacity-0 transition-opacity pointer-events-none"
+              id="stamp-like"
+            >
+              KÈO CHIẾN
+            </div>
+            <div
+              class="absolute top-16 left-6 rotate-12 px-4 py-2 rounded-xl bg-error-container text-on-error-container font-headline-md text-headline-md uppercase tracking-wider shadow-lg opacity-0 transition-opacity pointer-events-none"
+              id="stamp-pass"
+            >
+              BỎ QUA
+            </div>
+            <!-- Card Core Information Body -->
+            <div class="relative z-20 p-space-md flex flex-col gap-space-xs">
+              <!-- Tier & Stats Ribbons -->
+              <div class="flex items-center gap-space-xs flex-wrap">
+                <div
+                  class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/90 text-on-secondary-container shadow-sm"
+                >
+                  <span class="material-symbols-outlined text-[16px]"
+                    >stars</span
+                  >
+                  <span
+                    class="font-label-sm text-label-sm font-bold tracking-wider"
+                    >HẠNG B+ (ELO 1680)</span
+                  >
+                </div>
+                <div
+                  class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high/90 text-on-surface-variant shadow-sm"
+                >
+                  <span
+                    class="material-symbols-outlined text-[14px] text-primary"
+                    >trending_up</span
+                  >
+                  <span class="font-label-sm text-label-sm"
+                    >Thắng 68% (142 ván)</span
+                  >
+                </div>
+              </div>
+              <!-- Name & Age -->
+              <div class="flex items-baseline gap-2">
+                <h2 class="font-headline-md text-headline-md text-on-surface">
+                  Đức 'Cơ Điên'
+                </h2>
+                <span
+                  class="font-title-md text-title-md text-on-surface-variant"
+                  >• 27 tuổi</span
+                >
+              </div>
+              <!-- Location & Availability status -->
+              <div class="flex items-center gap-1.5 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[18px] text-primary"
+                  >near_me</span
+                >
+                <span class="font-body-md text-body-md text-on-surface"
+                  >Cách 1.8 km</span
+                >
+                <span class="text-outline-variant">•</span>
+                <span class="font-body-md text-body-md text-primary truncate"
+                  >Rảnh tại King Billiards</span
+                >
+              </div>
+              <!-- Match Speciality & Stakes -->
+              <div
+                class="bg-surface-container-high/70 backdrop-blur-md rounded-xl p-2.5 flex flex-col gap-1 shadow-inner"
+              >
+                <div class="flex items-center gap-1.5 text-secondary">
+                  <span class="material-symbols-outlined text-[16px]"
+                    >monetization_on</span
+                  >
+                  <span class="font-label-sm text-label-sm uppercase font-bold"
+                    >Kèo sở trường:</span
+                  >
+                </div>
+                <p
+                  class="font-body-md text-body-md text-on-surface leading-snug"
+                >
+                  Chuyên 9 Bi Bắn đền 20k-50k/điểm • Đánh giao lưu học hỏi • Có
+                  cơ riêng Peri
+                </p>
+              </div>
+              <!-- Utility tags -->
+              <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm"
+                >
+                  Không hút thuốc
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm"
+                >
+                  Đánh tối nay 19:30
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm"
+                >
+                  Chia đôi tiền bàn
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Tinder-style Action Bar -->
+        <div class="flex items-center justify-center gap-space-lg pt-1">
+          <!-- Pass / Next Match Button -->
+          <button
+            aria-label="Bỏ qua cơ thủ này"
+            class="relative group flex items-center justify-center w-14 h-14 rounded-full bg-surface-container-high text-error shadow-xl active:scale-90 transition-all"
+            id="btn-pass"
+          >
+            <span
+              class="material-symbols-outlined text-[30px] group-hover:scale-110 transition-transform"
+              >close</span
+            >
+          </button>
+          <!-- Super Cue / Star Signal Button -->
+          <button
+            aria-label="Bắn tín hiệu Siêu Thích"
+            class="relative group flex items-center justify-center w-12 h-12 rounded-full bg-surface-container-highest text-tertiary shadow-xl active:scale-90 transition-all"
+            id="btn-super"
+          >
+            <span
+              class="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >bolt</span
+            >
+          </button>
+          <!-- Accept Match / Challenge Button (Primary Glow) -->
+          <button
+            aria-label="Thách đấu ghép kèo ngay"
+            class="relative group flex items-center justify-center w-16 h-16 rounded-full bg-primary text-on-primary shadow-[0_8px_24px_-4px_rgba(78,222,163,0.5)] active:scale-90 transition-all"
+            id="btn-match"
+          >
+            <span
+              class="material-symbols-outlined text-[34px] group-hover:scale-110 transition-transform"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >sports_score</span
+            >
+          </button>
+        </div>
+        <!-- Mini Tray: Players Online Waiting for Match -->
+        <div
+          class="flex flex-col gap-space-xs mt-2 bg-surface-container-lowest/60 p-3 rounded-xl backdrop-blur-md"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-primary"
+                >groups</span
+              >
+              <span class="font-label-lg text-label-lg text-on-surface"
+                >Cơ thủ online quanh đây</span
+              >
+            </div>
+            <span class="font-label-sm text-label-sm text-on-surface-variant"
+              >5 người sẵn sàng</span
+            >
+          </div>
+          <!-- Horizontal Online Row -->
+          <div
+            class="flex items-center justify-between gap-space-sm overflow-x-auto no-scrollbar pt-1"
+          >
+            <!-- Player 1 -->
+            <div
+              class="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
+            >
+              <div
+                class="relative w-12 h-12 rounded-full overflow-hidden bg-surface-container"
+              >
+                <img
+                  class="w-full h-full object-cover"
+                  data-alt="Portrait of young Vietnamese pool player with dyed hair in urban pool room setting"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX_NF98K0nhSt32h86xY_yATPTgutdc0DF0lw8d3uhe3U9owwqkpt2CH27Dq0JzeSUxhf3vH466rm2GQktxgd0mPA0-laiYNK1uIxKA_S_8dr-Wp2vtue9Kx4-6orhISU3ZG8BfdIpne5rpwpL7Otu6z2f4jY6weEWZq6ftZv7vTs3xqN12LJuVufLwC8odaQcPfZPZY8gFrmAJhnVM0Sa5H3k_xVvktGcwXNOz4S-N1iw-_L80LJXYw"
+                />
+                <span
+                  class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary shadow-md"
+                ></span>
+              </div>
+              <span
+                class="font-label-sm text-label-sm text-on-surface truncate max-w-[56px] text-center"
+                >Hoàng L.</span
+              >
+              <span class="font-label-sm text-label-sm text-secondary"
+                >A (1750)</span
+              >
+            </div>
+            <!-- Player 2 -->
+            <div
+              class="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
+            >
+              <div
+                class="relative w-12 h-12 rounded-full overflow-hidden bg-surface-container"
+              >
+                <img
+                  class="w-full h-full object-cover"
+                  data-alt="Female Vietnamese billiards champion holding cue stick with determined expression"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP5pubY4v6QWjVl17c_cCdsLJ0lg3F4auX_uFi3xQvumZNo9X_dRvybkdspTBWx0yvMXo1qwIg_E8MxD4FOvHtc3AHhhKKbCYV7Z-O340Xb5tbjlPcZ0aDRp2rrku9jUbiefeYlORtidzHFzelOKu-iMi3ByWzqVceFqLjsaZmT0LGSL4JGlOnBHc4dkqIdEFXLUsAQO_WxmqhUFwMeEB9HbKCiCtPnprwYfNBBYk8d4wT4mNenO7gDQ"
+                />
+                <span
+                  class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary shadow-md"
+                ></span>
+              </div>
+              <span
+                class="font-label-sm text-label-sm text-on-surface truncate max-w-[56px] text-center"
+                >Trang Bi</span
+              >
+              <span class="font-label-sm text-label-sm text-secondary"
+                >B+ (1620)</span
+              >
+            </div>
+            <!-- Player 3 -->
+            <div
+              class="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
+            >
+              <div
+                class="relative w-12 h-12 rounded-full overflow-hidden bg-surface-container"
+              >
+                <img
+                  class="w-full h-full object-cover"
+                  data-alt="Male Asian pool player resting cue stick on shoulder in moody lighting"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLSU8aUnsxETL6QJgdr2BIRBHh4xmLpiUlrHKOgqvfSGdPk686olGWYRRVtaqPa-xwG6WqmkmSlalvnRzRTWnPdh0SpQOETzsAN_r6E_tTq5_5AHFktKzbCC6h6-M2ASpXiRhhbChHC6epmYayUEgpYA_htqa4ypbbJR7_ZtGtKwMpCxUlfEMafReuqlzK7UXc_o-LoI_IiYgdXeOGCbA8A4NnOZH2jiMqXrICwtHpSKiPJ6I5DVRtfg"
+                />
+                <span
+                  class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary shadow-md"
+                ></span>
+              </div>
+              <span
+                class="font-label-sm text-label-sm text-on-surface truncate max-w-[56px] text-center"
+                >Tuấn Anh</span
+              >
+              <span class="font-label-sm text-label-sm text-secondary"
+                >C+ (1480)</span
+              >
+            </div>
+            <!-- Player 4 -->
+            <div
+              class="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
+            >
+              <div
+                class="relative w-12 h-12 rounded-full overflow-hidden bg-surface-container"
+              >
+                <img
+                  class="w-full h-full object-cover"
+                  data-alt="Vietnamese competitive billiard player wearing wrist wrap smiling confidently"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdSXh1BI6hmF3OQwFQ6EG6gjGafnBrb_Txd-FvQYjK0u7_numOIdyKQCdX6JlRgF6w1-UOe8GxaV-cs87Kl6jJWj7qLBvjgi_97gOrNNhBwoBr0STUgt3U8KIwlc3Tko9bxJ9MJp-PkNsvGUs4lAUCZQbSu3qd8DU85qzCPmhZf_fMD1ATKDqv2I357UAFSYZvrB0nvi9cp4eMHmnSxFmpZcbTiaOPmWZMdSPknc2XL6W6WuhxmVSAKg"
+                />
+                <span
+                  class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary shadow-md"
+                ></span>
+              </div>
+              <span
+                class="font-label-sm text-label-sm text-on-surface truncate max-w-[56px] text-center"
+                >Minh Pro</span
+              >
+              <span class="font-label-sm text-label-sm text-secondary"
+                >B (1590)</span
+              >
+            </div>
+            <!-- Player 5 -->
+            <div
+              class="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
+            >
+              <div
+                class="relative w-12 h-12 rounded-full overflow-hidden bg-surface-container"
+              >
+                <img
+                  class="w-full h-full object-cover"
+                  data-alt="Portrait of seasoned Vietnamese amateur cueist in dark polo shirt"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIrK6TnbebJeHbe2dyHUn3CdhCc54URIfuvmXH2iUIUXRqkIDBSjMT-yprxMQut-Njtb-kmt1EYkt5X70hthQqK7KbSp5iyuOA84AFX5spH5oZ-E7wrYagtgjCTxInNUxLKW9YIBB48dC5kJBNQnlz0OX_bmDoRQNcoyeLFvObLQMgJNSv9gLn-Yh5eyyZ9oES6yyYDNbwhaBQXwcNLtqf6sqPxTI0gZY7AM0zaesugxeeD7pVMD1JGQ"
+                />
+                <span
+                  class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary shadow-md"
+                ></span>
+              </div>
+              <span
+                class="font-label-sm text-label-sm text-on-surface truncate max-w-[56px] text-center"
+                >Khang B.</span
+              >
+              <span class="font-label-sm text-label-sm text-secondary"
+                >C (1420)</span
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Interactive Swipe Logic Micro-Script -->
+        <script>
+          (function initCardActions() {
+            const card = document.getElementById("active-player-card");
+            const btnMatch = document.getElementById("btn-match");
+            const btnPass = document.getElementById("btn-pass");
+            const btnSuper = document.getElementById("btn-super");
+            const stampLike = document.getElementById("stamp-like");
+            const stampPass = document.getElementById("stamp-pass");
+
+            if (!card) return;
+
+            const triggerSwipe = (direction) => {
+              if (direction === "right") {
+                stampLike.style.opacity = "1";
+                card.style.transform = "translate3d(120%, 0, 0) rotate(18deg)";
+              } else if (direction === "left") {
+                stampPass.style.opacity = "1";
+                card.style.transform =
+                  "translate3d(-120%, 0, 0) rotate(-18deg)";
+              } else if (direction === "up") {
+                stampLike.textContent = "SIÊU KÈO ⚡";
+                stampLike.style.opacity = "1";
+                card.style.transform = "translate3d(0, -120%, 0) scale(1.05)";
+              }
+
+              setTimeout(() => {
+                card.style.transition = "none";
+                card.style.transform = "translate3d(0, 0, 0) scale(0.95)";
+                stampLike.style.opacity = "0";
+                stampPass.style.opacity = "0";
+                setTimeout(() => {
+                  card.style.transition =
+                    "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)";
+                  card.style.transform = "translate3d(0, 0, 0) scale(1)";
+                }, 40);
+              }, 340);
+            };
+
+            if (btnMatch)
+              btnMatch.addEventListener("click", () => triggerSwipe("right"));
+            if (btnPass)
+              btnPass.addEventListener("click", () => triggerSwipe("left"));
+            if (btnSuper)
+              btnSuper.addEventListener("click", () => triggerSwipe("up"));
+          })();
+        </script>
+      </div>
+    </main>
+    <nav
+      class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]"
+      data-active-classes="text-primary fill-1"
+    >
+      <div class="grid grid-cols-4 h-20 items-center px-space-xs">
+        <a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="van-dau"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]"
+            >sports_score</span
+          ><span class="text-label-sm font-label-sm">Ván đấu</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="tao-phong"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">add_circle</span
+          ><span class="text-label-sm font-label-sm">Tạo phòng</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="tim-keo"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">bolt</span
+          ><span class="text-label-sm font-label-sm">Tìm kèo</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-1 h-full w-full text-on-surface-variant transition-all"
+          data-path="clb-quan"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">location_on</span
+          ><span class="text-label-sm font-label-sm">CLB Quán</span></a
+        >
+      </div>
+    </nav>
+  </body>
+</html>
