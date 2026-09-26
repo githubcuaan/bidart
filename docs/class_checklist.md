@@ -7,7 +7,7 @@ all the class is following the [class_design](./class_design.md)
 ## Module 1: User & Auth
 
 - [ ] User
-- [ ] SkillLevel (enhanced enum)
+- [x] SkillLevel (enhanced enum)
 
 ## Module 2: Scoring
 
