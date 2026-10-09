@@ -1,3 +1,4 @@
+import 'package:bidart/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -9,9 +10,6 @@ class BidartApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Bidart',
-      home: Scaffold(),
-    );
+    return const MaterialApp(home: Mainscreen());
   }
 }
