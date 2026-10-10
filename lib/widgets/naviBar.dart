@@ -16,12 +16,30 @@ class Navibar extends StatelessWidget {
       selectedIndex: _selectedIndex,
       onDestinationSelected: _onDestinationSelected,
       destinations: const [
-        NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
-        NavigationDestination(icon: Icon(Icons.create_outlined), label: 'Room'),
-        NavigationDestination(icon: Icon(Icons.map_outlined), label: 'Map'),
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.create_outlined),
+          selectedIcon: Icon(Icons.create),
+          label: 'Room',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.map_outlined),
+          selectedIcon: Icon(Icons.map),
+          label: 'Map',
+        ),
         NavigationDestination(
           icon: Icon(Icons.people_outlined),
+          selectedIcon: Icon(Icons.people),
           label: 'People',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person_outlined),
+          selectedIcon: Icon(Icons.person),
+          label: 'Profile',
         ),
       ],
     );
