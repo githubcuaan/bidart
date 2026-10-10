@@ -1,7 +1,7 @@
-# Mô tả giao diện ứng dụng (từ `scratch/*.html`)
+# Mô tả giao diện ứng dụng (từ `scratch/*.html` + đề xuất cho tab chưa có mẫu)
 
-Nguồn: `scratch/createRoom.html`, `scratch/inGame.html`, `scratch/tinder.html`, `scratch/map.html`.
-Phạm vi: chỉ mô tả UI mẫu. Logic nghiệp vụ xem `docs/rule.md`, `docs/screens.md`.
+Nguồn scratch: `scratch/createRoom.html`, `scratch/inGame.html`, `scratch/tinder.html`, `scratch/map.html`.
+Tab chưa có mẫu (`Home`, `Profile`): mô tả đề xuất giữ cùng style. Logic nghiệp vụ xem `docs/rule.md`, `docs/screens.md`.
 
 ## 0. Khung chung (áp dụng cả 4 mẫu)
 
@@ -9,13 +9,13 @@ Phạm vi: chỉ mô tả UI mẫu. Logic nghiệp vụ xem `docs/rule.md`, `doc
 - Màu nhấn: `primary #4edea3` (xanh lá bàn bida), `primary-container #10b981` (nút CTA),
   `secondary #ffb95f` (vàng/cam điểm số, rating), `error #ffb4ab` / `error-container #93000a` (phạt, bỏ qua).
 - Font `Plus Jakarta Sans` (400/600/700/800). Icon `Material Symbols Outlined`.
-- Header cố định (fixed top, cao 64px, blur, bóng đổ):
-  logo trái + 2 dòng chữ (`Bida Bắn Đền` nhỏ màu primary + tên tab lớn),
-  phải là chip hạng (`Hạng B+`) + avatar tròn.
-- Bottom nav cố định (fixed bottom, cao 80px, blur): 3 tab
-  `Phòng (meeting_room)` | `Tìm kèo (bolt)` | `CLB Quán (location_on)`.
-  Tab `Phòng` gộp 2 tab cũ (`Ván đấu` + `Tạo phòng`) thành 1 đầu mối.
-  Tab active màu primary + đậm, còn lại màu `on-surface-variant`.
+- Header (AppBar): trái là title theo tab, phải là avatar tròn (`CircleAvatar`).
+  Bấm avatar -> mở drawer phải (`endDrawer`) chứa Profile. Không dùng nút back; vuốt/bấm ngoài để đóng.
+- Bottom nav (`lib/widgets/naviBar.dart:18`): 4 tab Material `NavigationBar`
+  `Home (home)` | `Room (create)` | `Map (map)` | `People (people)`.
+  Map với `Map` = tab `CLB Quán` (mẫu `map.html`), `People` = tab `Tìm kèo` (mẫu `tinder.html`),
+  `Room` = tab `Phòng` (mẫu `createRoom.html` + `inGame.html`).
+  Icon outlined khi chưa chọn, filled khi active. Không còn tab `Profile`.
 - Layout mobile-first, `main` chừa `pt-16 pb-28` để khỏi bị header/nav che, bo góc chủ đạo `rounded-xl/2xl`.
 
 ---
@@ -189,3 +189,48 @@ Bố cục từ trên xuống:
 5. Card cộng đồng `Kèo đang mở gần quán này` (`Xem tất cả (8)`):
    hàng gồm avatar + badge `B+` + tên `Vinh "Tay Trái"` + `Rank B+`
    + `9-Ball Solo • Chấp 1 ván • Đang có mặt` + nút `Vào bắt kèo` (hover thành primary).
+
+---
+
+## 5. Profile (`lib/screens/profile.dart`) — drawer phải từ avatar AppBar, chưa có mẫu scratch
+
+Profile không nằm ở bottom nav. Entry duy nhất: avatar tròn ở góc phải AppBar.
+Bấm avatar -> `endDrawer` trượt ra từ cạnh phải màn hình (rộng ~80%, full-height,
+nền `surface-container-low`, bo trái `xl`). Nội dung drawer chính là `Profile()`.
+Bấm vùng tối ngoài drawer hoặc vuốt phải để đóng; tab nav bên dưới giữ nguyên.
+Chi tiết field xem `docs/screens.md` §4 (hồ sơ) + §5 (lịch sử đấu).
+
+### 5.1. Xem thông tin cá nhân (mặc định)
+
+Bố cục từ trên xuống:
+
+1. Nút `edit`/dòng `Chỉnh sửa hồ sơ` trong drawer (cấu trúc header chung).
+2. Card định danh: avatar tròn lớn (bấm để đổi ảnh) + tên + chip hạng (`Hạng B+`, đồng bộ chip header)
+   + dòng phụ tuổi/giới tính/khu vực (vd `27 tuổi • Nam • Cầu Giấy`).
+   Nút icon `edit` góc phải -> sang chế độ 5.2.
+3. Hàng thống kê nhanh (3 ô): `Tổng trận` / `Thắng %` / `ELO` (vd `142` / `68%` / `1680`).
+   Kiểu số `headline-sm`, nhãn `label-sm` màu phụ — tái dùng ribbon kiểu thẻ Tìm kèo.
+4. Nhóm `Thông tin liên hệ`: các hàng icon + giá trị
+   (`phone` số điện thoại, `email` email, `location_on` địa chỉ, `military_tech` trình độ/hạng).
+   Mỗi hàng 1 dòng, icon màu primary, chữ tràn thì ellipsis.
+5. Nhóm lối tắt (menu list, mỗi hàng icon + tên + `chevron_right`):
+   - `Lịch sử đấu` (`history`) -> `docs/screens.md` §5 (list theo thời gian, lọc thắng/thua, bấm vào xem chi tiết lượt/bi/lỗi).
+   - `Bộ luật yêu thích` (`bookmark`) -> mẫu đã lưu ở trang con Tạo phòng 1.1.
+   - `Quán đã lưu` (`location_on`) -> quán bookmark ở tab CLB Quán.
+   - `Cài đặt tài khoản` (`settings`): đổi mật khẩu, OTP, đăng xuất, xóa tài khoản.
+
+### 5.2. Chỉnh sửa thông tin cá nhân
+
+Vào từ nút `edit` / `Chỉnh sửa hồ sơ` ở card định danh. Có thể là trang con push hoặc bottom sheet
+full-height; nút back hủy thay đổi chưa lưu.
+
+1. Đổi avatar: bấm avatar -> picker ảnh (chụp/tải lên), preview tròn + nút `Xóa ảnh`.
+2. Form text field (giữ dark input như ô tìm kiếm tab CLB Quán):
+   tên hiển thị (bắt buộc), tuổi, giới tính (dropdown Nam/Nữ/Khác), số điện thoại, địa chỉ.
+   Validate inline: tên trống, SĐT/email sai định dạng -> text error đỏ dưới field, disable nút Lưu.
+3. Chọn trình độ/hạng: chips hoặc dropdown đơn chọn theo `SkillLevel`
+   (`lib/core/enum/skill_level.dart`), hiển thị `code` + `displayName` + tooltip `description`.
+   Đây là `selfDeclaredLevel` (tự khai báo), khác ELO tính từ thắng/thua.
+4. Thanh CTA cuối: nút chính `Lưu thay đổi` (primary, disable khi form invalid/dirty-check)
+   + nút phụ `Hủy`. Lưu thành công -> toast/snackbar + quay về 5.1 với dữ liệu mới.
+5. Trạng thái: đang lưu hiển thị loading trên nút; lỗi mạng giữ form + báo lỗi, không mất dữ liệu đã nhập.

@@ -36,11 +36,6 @@ class Navibar extends StatelessWidget {
           selectedIcon: Icon(Icons.people),
           label: 'People',
         ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outlined),
-          selectedIcon: Icon(Icons.person),
-          label: 'Profile',
-        ),
       ],
     );
   }
