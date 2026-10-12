@@ -3,7 +3,7 @@ import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
-import 'package:bidart/widgets/naviBar.dart';
+import 'package:bidart/widgets/navi_bar.dart';
 import 'package:flutter/material.dart';
 
 class Mainscreen extends StatefulWidget {
