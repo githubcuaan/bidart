@@ -2,6 +2,16 @@
 
 Docs: [class_design.md](./class_design.md) | [class_checklist.md](./class_checklist.md)
 
+## Convention state management
+
+- Dùng **Riverpod** cho state management và dependency injection, gồm luồng tạo/chọn phòng và trong phòng.
+- Đặt providers/controllers theo feature tại `features/<feature>/provider/`; widget chỉ thu input và render state.
+- Controller gọi engine thuần Dart và repository; chỉ publish state thành công sau khi persistence thành công.
+- Không đặt luật tính điểm trong widget/provider: engine ở `domain/services/`, repository interface ở `domain/repositories/`.
+- Dùng **Drift/SQLite** cho local storage; lưu cú đánh và state liên quan trong cùng transaction, tự lưu sau mỗi cú và phục hồi khi mở lại app. Riverpod không thay thế database hoặc cơ chế đồng bộ online.
+- Dùng **Firebase** cho backend online: Authentication, Cloud Firestore, Security Rules và Cloud Functions. Local repository dùng Drift; online repository dùng Firebase làm nguồn dữ liệu chính. Chi tiết quyền, command idempotency và offline policy xem [plans/step1.md](./plans/step1.md).
+- Quyết định chi tiết: [plans/step1.md](./plans/step1.md), câu 25. Cây thư mục là thiết kế mục tiêu, không phải toàn bộ code hiện có.
+
 ```
 lib/
 ├── main.dart
@@ -43,13 +53,13 @@ lib/
 │   │       ├── game_session_mapper.dart
 │   │       ├── turn_mapper.dart
 │   │       └── ...
-│   ├── remote/                       # supabase
-│   │   ├── supabase_client.dart
+│   ├── remote/                       # Firebase (giai đoạn online)
+│   │   ├── firebase_client.dart       # Auth / Firestore / callable Functions
 │   │   ├── api/
 │   │   │   ├── auth_api.dart
 │   │   │   ├── matchmaking_api.dart
 │   │   │   └── venue_api.dart
-│   │   └── mappers/                  # supabase json → freezed model
+│   │   └── mappers/                  # Firestore documents → freezed model
 │   │       └── ...
 │   └── repositories/
 │       ├── auth_repository.dart

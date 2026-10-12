@@ -404,7 +404,7 @@ classDiagram
 - `PlayerProfile.isCompatibleWith(other)` dùng `SkillLevel.rankDistance()` (Module 1) + `maxRankDistance` do user tự set (vd: chỉ muốn gặp người trong ±2 hạng) — lọc ngay ở tầng query feed, tránh hiện người hạng K ghép với người hạng A gây trải nghiệm tệ cho cả hai bên.
 - **Vá lỗ hổng — Pass vĩnh viễn:** ràng buộc `UNIQUE(fromProfile, toProfile)` trên `SwipeAction` đảm bảo mỗi cặp chỉ có tối đa 1 record. Query lấy feed luôn `WHERE toProfile NOT IN (SELECT toProfile FROM SwipeAction WHERE fromProfile = :me)` — nghĩa là bất kể Like hay Pass, người đó **không bao giờ hiện lại** trong feed của mình nữa. Nếu sau này muốn tính năng "xem lại người đã Pass" (kiểu Tinder Rewind trả phí) thì mới cần query riêng trên bảng này, không cần đổi schema.
 - **Vá lỗ hổng — vòng đời `Match`:** trước đây chỉ có `ACTIVE/ARCHIVED` không đủ. Giờ có `UNMATCHED` (1 trong 2 bên chủ động huỷ, lưu `unmatchedBy` để biết ai huỷ) và `EXPIRED` (match tạo ra nhưng không ai nhắn tin trong X ngày, dùng `expiresAt` để job nền tự chuyển trạng thái — khuyến khích người dùng chủ động nhắn sớm). `Conversation.isConversationLocked()` suy ra từ `match.status != ACTIVE` (không lưu field riêng để tránh 2 nguồn state lệch nhau) — khi khoá thì UI chỉ cho xem lại lịch sử chat, không cho gửi tin mới.
-- `Match` chỉ được tạo khi tồn tại **2 `SwipeAction` LIKE** (hoặc ít nhất 1 `SUPER_LIKE`) giữa 2 profile theo cả 2 chiều — nên xử lý ở backend (Supabase function/trigger), không nên tính ở client để tránh gian lận.
+- `Match` chỉ được tạo khi tồn tại **2 `SwipeAction` LIKE** (hoặc ít nhất 1 `SUPER_LIKE`) giữa 2 profile theo cả 2 chiều — nên xử lý ở backend (Firebase Cloud Functions), không nên tính ở client để tránh gian lận.
 - `Report` và `BlockList` tách riêng vì mục đích khác nhau: Report cần workflow duyệt (moderation), Block chỉ là hành động 1 chiều ẩn user khỏi feed — cần có từ đầu vì tính năng này tiếp xúc người lạ ngoài đời thật.
 
 ---
@@ -484,11 +484,13 @@ classDiagram
 
 ## 7. Mapping sang tầng dữ liệu Flutter
 
-| Module                                     | Local (Drift/SQLite)     | Remote (Supabase/Firebase)                |
+| Module                                     | Local (Drift/SQLite)     | Remote (Firebase)                        |
 | ------------------------------------------ | ------------------------ | ----------------------------------------- |
-| Scoring (GameSession, Turn, RuleConfig...) | Bắt buộc — offline-first | Optional (sync sau nếu cần backup)        |
+| Scoring (GameSession, Turn, RuleConfig...) | Nguồn chính cho phòng local — offline-first | Firestore là nguồn chính cho phòng online; Functions xử lý command |
 | History & Statistics                       | Tính từ local trước      | Optional sync                             |
 | Matchmaking                                |                          | Bắt buộc — cần realtime + auth            |
 | Venue Map                                  | Cache local (đọc nhanh)  | Nguồn chính (crowdsource + Google Places) |
 
 **Khuyến nghị code:** dùng `freezed` cho immutable model classes (map trực tiếp từ các class ở trên), `drift` generate table từ model cho Scoring, và 1 lớp `Mapper`/`Repository` riêng để chuyển đổi giữa model local ↔ model remote (tránh model bị "dính" logic của cả 2 nguồn dữ liệu).
+
+**Quyết định backend:** dùng Firebase Authentication, Cloud Firestore, Security Rules và Cloud Functions; Riverpod quản lý state/dependency phía Flutter. MVP làm local trước. Phòng online cần mạng để ghi điểm/undo, chỉ chủ phòng có quyền ghi; command có ID duy nhất và state version, được backend xác thực và ghi atomically. Không cho client sửa trực tiếp điểm hoặc lịch sử có thẩm quyền. Chi tiết và các quyết định online còn mở: [plans/step1.md](./plans/step1.md), câu 25.
