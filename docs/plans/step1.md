@@ -1,219 +1,146 @@
-## A. Phạm vi phòng
-
-## Trạng thái bước 1
-
-### Xác nhận cuối: ngưỡng điểm và undo
-
-- Đã chạm ngưỡng thì chờ hết ván rồi đóng phòng, tính đầy đủ điểm phát sinh; điểm cuối có thể thấp hơn ngưỡng. Ví dụ +90 → +110 → +80 với ngưỡng +100: đóng phòng cuối ván, điểm cuối +80.
-- Undo cú làm chạm ngưỡng tính lại dấu chờ kết thúc từ lịch sử hiệu lực. Bỏ dấu nếu không còn lần chạm ngưỡng hợp lệ, không người khác đạt ngưỡng và chưa hết thời gian. Ví dụ undo +90 → +110 về +90: được chơi ván sau nếu không có điều kiện kết thúc khác.
-- Nhóm câu hỏi bổ sung đã được trả lời. Các ghi chú “còn cần chốt” bên dưới về ngưỡng điểm được thay thế bởi xác nhận này. Cần biên tập lại bản đặc tả và đồng bộ project plan/contracts/tests trước khi đánh dấu toàn bộ Phase 1 hoàn thành; không coi việc trả lời câu hỏi là đã triển khai tính năng.
-
-### Xác nhận bổ sung lần 4 (ưu tiên hơn ghi chú cũ)
-
-- Đền cả làng chỉ trong chuỗi đề-pa; ngoài chuỗi đề-pa người chịu đền trả tổng điểm, kể cả cú ăn hết bi còn lại gồm bi 9. Cú hợp lệ ăn hết bi còn lại gồm bi 9 thắng ván.
-- Sửa thứ tự giữ nguyên current player/payer; thứ tự mới quyết định người tiếp theo. Undo không vượt qua sửa thứ tự thủ công.
-- Đạt điều kiện kết thúc thì chơi hết ván, ghi đầy đủ điểm tới cú cuối rồi chốt phòng. Chưa xác định nếu điểm giảm dưới ngưỡng hoặc undo cú chạm ngưỡng có bỏ trạng thái chờ kết thúc không.
-- Cho xoá người giữa hai ván, giữ điểm/lịch sử người rời; roster hoạt động cần 2–5 người trước ván mới.
-
-**Còn cần chốt:** khi đã chạm ngưỡng điểm, điểm giảm sau đó có vẫn đóng phòng cuối ván không; undo cú chạm ngưỡng có tính lại trạng thái chờ kết thúc không. Sau khi chốt cần đồng bộ project plan/contracts trước khi đánh dấu bước 1 hoàn thành.
-
-Chưa hoàn thành: đã chốt công nghệ và phần lớn luật; cần chốt các edge cases chỉnh sửa giữa ván, kết thúc tự động và thứ tự ván mới trước khi hoàn thiện contract/tests. Phần xác nhận bổ sung dưới đây được ưu tiên khi mâu thuẫn với câu trả lời ban đầu.
-
-### Xác nhận bổ sung
-
-1. Người vừa mất cơ chịu đền suốt chuỗi người sau giữ cơ, không phải actor của cú ngay trước.
-2. Trong cả chuỗi giữ cơ đề-pa, mỗi người còn lại trả toàn bộ điểm bi. Ví dụ 4 người, bi 10đ: ba người mỗi người -10, người đề-pa +30.
-3. Chủ phòng ghi theo lượt: chỉ ghi cho người đang có cơ.
-4. TH1: đã ăn hợp lệ ở cú trước, cú sau lỗi; giữ điểm đã ăn, không swap thứ tự, chuyển người kế tiếp.
-5. Ăn bi có điểm và lỗi cùng một cú: người phạm lỗi trả tổng điểm các bi cho người chịu đền, không nhận điểm ăn; swap như TH2. Trong chuỗi đề-pa, trả tổng điểm cho từng người còn lại.
-6. Bi ăn chưa đến thứ tự phải đặt lại: ví dụ đang đánh bi 2 nhưng ăn bi 3 thì móc bi 3 lên đánh tiếp.
-7. Bi 9 ăn sớm vẫn tính điểm và giữ cơ nhưng đặt lại, chưa kết thúc ván. Ăn hợp lệ hai bi cuối cùng trong cùng cú thì thắng ngay.
-8. Back/chuyển tab/đóng app không kết thúc phòng local; lưu để vào lại. Điều kiện kết thúc theo thời gian/điểm thuộc MVP.
-9. Huỷ giữ lịch sử. Cho thêm/xoá người và sửa luật trong lúc chơi; semantics áp dụng/undo cần chốt thêm.
-10. Người đứng sau người thắng ở ván mới là người đã chịu đền điểm bi 9 cho người thắng ở ván trước. Trường hợp có nhiều người trả bi 9 trong chuỗi đề-pa chưa chốt cách chọn.
-
-### Các quyết định còn thiếu
-
-### Xác nhận bổ sung lần 2
-
-### Xác nhận bổ sung lần 3
-
-- Không cho xoá người cho tới hết trận; thay thế quyết định cho xoá giữa ván trước đây.
-- Ván đầu phải setup thứ tự bắn và người chịu đền trước khi bắt đầu.
-- Đạt điều kiện thời gian/điểm thì chơi hết ván hiện tại rồi chốt phòng.
-- Cho sửa thứ tự thủ công trong lúc chơi.
-- Bi ăn sớm trong cú lỗi vẫn đặt lại. Một cú ăn hết bi còn lại gồm bi 9: người dùng xác nhận “đền cả làng”; chiều trả, số điểm và phạm vi ngoài đề-pa cần xác nhận.
-
-**Câu hỏi mở hiện tại (ưu tiên hơn danh sách rà soát cũ):** công thức đền cả làng khi ăn hết bi trong một cú; current player/payer và undo sau sửa thứ tự; ngưỡng điểm đã đạt nhưng sau đó giảm/undo; thời điểm được xoá người (hết ván hay đóng phòng). Chưa đánh dấu bước 1 hoàn thành.
-
-- Thêm người: điểm ban đầu 0, đứng cuối thứ tự. Xoá người vẫn giữ điểm/lịch sử của họ để tổng điểm toàn phòng, gồm người đã rời, bằng 0. Người thay thế khi xoá current player/payer chưa xác định.
-- Sửa luật chỉ hiệu lực từ cú tiếp theo, không tính lại lịch sử. Undo không được vượt qua thay đổi roster/rules; lưu version luật và mốc chặn undo.
-- Thời gian phòng tính từ lúc tạo, kể cả khi đóng app; thời điểm dừng khi đạt thời gian/điểm chưa chốt.
-- Đi chấm phá: người đề-pa đi hết bi, cả làng chịu đền và giữ nguyên thứ tự cho ván sau.
-- Bi ăn sớm ngoài bi 9 cũng tính điểm và giữ cơ nếu hợp lệ, nhưng đặt lại. Nếu cùng cú ăn cả bi đến lượt và bi tiếp theo (ví dụ 2 và 3), giữ cả hai ngoài bàn.
-- TH2 trong chuỗi đề-pa swap với người chịu đền được mang từ ván trước; ván đầu chưa có payer ván trước cần chốt riêng.
-- Guest không được trùng tên. Bi 9 tắt điểm vẫn thắng nếu ăn hợp lệ đủ điều kiện. Kết thúc phòng thủ công giữa ván giữ điểm, đánh dấu ván chưa hoàn thành và khoá phòng.
-
-Các mục còn thiếu bên dưới là danh sách rà soát ban đầu; mục đã được xác nhận ở lần 2 không còn là câu hỏi mở. Còn cần chốt: người thay khi xoá current/payer; TH2 đề-pa ván đầu; dừng tự động ngay hay hết ván; sửa thứ tự thủ công; ưu tiên đặt lại bi sau lỗi và trường hợp nhiều bi cuối/bi 9 cùng cú.
-
-- Thêm người giữa ván: điểm ban đầu và vị trí trong thứ tự; xoá người đang có cơ/người chịu đền; xử lý số người ngoài 2–5 và điểm người đã rời phòng để bảo toàn zero-sum.
-- Sửa luật: thời điểm hiệu lực, version luật từng command; có cho sửa thứ tự thủ công không; undo có vượt qua thay đổi roster/rules không.
-- Kết thúc tự động: tính giờ từ tạo phòng hay chỉ thời gian hoạt động; chạm ngưỡng giữa ván dừng ngay hay hết ván; trường hợp bi 9/ăn sớm và undo làm thay đổi điều kiện kết thúc.
-- Ván mới: cách chọn người đứng thứ hai nếu cả làng trả bi 9; thuật toán thứ tự còn lại.
-- Bi ăn sớm ngoài bi 9 có tính điểm/giữ cơ không; một cú nhiều bi xác định bi đến lượt theo trạng thái trước/sau cú; đặt lại bi sau lỗi có ưu tiên luật ăn sớm không; TH2 khi chưa có người chịu đền ở đề-pa swap với ai.
-- Cho trùng tên guest không; bi 9 tắt điểm có kết thúc/thắng không; hành vi kết thúc thủ công khi ván chưa xong.
-
-1. Phòng local hay online? Một thiết bị ghi điểm cho cả bàn, hay nhiều thiết bị cùng vào phòng?
-
-- trước hết hãy làm phòng local, chỉ cần tên và lưu đỉêm cho trận đó.
-- sau đó kết hợp làm phòng onl
-- một thiết bị ghi cho cả bàn.
-
-2. Số người: giới hạn 2–5 như mẫu UI, hay khoảng khác?
-
-- 2-5
-
-3. Người chơi: nhập tên guest đủ chưa? Có cần chọn tài khoản đã đăng ký? Cho phép trùng tên không?
-
-- đối với phòng local thì tên guest là đủ
-- nhưng đối với phòng onl thì phải là tài khoản đã đăng kí để lưu lại log trận đấu.
-
-4. Vòng đời: một phòng chỉ chơi một ván, hay nhiều ván liên tiếp? Nếu nhiều ván, điểm cộng dồn hay reset?
-
-- 1 Phòng chỉ chơi nhiều ván nhiều ván điểm cộng dồn
-- một phòng kết thúc chỉ khi được bấm kết thúc hoặc người dùng thoát ra hết
-- có thể khoán trước điều kiện kết thúc (đủ thời gian, một người chạm đến 1 điểm thắng nhật định)
-
-5. Tạo và bắt đầu: tạo xong đánh ngay, hay có trạng thái chờ để sửa người/luật trước khi bắt đầu? Có cho nhiều phòng đang chơi cùng lúc không?
-
-- tạo là bắt đầu
-- Đang chơi phòng A thì không được bắt đầu phòng B, trừ khi kết thúc/huỷ A.
-  Logic đơn giản, tránh ghi nhầm phòng.
-
-## B. Thứ tự và người chịu đền
-
-6. “Người bắn trước đó” là:
-
-- Người thực sự đánh cú trước.
-
-7.  Lượt đề-pa: người đầu ăn bi có điểm thì ai chịu đền? Người cuối trong vòng, không tính điểm, hay cách khác?
-
-- tất cả những người còn lại đều bị trừ điểm ở lượt đề pa, và trong lượt bắn đề pa đó.
-
-8.  Ăn hợp lệ: người ăn luôn giữ cơ? Nếu ăn nhiều bi liên tiếp, cùng một người chịu đền toàn bộ?
-    A tiếp tục chịu đền suốt chuỗi B giữ cơ:
-    B ăn bi 3: B +10, A -10
-    B ăn bi 5: B +15, A -15
-    Tổng: B +25, A -25, C 0
-9.  Không ăn, không lỗi: chuyển sang người kế tiếp theo vòng, đúng không?
-    đúng
-10. Chọn người ghi điểm: chỉ cho chọn người đang có cơ, hay được chọn bất kỳ người nào? Nếu chọn người khác, hệ thống sửa lượt thế nào?
-    chỉ người chủ phòng mới được ghi điểm.
-
-## C. Bi và tính điểm
-
-11. Cấu hình điểm: bi 1–9 đều bật/tắt được? Bi bật phải có điểm nguyên dương? Có giới hạn điểm tối đa và cho phép tắt toàn bộ không?
-
-- Mọi bi bật/tắt được; bi bật có điểm nguyên dương, tối đa phụ thuộc vào cáu hình ban đầu (có thể có / không có giới hạn); không cho tắt toàn bộ.
-
-12. Một cú ăn nhiều bi: ghi nhận chung một cú rồi cộng tổng điểm, đúng không?
-
-- ghi nhận chung rồi cộng tổng.
-
-13. Bi không điểm: vẫn ghi nhận đã rời bàn và giữ cơ nếu ăn hợp lệ, đúng không?
-
-- Đúng, vẫn ghi nhận bi đã ăn và giữ cơ, không tạo giao dịch điểm.
-
-14. Hệ số: MVP có tính theo lỗ, đền chỉ định, đền cả làng hoặc x2 bi 9 khi dọn bàn không? Nếu có, mô tả điều kiện và người trả/nhận.
-
-- tạm thời chưa làm các điều kiện nâng cao này, để sau này.
-
-15. Bi 9: ăn hợp lệ có kết thúc ngay kể cả bàn còn bi khác? Bi 9 tắt điểm vẫn kết thúc? Có cho kết thúc thủ công trước bi 9 không?
-
-- nếu chưa ăn từ 1 -> 8 mà ăn chín thì chín sẽ đuợc móc lên đánh tiếp
-- nếu đã đủ điều kiện (chỉ còn 9). kết thúc ván.
-
-## D. Lỗi TH1 / TH2
-
-16. TH1 — ăn bi rồi lỗi:
-
-- Bi vừa ăn có được tính điểm không?
-  -> không, nếu ăn bi có điểm mà bị lỗi thì sẽ bị đền cho người trước ddos
-- Bi giữ ngoài bàn hay đặt lại?
-  -> nếu ăn trực tiếp thì đặt ngoài
-  -> ăn nối, chưa đến lượt bị đó thì lôi lên đánh.
-- “Giữ nguyên lượt” nghĩa là chính người phạm lỗi đánh tiếp, đúng không?
-  ->tức là người sau người đó đánh.
-
-- TH1 chỉ đạt điều kiện khi: ăn bi xong bắn tiếp tục lỗi, nếu ăn bi rồi lỗi ngay trong một cơ, điểm sẽ đền cho người trước (nếu có) rồi sẽ đổi cơ như th2.
-
-17. TH2 — chưa ăn bi đã lỗi: xác nhận ví dụ này:
-    Thứ tự: A → B → C → D
-    B đang đánh, A là người trước.
-    B mắc TH2.
-    Thứ tự mới: B → A → C → D
-    A đánh tiếp; nếu A không ăn thì C đánh.
-    Đúng không? Nếu không, thứ tự và lượt tiếp phải thế nào?
-    - đúng như bạn nói.
-18. Phạt điểm: lỗi chỉ ảnh hưởng lượt, hay còn mất điểm? Nếu mất: bao nhiêu, ai nhận, có phụ thuộc loại lỗi không?
-
-- lỗi chỉ ảnh hưởng mất lượt
-- chỉ mất điểm trong trường hợp ăn bi có điểm và lỗi cùng lucs.
-
-19. Bi sau lỗi: bi cái vào lỗ, bi mục tiêu vào lỗ sai luật hoặc nhảy khỏi bàn được xử lý thế nào? Đặc biệt bi 9: đặt lại hay kết thúc?
-
-- với các bi không có điểm: bỏ ra luôn
-- với các bi có điểm: phải đền cho người trước như ví dụ ở TH1
-- với bi 9: đặt lại rồi theo luật để giữ cho người sau đặt / đổi cơ
-
-20. Phạm vi tự kiểm tra: app chỉ ghi lỗi do người dùng chọn, hay phải tự kiểm tra luật 9 bi như chạm bi thấp nhất trước? Cần phân biệt loại lỗi nào trên UI?
-    Người dùng tự xác định lỗi
-    Người ghi điểm quan sát bàn rồi chọn:
-
-- Không lỗi.
-- TH1: ăn bi rồi mắc lỗi.
-- TH2: chưa ăn bi đã mắc lỗi.
-  App chỉ xử lý điểm, bi và lượt theo lựa chọn đó. Không tự biết cú đánh thực tế đúng luật không.
-  Ví dụ B chạm sai bi trước: người dùng tự chọn TH2; app thực hiện đổi cơ/thứ tự.
-
-## E. Undo, kết quả và dữ liệu
-
-21. Undo: chỉ lượt cuối hay nhiều lượt liên tiếp? Có giới hạn thời gian? Cho undo lượt ăn bi 9 để mở lại ván đã kết thúc không?
-
-- Cho undo nhiều lượt liên tiếp trong ván hiện tại, không giới hạn thời gian, chỉ để sửa dữ liệu nhập nhầm.
-  Mỗi lần hoàn tác lượt hiệu lực cuối và giữ dấu vết lịch sử. Cho undo lượt bi 9 để mở lại ván nếu chưa bắt đầu ván mới hoặc đóng phòng; cần xác nhận.
-
-22. Kết quả: người điểm cao nhất thắng, hay người ăn bi 9 thắng? Đồng điểm xử lý hòa hay tiêu chí phụ?
-
-- kết quả của ván sẽ là người ăn bi 9.
-- người thắng sẽ được depa, cơ sau đó sẽ là người đền còn các lượt còn lại sẽ là theo ván trước:
-  - ví dụ: a -> b -> c -> d->e. c thắng -> c đề pa -> b -> d ->e-> a
-
-23. Kết thúc/huỷ: trận đã đóng có được sửa/mở lại không? Huỷ giữ lịch sử hay xoá? Có được đổi người, thứ tự hoặc luật giữa ván không?
-
-- trận đã đóng tạm thời để là chỉ xem, sau này có kế hoạch khác tính sau
-
-24. Lưu dữ liệu: phải tự lưu sau mỗi cú và phục hồi khi mở lại app, đúng không? Có cần lưu bộ luật yêu thích ngay trong MVP?
-
-- tự động lưu dữ liệu sau mỗi cơ
-- được, thêm chức năng lưu luật yêu thích
-
-25. Kỹ thuật: nhóm đã chọn storage/state management chưa? Nếu chưa, có đồng ý Drift/SQLite + ChangeNotifier cho MVP local không?
-
-- Đã thống nhất sử dụng **Riverpod** cho state management và dependency injection; không dùng `ChangeNotifier` làm convention cho luồng phòng.
-- Controller điều phối thao tác, gọi engine và repository; chỉ cập nhật state thành công sau khi lưu thành công. Widget chỉ thu input và hiển thị state.
-- Engine luật chơi thuần Dart, không phụ thuộc Flutter, Riverpod hoặc database. Repository có interface riêng để hỗ trợ local trước, online sau.
-- Đã thống nhất **Drift/SQLite** cho local storage, kết hợp **Riverpod** cho state management và dependency injection. Lưu cú đánh và state liên quan trong cùng transaction; tự lưu sau mỗi cú và phục hồi khi mở lại app.
-- Chốt **Firebase** cho backend giai đoạn online: Firebase Authentication định danh người chơi, Cloud Firestore lưu dữ liệu/realtime, Security Rules kiểm soát truy cập và Cloud Functions xử lý command có thẩm quyền.
-
-### Quyết định kiến trúc local/online
-
-- MVP triển khai phòng local trước; một thiết bị ghi điểm cho cả bàn. Firebase không thay thế Drift hoặc Riverpod.
-- Phòng local dùng Drift làm nguồn dữ liệu chính. Phòng online dùng Firebase làm nguồn dữ liệu chính; không coi hai bản ghi độc lập ở Drift và Firestore là hai nguồn có thẩm quyền ngang nhau.
-- Tách repository interface, local implementation và Firebase implementation; controller không truy cập database trực tiếp.
-- Phòng online: chỉ chủ phòng được ghi điểm/undo; backend xác thực danh tính, vai trò thành viên và quyền thao tác. Ẩn nút trên client không thay thế kiểm tra quyền.
-- Client gửi command có ID duy nhất và expected state version. Cloud Functions xác thực, tính/kiểm tra kết quả và ghi command + state trong Firestore transaction; retry không tạo lượt trùng, command dựa trên state cũ bị từ chối.
-- Security Rules chặn client sửa trực tiếp điểm/lịch sử/state có thẩm quyền. Cloud Functions dùng Admin SDK phải tự kiểm tra quyền vì Admin SDK bỏ qua Security Rules.
-- Engine local vẫn thuần Dart. Runtime/implementation engine backend chưa chốt; nếu dùng TypeScript/JavaScript, dùng chung đặc tả luật và bộ test input/output để tránh lệch với Dart.
-- Phòng local chơi offline đầy đủ. Phòng online ban đầu cần mạng để ghi điểm/undo; mất mạng chỉ xem dữ liệu đã tải và báo trạng thái. Firestore cache không có nghĩa command đã được server chấp nhận; chưa triển khai queue command offline hoặc tự chuyển phòng local thành online.
-- Schema Firestore, cấu hình Auth, region, chi phí/quota và cơ chế đồng bộ chi tiết cần thiết kế ở giai đoạn online; quyết định này chưa thêm dependency hay triển khai backend.
+# Bước 1 — Đặc tả core phòng đã chốt
+
+**Trạng thái: hoàn thành phần thiết kế/đặc tả, chưa triển khai code.**
+
+Tổng hợp câu trả lời và các lần xác nhận của người phụ trách. Luật nghiệp vụ chuẩn của dự án nằm tại [../rule.md](../rule.md); khi UI/scratch hoặc class design cũ mâu thuẫn, ưu tiên luật và contract trong tài liệu này. Các tên model/command dưới đây là contract thiết kế, không khẳng định code đã tồn tại.
+
+## 1. Phạm vi và công nghệ
+
+- Local trước: một thiết bị ghi điểm cho cả bàn; 2–5 guest, tên trim không rỗng/không trùng, định danh bằng ID chứ không bằng tên.
+- Một phòng nhiều ván; điểm cộng dồn. Tạo là bắt đầu ván đầu, không có phòng chờ; chỉ một phòng chưa đóng tại một thời điểm.
+- Chủ phòng chỉ ghi cho người đang có cơ. Người dùng xác định tính hợp lệ/lỗi; app không tự phân xử mọi luật 9 bi.
+- MVP gồm luật yêu thích, chỉnh sửa giữa ván, kết thúc theo thời gian/ngưỡng điểm, undo và tự lưu/phục hồi.
+- **Riverpod** quản lý state/dependency; controller điều phối engine -> repository -> publish state sau lưu thành công.
+- **Drift/SQLite** là nguồn chính cho local; lưu command, lịch sử và state liên quan cùng transaction, có schema version/migration.
+- Engine thuần Dart không phụ thuộc Flutter/Riverpod/database; repository interface tách nguồn local và online.
+- Online sau dùng **Firebase Authentication, Cloud Firestore, Security Rules, Cloud Functions**. Không triển khai online trong MVP local.
+- Hệ số lỗ, preset vùng miền, x2 bi 9 và các chế độ đền nâng cao chưa thuộc MVP. Đền cả làng trong chuỗi đề-pa vẫn bắt buộc, không phải tính năng nâng cao bị hoãn.
+
+## 2. Domain contract: phòng -> ván -> cú đánh
+
+| Model | Trách nhiệm / dữ liệu bắt buộc |
+| --- | --- |
+| `Room` | ID, tên hiển thị, owner ID, mode local/online, trạng thái, createdAt/endTime, participant IDs, roster hoạt động, thứ tự, rule version hiện tại, current game ID, tổng điểm cộng dồn, cấu hình thời gian/ngưỡng và dấu chờ kết thúc |
+| `GameSession` | Một ván thuộc room; số ván, trạng thái, thời gian bắt đầu/kết thúc, winner ID, current player ID, payer ID, trạng thái chuỗi đề-pa/chuỗi giữ cơ, thứ tự và lịch sử hiệu lực |
+| `PlayerInGame` / participant | ID guest/user, tên, thời điểm tham gia/rời; giữ liên kết lịch sử khi rời. Điểm của người rời vẫn nằm trong ledger toàn phòng |
+| `RuleConfig` | Immutable version; cấu hình bi 1–9 enabled/points, giới hạn điểm optional; bi bật có điểm nguyên dương, tối thiểu một bi bật |
+| `Turn` | Một cú đã xác nhận: command/turn ID, room/game ID, actor ID, rule version, bi ăn và trạng thái đặt lại, lỗi, payer(s), giao dịch, thời gian, before/after state, isUndone |
+| `ScoreTransaction` | from/to participant IDs khác nhau, amount nguyên dương, game/turn ID, loại và group ID khi trả nhiều người |
+| `ScoreLog` | Điểm trước/sau của mỗi người bị ảnh hưởng, phục vụ nhật ký/undo |
+| `RoomEvent` | Thay đổi roster/rules/order, ID/version, dữ liệu trước/sau và mốc chặn undo |
+| `RuleTemplate` | Tên mẫu và bản cấu hình độc lập; áp dụng cho phòng tạo mới không sửa lịch sử phòng cũ |
+
+`RoomStatus`: `ACTIVE -> FINISHED/CANCELLED`. Chờ kết thúc là flag/reason trong `ACTIVE`, vẫn cho đánh nốt ván.
+
+`GameStatus`: `IN_PROGRESS -> FINISHED/INCOMPLETE/CANCELLED`. Ván thắng bi 9 là `FINISHED`; đóng phòng thủ công giữa ván là `INCOMPLETE`; huỷ phòng giữ ván/lịch sử với trạng thái huỷ. Giữa hai ván: phòng vẫn `ACTIVE`, current game đã `FINISHED`, chưa có ván mới đang chơi.
+
+Không dùng `PENDING/startGame` trong luồng tạo phòng. `createRoom` tạo phòng và ván đầu atomically; `startNextGame` là thao tác riêng sau một ván hoàn tất. Không xoá/reset điểm cũ khi xếp lại bộ bi 1–9.
+
+### Dữ liệu đầu vào của cú đánh
+
+- Actor phải là current player. Chọn người/bi trên UI chỉ là draft, xác nhận mới tạo `Turn`.
+- Bi phải đang trên bàn, trong 1–9 và không trùng trong một input.
+- Ghi nhận cả bi không điểm. Input chứa phân loại lỗi và kết quả bi giữ ngoài bàn/đặt lại theo luật; không nhập số điểm tuỳ ý.
+- Trạng thái chuỗi trước cú phải cho engine phân biệt TH1/TH2 và ăn+lỗi cùng cú; không dựa vào nhãn UI mơ hồ để bỏ qua nhánh ăn+lỗi.
+- Cú ăn sớm hợp lệ vẫn tính điểm/giữ cơ nhưng đặt lại bi. Cùng cú ăn bi đến lượt và bi tiếp theo thì giữ cả hai ngoài bàn; bi 9 trong cú lỗi luôn đặt lại.
+
+## 3. Luật điểm và lượt
+
+- Ngoài đề-pa: người vừa mất cơ trả toàn bộ điểm cho người ăn suốt chuỗi giữ cơ. Actor cú ngay trước không tự trở thành payer nếu đang giữ cơ.
+- Chuỗi đề-pa: mỗi người còn lại trả tổng điểm bi của cú, người đề-pa nhận tổng các khoản. Ăn+lỗi cùng cú đảo chiều: người phạm lỗi trả tổng điểm cho từng người còn lại.
+- Không ăn/không lỗi: chuyển người kế tiếp. TH1 (đã ăn hợp lệ ở cú trước rồi lỗi ở cú khác): giữ điểm cũ, không swap, chuyển người kế tiếp.
+- TH2: swap actor với payer, payer đánh tiếp. Ăn+lỗi cùng cú: không nhận điểm ăn; trả tổng điểm bi có điểm cho payer (hoặc cả làng trong đề-pa), swap như TH2.
+- Ván đầu setup cả người đề-pa, thứ tự và payer (payer thuộc roster, khác người đề-pa). Các ván sau dùng payer từ ván trước.
+- Ăn bi 9 hợp lệ khi đủ điều kiện kết thúc thì thắng, kể cả bi 9 tắt điểm. Ăn toàn bộ bi còn lại gồm bi 9 trong một cú hợp lệ cũng thắng.
+- Ván sau: người thắng đầu, người trả bi 9 đứng sau, những người còn lại theo vòng cũ bắt đầu sau người thắng. Ví dụ A/B/C/D/E, C thắng, B trả: C/B/D/E/A. Đi chấm phá giữ nguyên thứ tự; đền cả làng chỉ trong chuỗi đề-pa.
+
+## 4. Command contracts
+
+Command thay đổi dữ liệu có ID duy nhất; cùng ID retry trả kết quả đã commit, không áp dụng hai lần. Controller tuần tự hoá command theo phòng. Tất cả trả state/result hoặc lỗi rõ ràng; validation/persistence thất bại không publish state mới. Expected version dùng chống ghi dựa trên state cũ, đặc biệt khi online.
+
+| Command | Input | Preconditions / output |
+| --- | --- | --- |
+| `createRoom` | Command ID, roster, order, starter, payer, rule config, end conditions | 2–5 guest hợp lệ; chưa có phòng active; tạo room `ACTIVE` + ván 1 `IN_PROGRESS`, điểm 0, createdAt và current player, lưu atomically |
+| `getRoom/listRooms` | ID / filter | Đọc phòng active/đã đóng, bao gồm lịch sử và người đã rời; thiếu ID trả not-found |
+| `recordTurn` | ID/version, game ID, actor, bi/kết quả bi, lỗi | Room active + ván đang chơi; actor đúng lượt; tính giao dịch/bi/thứ tự, ghi log/snapshot; có thể finish ván và đóng phòng nếu đang chờ kết thúc |
+| `undoLastTurn` | ID/version, game ID, xác nhận nếu mở lại ván | Chỉ cú hiệu lực cuối của ván hiện tại, không qua mốc edit; room chưa đóng, chưa start ván sau; phục hồi before-state, giữ bản ghi undone, tính lại điều kiện kết thúc theo lịch sử còn hiệu lực và thời gian thực |
+| `startNextGame` | ID/version | Ván trước finished, room active và không có điều kiện kết thúc; roster 2–5; tạo ván mới với bộ bi đầy đủ, order/payer theo luật, giữ điểm phòng |
+| `addPlayer` | ID/version, tên/participant | Room active, không vượt 5, tên không trùng; điểm 0, cuối order, ghi event/mốc undo |
+| `removePlayer` | ID/version, participant ID | Chỉ giữa hai ván trong room active; roster ván kế phải hợp lệ; giữ ledger/lịch sử, không xoá participant referenced; roster/order setup ván mới không được tham chiếu người đã rời |
+| `updateRules` | ID/version, cấu hình mới | Room active; validate, tạo version mới hiệu lực cú sau; không recompute lịch sử, ghi mốc undo |
+| `reorderPlayers` | ID/version, permutation roster | Room active; giữ current/payer, order mới dùng cho người tiếp theo; ghi mốc undo |
+| `finishRoom` | ID/version, xác nhận | Chốt đầy đủ điểm; ván đang chơi thành incomplete; room finished/read-only, không mở lại bằng undo |
+| `cancelRoom` | ID/version, xác nhận | Room cancelled/read-only, giữ ledger và lịch sử, không xoá dữ liệu |
+| `saveRuleTemplate` | Tên và cấu hình hợp lệ | Lưu bản sao độc lập để tái dùng; không mutate room/history |
+| `evaluateEndConditions` | Room, clock hiện tại | Thời gian tính từ tạo phòng; khi đạt thời gian/điểm đánh dấu chờ kết thúc; nếu ván đã hết thì không start ván mới. Chạy khi load/resume, trước command và khi timer đến hạn |
+
+Sửa luật/người/thứ tự chỉ có hiệu lực sau command edit đã commit. Undo không vượt mốc edit, kể cả khi lượt cũ nằm trước một edit giữa hai cú.
+
+### Kết thúc tự động
+
+- Đạt điều kiện thì đánh nốt ván, ghi đầy đủ điểm rồi đóng phòng; không ép điểm về ngưỡng.
+- Ngưỡng +100: B +90 -> +110 -> +80; vẫn đóng cuối ván với +80.
+- Undo cú gây chạm ngưỡng: tính lại dấu chờ từ lịch sử hiệu lực, bao gồm các lần chạm trước mốc chặn undo. Nếu không còn lần chạm ngưỡng, không người khác đạt và chưa hết thời gian thì bỏ dấu.
+- Undo không làm lùi đồng hồ; room đã đóng là read-only. Nếu thời gian đã hết khi resume, tiếp tục nốt ván, không tự xoá hoặc kết thúc ván chưa chơi xong.
+
+## 5. Invariants
+
+- Tổng điểm toàn phòng, gồm người đã rời, bằng 0; điểm khớp giao dịch hiệu lực qua mọi ván.
+- Roster hoạt động 2–5 khi chơi; ID duy nhất, order là permutation roster; current/payer hợp lệ và khác nhau khi cần trả/swap.
+- Rules/version và giao dịch cũ immutable. Bi được đặt lại có thể ăn lần sau; không chặn theo “đã từng ăn” mà kiểm tra trạng thái bàn hiệu lực.
+- Bi còn lại lấy từ các kết quả giữ ngoài bàn/đặt lại trong ván, không từ tổng số lần ghi điểm.
+- Một command commit tối đa một lần, command + lịch sử + state trong cùng transaction.
+- Undo khôi phục points/order/current/payer/chain/balls/status và tính lại end conditions, không undo clock hoặc vượt edit barrier.
+- Trận/phòng đã đóng chỉ xem; guest rời không làm mất giao dịch hoặc điểm đã có.
+
+## 6. Bảng input/output dùng cho unit tests
+
+Các điểm trong bảng là delta, trừ case nêu điểm hiện tại. Engine nhận cấu hình đã chốt của phòng, không dùng điểm mẫu UI làm mặc định.
+
+| Case | Input | Output bắt buộc |
+| --- | --- | --- |
+| Tạo | A/B, order A/B, starter A, payer B, bi 3=10 | Room active, ván 1 đang chơi, A có cơ, điểm 0; 1 hoặc 6 người / tên trùng / payer A bị từ chối |
+| Ăn thường | B có cơ, A payer, bi 3=10 hợp lệ | B +10/A -10, B giữ cơ, A vẫn payer |
+| Chuỗi | Case trên rồi B ăn bi 5=15 | Tổng B +25/A -25; không chuyển payer thành B |
+| Nhiều bi | B ăn hợp lệ 2 và 3 cùng cú, tổng 25 | Một Turn, B +25/A -25, cả 2/3 ngoài bàn |
+| Ăn sớm | Đang tới bi 2, B ăn riêng bi 3=10 hợp lệ | B +10/A -10, bi 3 đặt lại, B giữ cơ; ăn lại hợp lệ có thể tính tiếp |
+| Bi tắt | B ăn hợp lệ bi 2 tắt điểm | Không transaction, bi ngoài bàn nếu tới lượt, B giữ cơ |
+| Đề-pa | A đề-pa, B/C/D, bi 10 | A +30, B/C/D mỗi người -10; chuỗi vẫn đề-pa |
+| Không ăn | A/B/C/D, B có cơ, không lỗi | C có cơ, B payer; kết thúc chuỗi B |
+| TH1 | B đã ăn hợp lệ cú trước, cú này lỗi không ăn | Giữ điểm cũ, order không đổi, C đánh tiếp |
+| TH2 | A/B/C/D, B có cơ, A payer, lỗi trước khi ăn hợp lệ | Order B/A/C/D, A có cơ; A không ăn thì C có cơ |
+| Ăn+lỗi | B ăn bi 10 và 15 cùng cú lỗi, A payer | B -25/A +25; không cộng ăn, swap như TH2 |
+| Đề-pa+lỗi | A đề-pa ăn bi 10 cùng cú lỗi, B/C/D | A -30, B/C/D mỗi người +10; swap với payer setup/from previous game |
+| Bi 9 sớm | B ăn riêng 9=50 hợp lệ, còn bi 2 | B +50/A -50; đặt lại 9, B giữ cơ, ván chưa xong |
+| Bi 9 lỗi | Chỉ còn 9, ăn 9 rồi lỗi cùng cú | Không thắng, đặt lại 9, trả điểm/swap theo luật |
+| Thắng | Chỉ còn 8/9, B ăn cả hai hợp lệ | Ván finished, B winner; ngoài đề-pa chỉ A trả, trong đề-pa cả làng trả |
+| Bi 9 tắt | Chỉ còn 9 tắt, B ăn hợp lệ | Không giao dịch, B thắng |
+| Ván mới | A/B/C/D/E, C thắng, B trả 9 | C/B/D/E/A, đủ bi 1–9, điểm phòng không reset |
+| Chấm phá | A đi hết bi trong chuỗi đề-pa | Cả làng trả; ván sau giữ nguyên order |
+| Edit | Thay rules/order hoặc thêm người sau một cú | History cũ không đổi, version/event lưu; undo không vượt event; reorder giữ current/payer |
+| Remove | Xoá giữa hai ván, còn >=2 | Rời active roster, điểm/lịch sử giữ; xoá trong ván bị từ chối |
+| Undo | Undo TH2 / cú thắng 9 trước ván mới | Phục hồi order/current/payer/balls/scores; ván có thể mở lại, turn undone; không mở room đã đóng |
+| Ngưỡng | Ngưỡng 100, B 90 ->110 ->80 | Chờ cuối ván, chốt B 80; không start ván mới |
+| Undo ngưỡng | B 90 ->110, undo về 90, chưa hết giờ | Bỏ pending-end nếu không còn điều kiện khác; hết giờ thì vẫn pending |
+| Clock | Đóng app khi ván chưa xong, resume đã hết giờ | Restore đúng state, pending-end, đánh hết ván rồi đóng |
+| Persistence | Save lỗi / retry command ID cũ | Lỗi không publish state; retry không thêm turn/transaction trùng |
+| Invalid | Actor sai, bi ngoài bàn/ngoài 1–9/trùng input, stale version | Lỗi rõ ràng, không mutate state |
+
+## 7. Kiến trúc online đã chốt (triển khai sau)
+
+- Online dùng tài khoản đăng ký; Firestore là nguồn chính, không coi Drift/Firestore là hai nguồn có thẩm quyền ngang nhau.
+- Chỉ owner ghi điểm/undo. Client gửi command ID và expected state version; Cloud Functions xác thực quyền, tính/kiểm tra luật, ghi command và state trong transaction.
+- Security Rules chặn sửa trực tiếp điểm/lịch sử/state có thẩm quyền; Functions dùng Admin SDK phải tự kiểm tra quyền vì bỏ qua Rules.
+- Online ban đầu cần mạng để ghi/undo; mất mạng chỉ xem dữ liệu đã tải và báo rõ. Cache không có nghĩa server đã chấp nhận command; không queue command offline hoặc tự chuyển local thành online.
+- Engine local Dart; runtime backend chưa chốt, nếu dùng TypeScript/JavaScript phải dùng cùng đặc tả/test input-output.
+- Schema Firestore, Auth provider, region, quota/chi phí và sync chi tiết là công việc online sau, không blocker cho MVP local.
+
+## 8. Bàn giao bước 1
+
+- [x] Luật và phạm vi thống nhất.
+- [x] Domain room/game/turn và lifecycle được mô tả.
+- [x] Command contracts, validation, undo/edit và end conditions được mô tả.
+- [x] Bảng input/output cho engine/tests.
+- [x] Công nghệ và ranh giới local/online thống nhất.
+
+Chuyển sang Phase 2: triển khai models/validator và repository interface. Checklist code/tests vẫn chưa hoàn thành. [class_design.md](../class_design.md) là thiết kế ban đầu; phần scoring phải được triển khai theo bổ sung room/version/commands tại đây, không theo các chữ ký cũ nếu mâu thuẫn.

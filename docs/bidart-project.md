@@ -17,7 +17,7 @@ created: 2026-08-26
 
 **Phạm vi công việc hiện tại:** domain models, validation, tạo/chọn phòng, scoring/turn engine, state trong phòng, lưu local và kiểm thử. Không triển khai Auth, tìm đối, chat, bản đồ, đồng bộ online, mã mời/join phòng từ thiết bị khác, xuất PDF hoặc thống kê nâng cao.
 
-**Định nghĩa phòng trong MVP:** một `GameSession` lưu trên thiết bị, không phải phòng multiplayer realtime. Tên/mã phòng là thông tin hiển thị; người chơi có thể là guest. Chốt lại phạm vi nếu nhóm cần phòng online.
+**Định nghĩa phòng trong MVP:** một `Room` local chứa nhiều `GameSession` (ván), mỗi ván chứa nhiều `Turn` (cú đánh). Điểm cộng dồn toàn phòng, gồm người đã rời; local trước, Firebase online sau. Đặc tả đã chốt: [plans/step1.md](./plans/step1.md).
 
 ### Hiện trạng đã kiểm tra
 
@@ -30,7 +30,7 @@ created: 2026-08-26
 ### Tiêu chí hoàn thành
 
 - Tạo được phòng hợp lệ với 2–5 guest theo UI hiện có; chọn người đề-pa và thứ tự bắn.
-- Cấu hình điểm bi 1–9 được chụp cố định khi tạo trận, không đổi giữa trận.
+- Cấu hình điểm bi 1–9 có version; cho sửa khi chơi, chỉ áp dụng từ cú tiếp theo, không tính lại lịch sử. Có lưu luật yêu thích.
 - Ăn bi có điểm tạo giao dịch từ người chịu đền sang người ăn; tổng điểm mọi người luôn bằng 0.
 - Ghi nhận được lượt không ăn bi và lỗi TH1/TH2; xác định đúng người hiện tại, người trước và người tiếp theo theo luật đã chốt.
 - Undo khôi phục điểm, bi còn lại, thứ tự bắn, trạng thái trận và lịch sử hiệu lực.
@@ -66,26 +66,26 @@ views:
 
 ## Milestones & Tasks
 
-- [ ] **Phase 1: Chốt contract và luật (P0 — trước khi code engine)**
-  - [ ] Xác nhận phòng local, giới hạn 2–5 người và một phòng tương ứng một ván.
-  - [ ] Chốt các câu hỏi trong mục “Luật cần xác nhận”; chuyển thành bảng input/output dùng chung cho engine và tests.
-  - [ ] Chốt semantics của một `Turn`: một lần ghi nhận cú đánh, có thể không ăn bi hoặc ăn nhiều bi; không tạo lượt chỉ vì chạm chọn bi trên UI.
-  - [ ] Chốt API command, trạng thái `PENDING -> IN_PROGRESS -> FINISHED/CANCELLED` và chính sách undo/kết thúc.
+- [x] **Phase 1: Chốt contract và luật (hoàn thành đặc tả, chưa triển khai)**
+  - [x] Phòng local, 2–5 guest không trùng tên; một phòng nhiều ván, điểm cộng dồn, chỉ một phòng active.
+  - [x] Luật trong `rule.md` và bảng input/output trong `plans/step1.md` đã thống nhất.
+  - [x] Một `Turn` là một cú đã xác nhận, có thể không ăn hoặc ăn nhiều bi; chọn trên UI chỉ là draft.
+  - [x] Chốt Room ACTIVE -> FINISHED/CANCELLED, ván IN_PROGRESS -> FINISHED/INCOMPLETE/CANCELLED; tạo là bắt đầu, contract undo/edit/kết thúc trong `plans/step1.md`.
   - [x] Chốt Riverpod cho state management và dependency injection; engine thuần Dart, controller và repository tách riêng. Quyết định được ghi tại [plans/step1.md](./plans/step1.md), câu 25.
   - [x] Chốt Drift/SQLite cho local storage, kết hợp Riverpod; lưu lượt và state liên quan trong cùng transaction, tự lưu và phục hồi khi mở lại app.
   - [x] Chốt Firebase cho backend giai đoạn online (Auth, Firestore, Security Rules, Cloud Functions). MVP vẫn làm local trước; quyền chủ phòng, command idempotency và offline policy ghi tại [plans/step1.md](./plans/step1.md).
 
 - [ ] **Phase 2: Models và tạo/chọn phòng (P0)**
-  - [ ] Tạo immutable models/enums cho `GameSession`, `PlayerInGame`, `RuleConfig`, `GameStatus`, `Turn`, `PottedBall`, `ScoreTransaction`, `ScoreLog` và các enum scoring cần dùng.
+  - [ ] Tạo immutable models/enums cho `Room`, `RoomStatus`, `RoomEvent`, `RuleTemplate`, `GameSession`, `PlayerInGame`, `RuleConfig`, `GameStatus`, `Turn`, `PottedBall`, `ScoreTransaction`, `ScoreLog` theo contract bước 1.
   - [ ] Bổ sung cấu hình điểm theo từng bi (`ballNumber -> enabled/points`): `pointsPerBall` đơn lẻ trong class design chưa đủ cho yêu cầu màn hình tạo phòng.
   - [ ] Bổ sung IDs actor/người chịu đền, thứ tự player IDs, current player và dữ liệu trước/sau lượt để xử lý chuyển cơ/undo; không dùng tên làm khoá.
   - [ ] Tạo validator: 2–5 người, ID duy nhất, tên trim không rỗng, thứ tự là hoán vị roster, người đề-pa thuộc roster, bi trong 1–9, điểm nguyên dương cho bi bật, bi tắt tính 0.
-  - [ ] Chốt giới hạn điểm tối đa và việc cho phép mọi bi tắt; hiển thị lỗi thay vì tự sửa cấu hình không hợp lệ.
-  - [ ] Viết `createRoom`: validate -> tạo UUID/timestamp -> chụp rule snapshot -> điểm ban đầu 0 -> lưu -> trả session ID. Không tạo phòng nếu lưu thất bại.
-  - [ ] Viết `listRooms/getRoom/startGame`; start chỉ hợp lệ từ `PENDING`, không reset trận đang diễn ra.
+  - [ ] Validate tên guest không trùng, ít nhất một bi bật; giới hạn điểm optional theo cấu hình; payer/starter thuộc roster và khác nhau.
+  - [ ] Viết `createRoom`: validate -> tạo IDs/timestamp -> rule version -> điểm 0 -> lưu Room active + ván đầu đang chơi atomically -> trả room ID. Không tạo phòng nếu lưu thất bại.
+  - [ ] Viết `listRooms/getRoom/startNextGame`; ván tiếp chỉ sau ván hoàn tất và khi chưa có điều kiện đóng phòng, không reset điểm phòng.
   - [ ] Nối `add_room.dart` với form, thêm/xoá/sắp xếp guest, chọn người đầu và preview luật; disable submit khi invalid/đang lưu.
   - [ ] Nối `rooms.dart` và `chose_room.dart` với danh sách/chọn phòng; xử lý empty/loading/error và phòng không tồn tại. Chốt trách nhiệm hai file để tránh hai danh sách trùng chức năng.
-  - [ ] Sau tạo/start thành công mới điều hướng vào trận bằng ID; quay về danh sách không làm mất phòng.
+  - [ ] Sau tạo thành công mới điều hướng bằng room ID; quay về danh sách không đóng hoặc làm mất phòng.
 
 - [ ] **Phase 3: Engine và thao tác trong phòng (P0)**
   - [ ] Tạo `lib/domain/services/score_engine.dart` thuần Dart: nhận session + turn input, trả kết quả mới; không phụ thuộc Flutter/storage.
@@ -94,21 +94,24 @@ views:
   - [ ] Xử lý giữ cơ khi ăn hợp lệ, chuyển cơ khi không ăn và TH1/TH2 theo bảng luật đã duyệt; TH2 phải đổi vị trí hai người, không chỉ đổi highlight.
   - [ ] Tách bi không tính điểm khỏi bi đã rời bàn: vẫn cần cách ghi nhận bi tắt để `remainingBalls` đúng, dù không xuất hiện trong bộ chọn cộng điểm.
   - [ ] Lưu lịch sử có actor, bi, lỗi, giao dịch, score logs, thứ tự trước/sau và người nhận lượt; bi còn lại được suy ra từ lượt hiệu lực.
-  - [ ] Tạo `recordTurn`, `undoLastTurn`, `finishGame`, `cancelGame`; mọi command có validation và kết quả lỗi rõ ràng.
+  - [ ] Tạo `recordTurn`, `undoLastTurn`, `startNextGame`, `finishRoom`, `cancelRoom`, commands edit và `evaluateEndConditions` theo bước 1; validation/lỗi rõ ràng.
+  - [ ] Triển khai chuỗi đề-pa trả mỗi người, payer cố định suốt chuỗi, bi ăn sớm/đặt lại và thứ tự ván mới; không dùng luật WPA/mẫu UI thay biến thể đã chốt.
+  - [ ] Triển khai thời gian từ tạo phòng/ngưỡng điểm: đạt điều kiện chờ hết ván, ghi đủ điểm; undo tính lại pending-end nhưng không lùi clock.
   - [ ] Undo lượt hiệu lực cuối: khôi phục toàn bộ state trước lượt, đánh dấu `isUndone`, không tính lại lượt đó vào điểm/bi còn lại. Không cho undo lặp cùng lượt.
   - [ ] Tích hợp màn hình trong phòng mới (đề xuất `lib/screens/rooms/in_room.dart`): scoreboard, lượt hiện tại, chọn bi, preview cộng/trừ, ghi nhận lỗi, xác nhận, undo, nhật ký, kết thúc/huỷ.
   - [ ] Chọn người/bi chỉ thay đổi draft; một lần xác nhận tạo đúng một lượt, khoá nút khi xử lý và giữ draft nếu lưu lỗi.
 
 - [ ] **Phase 4: Persistence và phục hồi (P0 cho bản bàn giao)**
-  - [ ] Định nghĩa `lib/domain/repositories/game_repository_interface.dart`: create/list/get/save session; implementation ở `lib/data/repositories/game_repository.dart`.
+  - [ ] Định nghĩa `lib/domain/repositories/game_repository_interface.dart`: create/list/get/save room aggregate và commands atomic; local implementation ở `lib/data/repositories/game_repository.dart`.
   - [ ] Dùng in-memory repository cho tests và tích hợp sớm, sau đó local repository; in-memory không được tính là hoàn thành offline persistence.
-  - [ ] Thêm dependency storage đã thống nhất; schema lưu session, rule snapshot, roster/order, turns, transactions và undo metadata; có schema version/migration.
+  - [ ] Thêm Drift/Riverpod; schema Room -> GameSession -> Turn, rule versions/templates, roster/events, transactions và undo barrier; có schema version/migration.
   - [ ] Lưu lượt + state trong cùng transaction. Dùng command/turn ID chống lưu trùng khi retry; UI chỉ công bố state mới sau lưu thành công.
   - [ ] Reload theo session ID, phục hồi lượt/điểm/bi/trạng thái; hiển thị lỗi dữ liệu hỏng thay vì tạo trận mới âm thầm.
-  - [ ] Không sửa luật/roster sau start. Chỉ cho các thao tác hợp lệ trên trạng thái hiện tại; trận kết thúc/huỷ là read-only.
+  - [ ] Cho thêm người/sửa luật/thứ tự khi chơi; xoá người chỉ giữa hai ván, giữ ledger/lịch sử. Edit là mốc chặn undo; phòng đóng/huỷ read-only.
+  - [ ] Lưu luật yêu thích độc lập, không mutate cấu hình/lịch sử phòng cũ.
 
 - [ ] **Phase 5: Kiểm thử và bàn giao (P0)**
-  - [ ] Unit tests cho room validator, create/start và mọi nhánh score/turn engine theo bảng dưới.
+  - [ ] Unit tests cho validator, create/startNextGame và mọi nhánh engine theo bảng input/output tại `plans/step1.md` §6.
   - [ ] Repository tests cho save/load, atomicity, retry không trùng và restore sau undo.
   - [ ] Widget tests: form invalid, sắp xếp roster, tạo/chọn phòng, xác nhận lượt, loading/lỗi, undo và xem trận kết thúc.
   - [ ] Chạy thử offline trên thiết bị/emulator: tạo -> ghi lượt -> TH2 -> undo -> đóng/mở app -> kết thúc -> xem lại.
@@ -117,9 +120,9 @@ views:
 
 ### Thứ tự triển khai đề xuất
 
-`Chốt luật -> Models/validator -> Repository interface + fake -> Create/list/start -> Engine + unit tests -> Controller + UI trong phòng -> Local persistence -> Regression + bàn giao`
+`Đặc tả đã chốt -> Models/validator -> Repository interface + fake -> Create/list/startNextGame -> Engine + unit tests -> Controller + UI -> Local persistence -> Regression + bàn giao`
 
-Mỗi bước cần chạy được trước khi sang bước sau. Đền chỉ định/cả làng, hệ số lỗ, preset vùng miền, lưu bộ luật yêu thích và x2 bi 9 là **P1**, chỉ triển khai sau core hoặc khi nhóm xác nhận bắt buộc; không tự thêm luật từ scratch.
+Mỗi bước cần chạy được trước khi sang bước sau. Đền cả làng trong chuỗi đề-pa, luật yêu thích và kết thúc thời gian/điểm là **P0** đã chốt. Hệ số lỗ, các chế độ đền nâng cao/preset vùng miền và x2 bi 9 là **P1**; không tự thêm luật từ scratch.
 
 ## Contract logic đề xuất
 
