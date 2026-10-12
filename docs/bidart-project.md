@@ -4,10 +4,10 @@ categories:
 subjects:
   - "[[Flutter]]"
 type: project
-status: active                     # backlog | active | paused | completed
-priority: p2                       # p1 (cao nhất) | p2 | p3 (thấp nhất)
-deadline: 
-repo: ""                           # Chưa xác nhận URL repository
+status: active # backlog | active | paused | completed
+priority: p2 # p1 (cao nhất) | p2 | p3 (thấp nhất)
+deadline:
+repo: "https://github.com/githubcuaan/bidart.git"
 created: 2026-08-26
 ---
 
@@ -71,13 +71,13 @@ views:
   - [x] Luật trong `rule.md` và bảng input/output trong `plans/step1.md` đã thống nhất.
   - [x] Một `Turn` là một cú đã xác nhận, có thể không ăn hoặc ăn nhiều bi; chọn trên UI chỉ là draft.
   - [x] Chốt Room ACTIVE -> FINISHED/CANCELLED, ván IN_PROGRESS -> FINISHED/INCOMPLETE/CANCELLED; tạo là bắt đầu, contract undo/edit/kết thúc trong `plans/step1.md`.
-  - [x] Chốt Riverpod cho state management và dependency injection; engine thuần Dart, controller và repository tách riêng. Quyết định được ghi tại [plans/step1.md](./plans/step1.md), câu 25.
+  - [x] Chốt Riverpod cho state management và dependency injection; engine thuần Dart, controller và repository tách riêng. Quyết định tại [plans/step1.md](./plans/step1.md).
   - [x] Chốt Drift/SQLite cho local storage, kết hợp Riverpod; lưu lượt và state liên quan trong cùng transaction, tự lưu và phục hồi khi mở lại app.
   - [x] Chốt Firebase cho backend giai đoạn online (Auth, Firestore, Security Rules, Cloud Functions). MVP vẫn làm local trước; quyền chủ phòng, command idempotency và offline policy ghi tại [plans/step1.md](./plans/step1.md).
 
 - [ ] **Phase 2: Models và tạo/chọn phòng (P0)**
   - [ ] Tạo immutable models/enums cho `Room`, `RoomStatus`, `RoomEvent`, `RuleTemplate`, `GameSession`, `PlayerInGame`, `RuleConfig`, `GameStatus`, `Turn`, `PottedBall`, `ScoreTransaction`, `ScoreLog` theo contract bước 1.
-  - [ ] Bổ sung cấu hình điểm theo từng bi (`ballNumber -> enabled/points`): `pointsPerBall` đơn lẻ trong class design chưa đủ cho yêu cầu màn hình tạo phòng.
+  - [ ] Triển khai cấu hình điểm theo từng bi (`ballNumber -> enabled/points`) và rule versions theo contract bước 1.
   - [ ] Bổ sung IDs actor/người chịu đền, thứ tự player IDs, current player và dữ liệu trước/sau lượt để xử lý chuyển cơ/undo; không dùng tên làm khoá.
   - [ ] Tạo validator: 2–5 người, ID duy nhất, tên trim không rỗng, thứ tự là hoán vị roster, người đề-pa thuộc roster, bi trong 1–9, điểm nguyên dương cho bi bật, bi tắt tính 0.
   - [ ] Validate tên guest không trùng, ít nhất một bi bật; giới hạn điểm optional theo cấu hình; payer/starter thuộc roster và khác nhau.
@@ -124,56 +124,51 @@ views:
 
 Mỗi bước cần chạy được trước khi sang bước sau. Đền cả làng trong chuỗi đề-pa, luật yêu thích và kết thúc thời gian/điểm là **P0** đã chốt. Hệ số lỗ, các chế độ đền nâng cao/preset vùng miền và x2 bi 9 là **P1**; không tự thêm luật từ scratch.
 
-## Contract logic đề xuất
+## Contract logic đã chốt
 
-| Command | Input chính | Kết quả / ràng buộc |
-| --- | --- | --- |
-| `createRoom` | Roster, thứ tự, người đầu, rule config | Phòng `PENDING`, điểm 0, rule snapshot; không có lịch sử |
-| `startGame` | Session ID | `IN_PROGRESS`, thời gian bắt đầu, current player; chỉ từ `PENDING` |
-| `recordTurn` | Session ID, command ID, actor ID, bi ăn, lỗi | State mới + giao dịch + nhật ký + lượt tiếp; chỉ khi đang chơi |
-| `undoLastTurn` | Session ID | Phục hồi snapshot trước lượt hiệu lực cuối; báo lỗi nếu không có lượt để undo |
-| `finishGame` | Session ID, xác nhận | `FINISHED`, thời gian kết thúc, kết quả; điều kiện kết thúc cần chốt |
-| `cancelGame` | Session ID, xác nhận | `CANCELLED`, giữ lịch sử; không xoá phòng |
-| `getRoom/listRooms` | ID / filter trạng thái | Dữ liệu đã lưu để vào lại hoặc xem kết quả |
+| Command                                             | Input chính                                                      | Kết quả / ràng buộc                                                                   |
+| --------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `createRoom`                                        | Roster, order, starter, payer, rules, end conditions, command ID | Room ACTIVE + ván đầu IN_PROGRESS, điểm 0; lưu atomically, không có PENDING           |
+| `startNextGame`                                     | Room ID, command ID/version                                      | Ván trước hoàn tất, room chưa chờ đóng; reset bi, không reset điểm                    |
+| `recordTurn`                                        | Room/game ID, command ID/version, actor, bi, lỗi                 | Actor đúng current player; giao dịch, state, history được lưu cùng nhau               |
+| `undoLastTurn`                                      | Room/game ID, command ID/version, xác nhận                       | Chỉ ván hiện tại, không qua edit barrier, không mở room đã đóng; tính lại pending-end |
+| `finishRoom/cancelRoom`                             | Room ID, command ID/version, xác nhận                            | Đóng read-only, giữ lịch sử; finish giữa ván đánh dấu incomplete                      |
+| `addPlayer/removePlayer/updateRules/reorderPlayers` | Room ID, ID/version, dữ liệu edit                                | Edit có lịch sử; remove chỉ giữa ván; không tính lại điểm cũ; mốc chặn undo           |
+| `saveRuleTemplate/evaluateEndConditions`            | Cấu hình / room + clock                                          | Lưu mẫu độc lập / đánh dấu chờ hết ván theo thời gian hoặc ngưỡng                     |
+| `getRoom/listRooms`                                 | ID / filter trạng thái                                           | Dữ liệu đã lưu để vào lại hoặc xem kết quả                                            |
 
 Controller Riverpod điều phối `command -> engine -> repository -> publish state`; widget chỉ thu input/hiển thị. Riverpod quản lý state và dependency injection, không chứa luật tính điểm hoặc thay thế persistence. Có thể đặt controller/providers tại `lib/features/scoring/provider/` theo thiết kế mục tiêu và giữ màn hình tại `lib/screens/rooms/` ở giai đoạn này. Engine thuần Dart và repository interface độc lập với Riverpod để hỗ trợ local trước, online sau.
 
 ### Invariants bắt buộc
 
 - Tổng điểm luôn bằng 0, kể cả sau lỗi, undo và reload; scores phải khớp tổng giao dịch hiệu lực.
-- Player IDs duy nhất; current/previous player hợp lệ; thứ tự chứa đúng roster, không trùng hoặc thiếu người.
-- Bi hợp lệ trong 1–9; một bi không được ăn hai lần trong lịch sử hiệu lực nếu chưa có luật đặt lại bi được chốt.
-- Rules của trận là snapshot độc lập với form/preset; sửa draft phòng mới không ảnh hưởng trận cũ.
+- Player IDs duy nhất; current/payer hợp lệ; order chứa đúng roster hoạt động; điểm người rời vẫn thuộc ledger phòng.
+  Bi hợp lệ 1–9, chỉ ghi nếu đang trên bàn; bi đặt lại có thể ăn lần sau. Remaining balls theo kết quả bi của ván, không theo số lần đã ghi điểm.
+- Rule versions và lịch sử immutable; sửa chỉ áp dụng cú sau, không recompute điểm cũ.
 - Một command được commit tối đa một lần; không có lượt/giao dịch tồn tại mà state trận chưa cập nhật tương ứng.
 - Undo phục hồi cả roster order, current/previous player, scores, balls, timestamps/status liên quan; không chỉ trừ ngược điểm.
 
-## Luật cần xác nhận trước triển khai
+## Luật đã xác nhận
 
-`rule.md` và phần Game trong `screens.md` là baseline nghiệp vụ hiện tại. `ui_description.md`/scratch chỉ tham khảo UI khi có mâu thuẫn; các quyết định dưới đây chưa phải luật đã được duyệt.
+Nguồn nghiệp vụ: [rule.md](./rule.md). Domain, lifecycle, commands, invariants và bảng test cụ thể: [plans/step1.md](./plans/step1.md). Bước 1 hoàn thành đặc tả, không phải code. `screens.md`, class design và scratch là tài liệu thiết kế ban đầu; khi mâu thuẫn phải theo đặc tả mới, không tự bổ sung luật.
 
-| Vấn đề | Điểm chưa thống nhất | Quyết định cần nhóm chốt |
-| --- | --- | --- |
-| Người “bắn trước đó” | Người trước trong vòng thứ tự hay actor của cú đánh trước? Người đề-pa chưa có cú trước | Cách xác định payer, đặc biệt lượt đầu và lúc cùng người giữ cơ nhiều lần; không cho giao dịch tự trả |
-| TH1 | Rule nói giữ lượt; chưa rõ bi đã ăn có tính điểm/ở lại ngoài bàn không | Điểm, bi và previous player sau TH1 |
-| TH2 | Rule yêu cầu đổi cơ với người trước và đổi thứ tự; UI mẫu có mô tả chuyển vòng sau | Ưu tiên hành vi TH2 trong rule: định nghĩa swap và người bắn tiếp, gồm wrap-around 2/3/5 người |
-| Phạt lỗi | UI có -20đ nhưng rule chưa quy định khoản phạt hay người nhận | MVP có phạt điểm không? Nếu có, ai nhận để tổng vẫn bằng 0? Không tự trừ điểm một phía |
-| Bi không điểm | Screens chặn chọn để cộng điểm nhưng engine cần biết bi còn lại | Thao tác ghi nhận bi không điểm riêng, không sinh giao dịch |
-| Kết thúc/bi 9 | UI nói ăn bi 9 kết thúc, x2 khi dọn bàn; rule chưa mô tả các ngoại lệ | Ăn bi 9 hợp lệ, ăn kèm lỗi, đặt lại bi, kết thúc thủ công và định nghĩa dọn bàn |
-| Undo | Screens nói “trong thời gian ngắn”, chưa có thời hạn | Thời hạn, undo nhiều lượt và có mở lại trận vừa kết thúc bằng undo không |
-| Kết quả | `winnerId` đơn lẻ chưa biểu diễn đồng điểm | Cách xác định thắng/hòa, có cho kết thúc sớm không |
-| Luật 9 bi | Rule dẫn chiếu “toàn bộ luật 9 bi cơ bản” nhưng chưa có input nhận biết tất cả lỗi | Những gì app tự kiểm tra được và những gì người ghi điểm phải xác nhận; không tuyên bố engine tự phân xử đầy đủ |
+- Payer là người vừa mất cơ, giữ suốt chuỗi người sau đánh; đề-pa cả làng trả mỗi người toàn bộ điểm.
+- TH1 chuyển người kế tiếp, giữ thứ tự/điểm cũ; TH2 swap với payer. Ăn+lỗi cùng cú trả ngược tổng điểm và swap như TH2.
+- Bi ăn sớm tính điểm/giữ cơ nhưng đặt lại; cùng cú ăn bi đến lượt và bi tiếp theo giữ ngoài bàn. Bi 9 lỗi luôn đặt lại; thắng bi 9 theo điều kiện mới.
+- Người thắng đề-pa, payer bi 9 đứng sau; đi chấm phá giữ order. Điểm cộng dồn, không reset qua ván.
+- Đạt thời gian/ngưỡng chờ hết ván, cộng/trừ đủ điểm; undo tính lại pending-end. Edit chặn undo, phòng đóng chỉ xem.
 
 ### Bảng test tối thiểu
 
-| Nhóm | Case cần kiểm tra |
-| --- | --- |
-| Tạo phòng | 1/6 người bị từ chối; 2/5 người hợp lệ; tên trắng; ID/order trùng; starter ngoài roster; điểm/bi không hợp lệ |
-| Tính điểm | A ăn bi 10đ, B chịu đền -> A +10/B -10; nhiều bi trong một cú; bi tắt không tạo giao dịch; điểm tổng 0 |
-| Lượt bắn | Giữ cơ, không ăn chuyển lượt, vòng cuối về đầu, người đầu chưa có lượt trước, TH1, TH2 ở 2/3/5 người |
-| Validation | Actor sai, bi đã ăn/ngoài 1–9, bi trùng trong input, room không tồn tại, command khi chưa start/đã kết thúc |
-| Undo | Không có lượt; undo ăn bi; undo TH2 phục hồi thứ tự; undo nhiều lần theo chính sách; ghi lượt mới sau undo |
-| Kết thúc | Bi 9 theo luật đã chốt, đồng điểm, finish/cancel lặp, chặn ghi lượt mới ở trận đóng |
-| Lưu dữ liệu | Lưu lỗi không đổi state; retry không nhân đôi; reload rule/score/order/balls/history khớp trước khi đóng app |
+| Nhóm        | Case cần kiểm tra                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| Tạo phòng   | 1/6 người bị từ chối; 2/5 người hợp lệ; tên trắng; ID/order trùng; starter ngoài roster; điểm/bi không hợp lệ      |
+| Tính điểm   | A ăn bi 10đ, B chịu đền -> A +10/B -10; nhiều bi trong một cú; bi tắt không tạo giao dịch; điểm tổng 0             |
+| Lượt bắn    | Giữ cơ, payer cố định, chuỗi đề-pa, wrap-around, payer setup ván đầu, TH1/TH2/ăn+lỗi, order ván mới                |
+| Validation  | Actor sai, bi không còn trên bàn/ngoài 1–9/trùng input, room thiếu/đã đóng, stale version; bi đặt lại được ghi lại |
+| Undo        | Không có lượt; undo ăn bi; undo TH2 phục hồi thứ tự; undo nhiều lần theo chính sách; ghi lượt mới sau undo         |
+| Kết thúc    | Bi 9 hợp lệ/lỗi/ăn sớm/tắt điểm, ngưỡng điểm giảm/undo, timer khi resume, finish/cancel, chặn room đóng            |
+| Lưu dữ liệu | Lưu lỗi không đổi state; retry không nhân đôi; reload rule/score/order/balls/history khớp trước khi đóng app       |
 
 ---
 
@@ -196,4 +191,5 @@ Controller Riverpod điều phối `command -> engine -> repository -> publish s
 - 2026-10-12: Bổ sung kế hoạch chi tiết cho phần tạo/chọn phòng và core trong phòng dựa trên docs/code hiện tại. Chưa triển khai logic; checklist implementation giữ chưa hoàn thành.
 - Đã chốt Drift/SQLite cho local storage và Riverpod cho state management/dependency injection; chưa thêm dependency hoặc triển khai code.
 - Đã chốt Firebase cho backend online; tách local/online repository và nguồn dữ liệu chính. Online ban đầu cần mạng để ghi điểm/undo, backend kiểm tra quyền chủ phòng và xử lý command; chưa triển khai Firebase.
-- Deadline, URL repository và các luật còn mâu thuẫn cần nhóm xác nhận; chưa đặt mốc thời gian giả định.
+- Phase 1 hoàn thành đặc tả: đã tổng hợp luật, room/nhiều ván, commands và bảng input/output tại `plans/step1.md`. Phase 2–5 chưa hoàn thành.
+- Deadline và URL repository chưa xác nhận; không đặt mốc thời gian giả định. Chi tiết backend online để giai đoạn sau.

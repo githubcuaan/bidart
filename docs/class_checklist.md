@@ -11,6 +11,11 @@ all the class is following the [class_design](./class_design.md)
 
 ## Module 2: Scoring
 
+- [ ] Room (aggregate nhiều ván)
+- [ ] RoomStatus (enum)
+- [ ] RoomEvent (edit/undo barrier)
+- [ ] RuleTemplate
+- [ ] BallPointConfig
 - [ ] GameSession
 - [ ] GameStatus (enum)
 - [ ] RuleConfig

@@ -62,15 +62,14 @@ Màn hình hiển thị các trận đã tạo hoặc đã tham gia.
 Màn hình thiết lập trận trước khi bắt đầu.
 
 - Chọn số lượng người chơi và thêm người chơi theo tên hoặc hồ sơ.
-- Chọn người bắn trước và thứ tự lượt ban đầu.
+- Chọn người bắn trước, người chịu đền và thứ tự lượt ban đầu.
 - Chọn loại trận theo luật 9 bi cơ bản.
 - Cấu hình các bi có điểm và số điểm tương ứng cho từng bi.
 - Hiển thị tóm tắt luật trước khi tạo phòng.
 - Không cho bắt đầu nếu thiếu người chơi hoặc cấu hình điểm không hợp lệ.
 - Khi xác nhận, tạo phòng và chuyển sang màn hình trong trận.
 
-Luật cấu hình tại đây được dùng làm dữ liệu cố định cho toàn bộ trận. Người
-dùng không nên thay đổi luật giữa trận nếu chưa kết thúc hoặc huỷ trận.
+Tạo phòng là bắt đầu ván đầu. Một phòng nhiều ván, điểm cộng dồn. Cho sửa luật từ cú tiếp theo bằng version mới, không tính lại lịch sử; edit chặn undo. Chi tiết theo `docs/rule.md` và `docs/plans/step1.md`.
 
 ### 7. Màn hình trong trận
 
@@ -78,26 +77,26 @@ Màn hình chính để theo dõi và ghi nhận từng lượt bắn.
 
 - Hiển thị danh sách người chơi, điểm hiện tại và người đang có lượt.
 - Quy trình cộng điểm chính gồm ba bước:
-  1. Chọn người chơi vừa ăn bi.
+   1. Ghi nhận cho người đang có cơ; chỉ chủ phòng được ghi điểm.
   2. Chọn hình bi mà người đó đã ăn. Mỗi hình bi hiển thị rõ số bi và số điểm
      tương ứng theo luật của phòng.
   3. Hệ thống chạy logic game, tính điểm cộng/trừ và cập nhật bảng điểm ngay.
 - Sau khi cập nhật, hiển thị tóm tắt kết quả:
   - Người ăn bi được cộng điểm của bi đã chọn.
-  - Người bắn trước đó bị trừ điểm tương ứng theo luật bắn đền.
+   - Người vừa mất cơ chịu đền suốt chuỗi giữ cơ; trong chuỗi đề-pa mỗi người còn lại trả toàn bộ điểm.
   - Điểm mới của tất cả người chơi và người nhận lượt tiếp theo.
-- Không cho chọn bi không tồn tại hoặc bi không có điểm theo cấu hình phòng.
+- Không cho chọn bi không tồn tại hoặc không còn trên bàn. Bi không điểm vẫn ghi nhận để cập nhật bàn/lượt, không sinh giao dịch. Bi đặt lại được chọn ở cú sau.
 - Việc chọn hình bi chỉ là dữ liệu đầu vào; người dùng không nhập trực tiếp số
   điểm để tránh sai lệch với logic game.
 - Cho phép đánh dấu người chơi mắc lỗi và chọn trường hợp lỗi:
-  - **TH1: ăn bi rồi mới mắc lỗi**: giữ nguyên lượt bắn hiện tại.
+  - **TH1: ăn hợp lệ ở cú trước rồi lỗi ở cú khác**: giữ điểm cũ và thứ tự, chuyển người kế tiếp.
   - **TH2: chưa ăn bi đã mắc lỗi**: đổi cơ với người bắn trước đó; lượt tiếp theo
     thuộc về người trước đó và hai người đổi lượt bắn cho nhau.
-- Cho phép hoàn tác lượt vừa nhập trong thời gian ngắn nếu chọn nhầm người hoặc
-  nhầm bi; hoàn tác phải khôi phục cả điểm, lượt bắn và lịch sử.
+- Ăn bi và lỗi cùng cú: trả tổng điểm bi có điểm cho payer, hoặc mỗi người còn lại trong đề-pa; swap như TH2, không cộng điểm ăn.
+- Cho undo nhiều cú trong ván hiện tại, không giới hạn thời gian; không qua edit người/luật/thứ tự, không mở phòng đã đóng. Khôi phục điểm/lượt/thứ tự/bi/trạng thái và giữ dấu vết undone.
 - Lưu lịch sử từng lượt, bao gồm người bắn, bi ăn, lỗi, điểm cộng/trừ và người
   được chuyển lượt.
-- Hiển thị trạng thái kết thúc trận và cho phép xem lại bảng điểm.
+- Hiển thị kết thúc ván, bắt đầu ván tiếp với điểm cộng dồn; phòng đóng chỉ xem lại. Đạt thời gian/ngưỡng thì chơi hết ván, tính đủ điểm rồi đóng. Cho lưu luật yêu thích.
 
 #### Thành phần giao diện nhập điểm
 
@@ -124,7 +123,7 @@ Màn hình xem lại một trận đã lưu.
 - Hiển thị người chơi, luật đã dùng và kết quả cuối cùng.
 - Hiển thị bảng điểm theo từng lượt.
 - Hiển thị các lần ăn bi có điểm, người bị trừ điểm và các lỗi đã ghi nhận.
-- Đối với lỗi TH1, thể hiện lượt vẫn được giữ nguyên.
+- Đối với lỗi TH1, thể hiện thứ tự giữ nguyên nhưng cơ chuyển người kế tiếp.
 - Đối với lỗi TH2, thể hiện việc đổi cơ và người nhận lượt tiếp theo.
 - Cho phép xuất/chia sẻ kết quả nếu tính năng này được bật.
 
