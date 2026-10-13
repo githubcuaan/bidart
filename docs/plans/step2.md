@@ -1,6 +1,6 @@
 # Step 2 — Models and create/select rooms
 
-**Status: implementation plan; not implemented.**
+**Status: implementation in progress; §1–2 complete. Aggregate models follow in §3.**
 
 Scope: Phase 2 in [../bidart-project.md](../bidart-project.md). Follow [step1.md](./step1.md) when older class designs or UI samples conflict.
 
@@ -8,10 +8,12 @@ Deliver immutable domain models, validation, repository contract and in-memory i
 
 ## 1. Establish baseline and dependencies
 
-- [ ] Run `flutter analyze` and `flutter test`; record pre-existing failures separately.
-- [ ] Add compatible `flutter_riverpod`; reuse existing Freezed, JSON and UUID dependencies.
-- [ ] Wrap the app with `ProviderScope` in `lib/main.dart`.
-- [ ] Leave unrelated tabs unchanged.
+- [x] Run `flutter analyze` and `flutter test`; baseline clean, confirmed by user.
+- [x] Add compatible `flutter_riverpod`; reuse existing Freezed, JSON and UUID dependencies.
+- [x] Wrap the app with `ProviderScope` in `lib/main.dart`.
+- [x] Leave unrelated tabs unchanged.
+
+Verified after integration: `flutter analyze` reports no issues; `flutter test` passes both widget tests, including entry-point `ProviderScope` coverage.
 
 **Acceptance:** app starts; baseline failures identified; dependencies injectable in tests.
 
@@ -19,13 +21,15 @@ Deliver immutable domain models, validation, repository contract and in-memory i
 
 Create models under `lib/domain/models/scoring/`.
 
-- [ ] `Room` owns participants, active roster, order, cumulative scores, rule versions, games, current game ID, status, timestamps, revision and end conditions.
-- [ ] `GameSession` owns game number, current/payer IDs, game order, remaining balls, chain state, winner, timestamps and turns.
-- [ ] Add supporting types: `RoomMode`, `EndConditions`, `PendingEndReason`, `ChainState`, `TurnStateSnapshot`.
-- [ ] Distinguish local owner identity from participant IDs; do not implement Auth.
-- [ ] Keep scores authoritative at room level; avoid independently editable player totals.
-- [ ] Define before/after snapshots covering scores, roster/order, current/payer, chain, balls and relevant statuses/timestamps. Do not recursively embed entire Room/Turn histories.
-- [ ] Specify how room-level order and game-level order stay consistent when commands commit.
+- [x] Define `Room` ownership: participants, active roster, order, cumulative scores, rule versions, games, current game ID, status, timestamps, revision and end conditions.
+- [x] Define `GameSession` ownership: game number, current/payer IDs, game order, remaining balls, chain state, winner, timestamps and turns.
+- [x] Add supporting types: `RoomMode`, `EndConditions`, `PendingEndReason`, `ChainState`, `TurnStateSnapshot`.
+- [x] Distinguish local owner identity from participant IDs; do not implement Auth.
+- [x] Keep scores authoritative at room level; avoid independently editable player totals.
+- [x] Define before/after snapshots covering scores, roster/order, current/payer, chain, balls and relevant statuses/timestamps. Do not recursively embed entire Room/Turn histories.
+- [x] Specify how room-level order and game-level order stay consistent when commands commit.
+
+Ownership and undo boundaries: [step2-domain-contract.md](./step2-domain-contract.md). Supporting types implemented under `lib/domain/models/scoring/`; aggregate classes remain §3 work. Generator dependencies upgraded for Dart 3.13 compatibility. Tests cover serialization, copying, immutable collection views and non-restorable metadata exclusion.
 
 **Acceptance:** each field has one authoritative owner; snapshots support the Step 1 undo contract.
 
@@ -47,7 +51,7 @@ Create models under `lib/domain/models/scoring/`.
 Generate code:
 
 ```sh
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 ```
 
 **Tests:** JSON round-trip, nested snapshots, integer ball-map keys, immutable collections and preserved historical rule versions.
@@ -212,4 +216,4 @@ flutter test
 
 `Models → validators → repository fake → services/tests → Riverpod → create form → list/gateway → acceptance`
 
-Complete tests for each layer before integrating the next. This file records a plan, not completion of Phase 2.
+Complete tests for each layer before integrating the next. Checked items record verified implementation; Phase 2 as a whole remains incomplete.
