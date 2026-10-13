@@ -1,6 +1,6 @@
 # Step 2 — Models and create/select rooms
 
-**Status: implementation in progress; §1–3 complete. Validators/repository/services follow in §4–7.**
+**Status: implementation in progress; §1–4 complete. Repository/services follow in §5–7.**
 
 Scope: Phase 2 in [../bidart-project.md](../bidart-project.md). Follow [step1.md](./step1.md) when older class designs or UI samples conflict.
 
@@ -68,19 +68,21 @@ lib/domain/validation/rule_config_validator.dart
 lib/domain/validation/validation_issue.dart
 ```
 
-- [ ] Validate roster size 2–5 and unique participant IDs.
-- [ ] Trim guest names; reject empty and duplicate names.
-- [ ] Validate order as an exact permutation of active roster.
-- [ ] Require starter and payer in roster and different from each other.
-- [ ] Require configurations for balls 1–9, with no extra ball numbers.
-- [ ] Require positive integer points for enabled balls; disabled balls contribute zero.
-- [ ] Require at least one enabled ball; enforce optional point limit.
-- [ ] Validate positive optional duration and score threshold.
-- [ ] Return structured issues with field paths and codes; map codes to UI messages outside domain.
+- [x] Validate roster size 2–5 and unique participant IDs.
+- [x] Trim guest names; reject empty and duplicate names.
+- [x] Validate order as an exact permutation of active roster.
+- [x] Require starter and payer in roster and different from each other.
+- [x] Require configurations for balls 1–9, with no extra ball numbers.
+- [x] Require positive integer points for enabled balls; disabled balls contribute zero.
+- [x] Require at least one enabled ball; validate optional score limit through `EndConditions.scoreThreshold` (no separate per-ball or total-ball cap).
+- [x] Validate positive optional duration and score threshold.
+- [x] Return structured issues with field paths and codes; map codes to UI messages outside domain.
 
-**Decision needed:** duplicate names use trim-only or trim plus case-insensitive comparison. Step 1 does not specify case handling; confirm before implementation.
+**Decision confirmed by user:** duplicate names use trim plus case-insensitive comparison (`An` = `an`). IDs remain stable identity.
 
 **Tests:** valid 2/5 players; invalid 1/6; whitespace/duplicate names; duplicate IDs/order; missing order entries; invalid starter/payer; malformed rules and end conditions.
+
+Implemented as pure static validators under `lib/domain/validation/` (`validation_issue.dart`, `room_validator.dart`, `rule_config_validator.dart`); no codegen, no Flutter dependency. Active IDs must be unique and reference participants; roster size counts unique known active IDs, not historical participants. `normalizeParticipants` returns immutable trimmed copies preserving IDs/timestamps/casing; §6 services must normalize, validate, then persist those copies. Validation alone does not mutate input. `BallPointConfig` asserts guard debug misuse; `validateBallEntry` covers raw values for production where asserts stripped. Score limits belong only to `EndConditions.scoreThreshold`, consistent with the domain contract. Coverage in `test/domain/validation/validators_test.dart` (17 tests).
 
 ## 5. Define atomic repository contract and fake
 
