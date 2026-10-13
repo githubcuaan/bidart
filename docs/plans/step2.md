@@ -1,6 +1,6 @@
 # Step 2 — Models and create/select rooms
 
-**Status: implementation in progress; §1–2 complete. Aggregate models follow in §3.**
+**Status: implementation in progress; §1–3 complete. Validators/repository/services follow in §4–7.**
 
 Scope: Phase 2 in [../bidart-project.md](../bidart-project.md). Follow [step1.md](./step1.md) when older class designs or UI samples conflict.
 
@@ -35,18 +35,18 @@ Ownership and undo boundaries: [step2-domain-contract.md](./step2-domain-contrac
 
 ## 3. Implement immutable models and serialization
 
-- [ ] Implement `Room`, `RoomStatus`, `RoomEvent`, `RuleTemplate`.
-- [ ] Implement `GameSession`, `GameStatus`, `PlayerInGame`.
-- [ ] Implement `RuleConfig`, `BallPointConfig`.
-- [ ] Implement `Turn`, `PottedBall`, `ScoreTransaction`, `ScoreLog`.
-- [ ] Use Freezed immutable collections, equality and `copyWith`.
-- [ ] Use IDs for references, not names or nested mutable player objects.
-- [ ] Include command ID, actor, rule reference, payers, ball outcomes, foul classification, transactions, logs, snapshots and `isUndone` in `Turn`.
-- [ ] Distinguish removed balls from respotted balls.
-- [ ] Require distinct transaction participants and positive integer amounts.
-- [ ] Give room events revision, before/after edit data and undo barrier.
-- [ ] Keep rule versions immutable and templates independent from room configuration.
-- [ ] Exclude P1 pocket multipliers, regional presets and x2 rules.
+- [x] Implement `Room`, `RoomStatus`, `RoomEvent`, `RuleTemplate`.
+- [x] Implement `GameSession`, `GameStatus`, `PlayerInGame`.
+- [x] Implement `RuleConfig`, `BallPointConfig`.
+- [x] Implement `Turn`, `PottedBall`, `ScoreTransaction`, `ScoreLog`.
+- [x] Use Freezed immutable collections, equality and `copyWith`.
+- [x] Use IDs for references, not names or nested mutable player objects.
+- [x] Include command ID, actor, rule reference, payers, ball outcomes, foul classification, transactions, logs, snapshots and `isUndone` in `Turn`.
+- [x] Distinguish removed balls from respotted balls.
+- [x] Require distinct transaction participants and positive integer amounts.
+- [x] Give room events revision, before/after edit data and undo barrier.
+- [x] Keep rule versions immutable and templates independent from room configuration.
+- [x] Exclude P1 pocket multipliers, regional presets and x2 rules.
 
 Generate code:
 
@@ -55,6 +55,8 @@ dart run build_runner build
 ```
 
 **Tests:** JSON round-trip, nested snapshots, integer ball-map keys, immutable collections and preserved historical rule versions.
+
+Aggregates implemented under `lib/domain/models/scoring/` (`room`, `game_session`, `player_in_game`, `rule_config`, `ball_point_config`, `rule_template`, `turn`, `potted_ball`, `score_transaction`, `transaction_type`, `score_log`, `foul_classification`, `room_event`, `room_event_type`); enums `RoomStatus`/`GameStatus` reused from §2. Foul model uses step-1 `FoulClassification` (none/th1/th2/potAndFoul), not WPA-style `FoulType`; no `PenaltyRule`/`PocketRule`/preset/x2 per P1 exclusion. Coverage in `test/domain/models/scoring/aggregate_models_test.dart` (8 tests).
 
 ## 4. Implement reusable validators
 
