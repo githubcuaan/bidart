@@ -1,6 +1,6 @@
 # Step 2 — Models and create/select rooms
 
-**Status: implementation in progress; §1–5 complete. Services follow in §6–7.**
+**Status: implementation in progress; §1–6 domain work complete. Read/next-game services follow in §7; draft/UI integration remains §8–9.**
 
 Scope: Phase 2 in [../bidart-project.md](../bidart-project.md). Follow [step1.md](./step1.md) when older class designs or UI samples conflict.
 
@@ -124,10 +124,12 @@ Sequence:
 9. Persist aggregate and command receipt atomically, including the active-room check.
 10. Return committed room ID.
 
-- [ ] Give form participants stable draft IDs so reordering does not change identity.
-- [ ] Do not publish or navigate with an uncommitted room.
+- [x] Give form participants stable draft IDs so reordering does not change identity.
+- [x] Do not publish or navigate with an uncommitted room.
 
 **Tests:** valid initialization; zero-sum scores; existing active room rejection; persistence failure; retry returns the same room without duplicates.
+
+Implemented `RoomService.createRoom` with injected ID factory/clock, normalized participants, local-mode room at revision 0, rule version 1 and exactly one initialized game. Caller-supplied participant IDs remain unchanged; mutable input collections are captured before asynchronous work. Committed receipts precede validation; concurrent same-command calls share an in-flight result, including receipt recovery across service instances. Only the committed room ID is returned; typed validation/storage failures propagate without publishing candidate state. Coverage in `test/domain/services/room_service_test.dart`. Stable draft-ID generation and navigation remain unchecked until §8–9; in-memory storage still does not survive restart.
 
 ## 7. Implement reads and `startNextGame`
 
