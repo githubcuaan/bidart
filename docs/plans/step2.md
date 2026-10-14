@@ -1,6 +1,6 @@
 # Step 2 — Models and create/select rooms
 
-**Status: implementation in progress; §1–4 complete. Repository/services follow in §5–7.**
+**Status: implementation in progress; §1–5 complete. Services follow in §6–7.**
 
 Scope: Phase 2 in [../bidart-project.md](../bidart-project.md). Follow [step1.md](./step1.md) when older class designs or UI samples conflict.
 
@@ -93,17 +93,19 @@ lib/domain/repositories/game_repository_interface.dart
 lib/data/repositories/in_memory_game_repository.dart
 ```
 
-- [ ] Define `listRooms` and `getRoom`.
-- [ ] Define atomic room creation and aggregate update with expected revision.
-- [ ] Store command receipts for idempotent retries.
-- [ ] Define typed failures: validation, not-found, active-room-exists, stale-version and persistence.
-- [ ] Check committed command receipts before rejecting stale versions.
-- [ ] Atomically enforce one active room, including concurrent create attempts.
-- [ ] Commit aggregate and command receipt together.
-- [ ] Leave all stored data unchanged after failed writes.
-- [ ] Support injected save failures and deterministic tests.
+- [x] Define `listRooms` and `getRoom`.
+- [x] Define atomic room creation and aggregate update with expected revision.
+- [x] Store command receipts for idempotent retries.
+- [x] Define typed failures: validation, not-found, active-room-exists, stale-version and persistence.
+- [x] Check committed command receipts before rejecting stale versions.
+- [x] Atomically enforce one active room, including concurrent create attempts.
+- [x] Commit aggregate and command receipt together.
+- [x] Leave all stored data unchanged after failed writes.
+- [x] Support injected save failures and deterministic tests.
 
 **Acceptance:** retries return the original committed result; concurrent creates cannot produce two active rooms; partial writes never become visible.
+
+Implemented `GameRepository`, immutable command receipts and typed failures in the domain interface, with `InMemoryGameRepository` in data. Reads sort by created timestamp descending then ID ascending; optional status filtering. Updates require candidate revision = expected revision + 1. Receipts retain the original aggregate result, even after later updates. Command IDs are repository-wide; reusing one for another room or operation is rejected. Services must use a new command ID when input changes and validate business rules before writes. The fake detaches nested collections through model serialization and commits without asynchronous gaps in a single isolate. `failNextWrite` injects a failure into the next otherwise-valid non-retry write. Coverage: 9 repository tests, including concurrent creation, rollback, retries, stale revisions and collection isolation. RAM only; not restart persistence.
 
 ## 6. Implement `createRoom`
 
