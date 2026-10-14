@@ -1,6 +1,6 @@
 # Step 2 — Models and create/select rooms
 
-**Status: implementation in progress; §1–6 domain work complete. Read/next-game services follow in §7; draft/UI integration remains §8–9.**
+**Status: implementation in progress; §1–7 domain work complete. Draft/UI integration remains §8–10.**
 
 Scope: Phase 2 in [../bidart-project.md](../bidart-project.md). Follow [step1.md](./step1.md) when older class designs or UI samples conflict.
 
@@ -133,9 +133,9 @@ Implemented `RoomService.createRoom` with injected ID factory/clock, normalized 
 
 ## 7. Implement reads and `startNextGame`
 
-- [ ] `listRooms`: status filter, documented deterministic sorting and summaries.
-- [ ] `getRoom`: full aggregate or explicit not-found.
-- [ ] Extract a pure next-game setup helper; do not implement scoring here.
+- [x] `listRooms`: status filter, documented deterministic sorting and summaries.
+- [x] `getRoom`: full aggregate or explicit not-found.
+- [x] Extract a pure next-game setup helper; do not implement scoring here.
 
 `startNextGame` sequence:
 
@@ -152,6 +152,8 @@ Implemented `RoomService.createRoom` with injected ID factory/clock, normalized 
 Model/store winner, final payer and break-clear outcome now; Phase 3 produces those outcomes. Use finished-game fixtures for Step 2 tests. Do not guess replacement payer/order when roster edits remove required players; settle the valid setup policy before supporting that branch.
 
 **Tests:** `A/B/C/D/E`, C wins, B pays → `C/B/D/E/A`; break-clear preserves order; scores unchanged; active game, closed room, expired timer, pending-end and stale revision rejected. Check previously reached score thresholds, not only current scores.
+
+Implemented reads and `startNextGame` in `RoomService`, immutable `RoomSummary`, and pure `NextGameSetup`. Read sorting is createdAt descending then ID ascending. Next-game receipts have a distinct command type; retry returns the original aggregate before revision checks. Writes preserve scores, rule versions and game history, increment revision and reset balls/chain. Historical threshold checks inspect before/after score snapshots of non-undone turns. Roster/order changes between games and missing/removed winner or final payer are explicitly rejected until their setup policy is settled; no replacement is guessed. Coverage: 16 tests in `test/domain/services/next_game_test.dart`; full suite 70 tests passes, `flutter analyze` clean. RAM-only storage remains unchanged.
 
 ## 8. Add Riverpod providers and controllers
 
