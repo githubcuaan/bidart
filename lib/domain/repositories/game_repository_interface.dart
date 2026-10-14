@@ -2,7 +2,7 @@ import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/validation/validation_issue.dart';
 
-enum RoomCommandType { create, update }
+enum RoomCommandType { create, update, startNextGame }
 
 /// Immutable result at commit time, not the room's latest state.
 class CommandReceipt {
@@ -39,6 +39,7 @@ abstract interface class GameRepository {
     required String commandId,
     required int expectedRevision,
     required Room room,
+    RoomCommandType type = RoomCommandType.update,
   });
 }
 

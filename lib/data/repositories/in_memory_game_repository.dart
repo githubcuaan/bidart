@@ -61,7 +61,13 @@ class InMemoryGameRepository implements GameRepository {
     required String commandId,
     required int expectedRevision,
     required Room room,
-  }) async => _write(commandId, room, RoomCommandType.update, expectedRevision);
+    RoomCommandType type = RoomCommandType.update,
+  }) async {
+    if (type == RoomCommandType.create) {
+      throw RepositoryValidationFailure('Create type is not an update');
+    }
+    return _write(commandId, room, type, expectedRevision);
+  }
 
   CommandReceipt _write(
     String commandId,
