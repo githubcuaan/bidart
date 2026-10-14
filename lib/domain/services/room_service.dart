@@ -7,9 +7,12 @@ import 'package:bidart/domain/models/scoring/player_in_game.dart';
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_mode.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
+import 'package:bidart/domain/models/scoring/room_summary.dart';
 import 'package:bidart/domain/models/scoring/rule_config.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/validation/room_validator.dart';
+
+import 'next_game_setup.dart';
 
 /// Creates committed aggregates only. Draft participant IDs belong to callers:
 /// preserve them across rename/reorder, and use a new command ID if input changes.
@@ -24,6 +27,137 @@ class RoomService {
   final String Function() idFactory;
   final DateTime Function() clock;
   final Map<String, Future<String>> _pendingCreates = {};
+
+  /// Newest created first, then ascending ID for timestamp ties.
+  Future<List<RoomSummary>> listRooms({RoomStatus? status}) async {
+    final rooms = [...await repository.listRooms(status: status)]
+      ..sort((a, b) {
+        final timestamp = b.createdAt.compareTo(a.createdAt);
+        return timestamp == 0 ? a.id.compareTo(b.id) : timestamp;
+      });
+    return List.unmodifiable(rooms.map(RoomSummary.fromRoom));
+  }
+
+  Future<Room> getRoom(String roomId) => repository.getRoom(roomId);
+
+  Future<Room> startNextGame({
+    required String commandId,
+    required String roomId,
+    required int expectedRevision,
+  }) async {
+    final prior = await repository.getCommandReceipt(commandId);
+    if (prior != null) {
+      if (prior.type != RoomCommandType.startNextGame ||
+          prior.room.id != roomId) {
+        throw RepositoryValidationFailure(
+          'Command ID belongs to another operation',
+        );
+      }
+      return prior.room;
+    }
+
+    if (commandId.trim().isEmpty) {
+      throw RepositoryValidationFailure('Nonempty command ID required');
+    }
+
+    final room = await repository.getRoom(roomId);
+    if (room.revision != expectedRevision) {
+      // A concurrent service may commit after the initial receipt lookup.
+      final committed = await repository.getCommandReceipt(commandId);
+      if (committed?.type == RoomCommandType.startNextGame &&
+          committed?.room.id == roomId) {
+        return committed!.room;
+      }
+      throw StaleRevisionFailure(
+        expected: expectedRevision,
+        actual: room.revision,
+      );
+    }
+
+    if (room.status != RoomStatus.active ||
+        room.games.isEmpty ||
+        room.currentGameId != room.games.last.id ||
+        room.games.last.status != GameStatus.finished) {
+      throw RepositoryValidationFailure(
+        'Active room and finished current game required',
+      );
+    }
+
+    final now = clock();
+    final duration = room.endConditions.durationSeconds;
+    final threshold = room.endConditions.scoreThreshold;
+    bool reached(Map<String, int> scores) =>
+        threshold != null && scores.values.any((score) => score >= threshold);
+    final historicalThreshold = room.games.any(
+      (game) => game.turns.any(
+        (turn) =>
+            !turn.isUndone &&
+            (reached(turn.beforeSnapshot.scores) ||
+                reached(turn.afterSnapshot.scores)),
+      ),
+    );
+
+    if (room.pendingEndReasons.isNotEmpty ||
+        (duration != null &&
+            !now.isBefore(room.createdAt.add(Duration(seconds: duration)))) ||
+        reached(room.scores) ||
+        historicalThreshold) {
+      throw RepositoryValidationFailure('Room end condition reached');
+    }
+
+    final issues = [
+      ...RoomValidator.validateRoster(room.participants, room.activePlayerIds),
+      ...RoomValidator.validateEndConditions(room.endConditions),
+    ];
+
+    if (issues.isNotEmpty) {
+      throw RepositoryValidationFailure(
+        'Invalid next-game roster or limits',
+        issues: issues,
+      );
+    }
+
+    final previous = room.games.last;
+    final setup = NextGameSetup.derive(
+      previous: previous,
+      activePlayerIds: room.activePlayerIds,
+      roomOrder: room.playerOrder,
+    );
+
+    final gameId = idFactory();
+    if (room.games.any((game) => game.id == gameId)) {
+      throw RepositoryValidationFailure('Game ID already exists');
+    }
+
+    final game = GameSession(
+      id: gameId,
+      roomId: room.id,
+      gameNumber: previous.gameNumber + 1,
+      status: GameStatus.inProgress,
+      startedAt: now,
+      currentPlayerId: setup.starterId,
+      payerId: setup.payerId,
+      playerOrder: setup.playerOrder,
+      remainingBalls: {for (var ball = 1; ball <= 9; ball++) ball},
+      chainState: const ChainState(
+        isBreakChain: true,
+        hasLegalPotInChain: false,
+      ),
+    );
+
+    final receipt = await repository.updateRoom(
+      commandId: commandId,
+      type: RoomCommandType.startNextGame,
+      expectedRevision: expectedRevision,
+      room: room.copyWith(
+        revision: room.revision + 1,
+        games: [...room.games, game],
+        currentGameId: game.id,
+        playerOrder: setup.playerOrder,
+      ),
+    );
+    return receipt.room;
+  }
 
   Future<String> createRoom({
     required String commandId,
