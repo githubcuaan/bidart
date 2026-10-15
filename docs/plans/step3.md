@@ -20,10 +20,21 @@ Storage vẫn RAM-only; Drift/khôi phục sau restart thuộc Phase 4.
 - [x] Ghi chính sách thay thế winner/payer và ranh giới persistence.
 
 ### CP1 — Pure score engine
-- [ ] Input/result immutable; validate actor, game, rules, payer, balls.
-- [ ] Transactions amount > 0, tổng điểm luôn 0; bi tắt vẫn được ghi nhận.
-- [ ] Giữ/chuyển cơ, TH1/TH2, đề-pa/cả làng, ăn sớm/đặt lại, thắng bi 9.
-- [ ] Unit tests theo step1 §6; lỗi không mutate input.
+- [x] Input/result immutable; validate actor, game, rules, payer, balls.
+- [x] Transactions amount > 0, tổng điểm luôn 0; bi tắt vẫn được ghi nhận.
+- [x] Giữ/chuyển cơ, TH1/TH2, đề-pa/cả làng, ăn sớm/đặt lại, thắng bi 9.
+- [x] Unit tests cho các nhánh engine trong step1 §6; lỗi không mutate input.
+
+CP1 API: `ScoreEngine.evaluate(game, rules, scores, input, occurredAt)` dùng named arguments;
+`TurnInput` chứa turn ID, actor, ball numbers, foul classification. Result chứa candidate
+game/scores, ball outcomes, payer IDs, transactions và score logs. Engine từ chối foul
+classification không khớp chain/input; tự tính respot từ prefix bi còn lại được ăn.
+Không append Turn hoặc ghi storage: room status/revision, snapshots, history, undo và
+end conditions thuộc command layer CP2. Caller phải kiểm tra room ACTIVE trước khi gọi.
+
+Kiểm tra CP1 ngày 2026-10-15: `flutter analyze` sạch; toàn bộ 117 tests pass.
+23 engine tests gồm 8.192 tổ hợp pot subset/foul/break-chain/roster 2–5 người.
+Chạy riêng: `flutter test test/domain/services/score_engine_test.dart`.
 
 ### CP2 — Commands, undo và lifecycle
 - [ ] recordTurn, undoLastTurn, finishRoom, cancelRoom, evaluateEndConditions.
