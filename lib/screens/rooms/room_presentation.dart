@@ -3,6 +3,7 @@ import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/validation/validation_issue.dart';
+import 'package:bidart/domain/services/score_engine.dart';
 import 'package:flutter/material.dart';
 
 String roomStatusLabel(RoomStatus status) => switch (status) {
@@ -40,6 +41,13 @@ String roomFailureMessage(Object error) => switch (error) {
   RoomNotFoundFailure() => 'Không tìm thấy phòng.',
   ActiveRoomExistsFailure() => 'Đã có một phòng đang chơi.',
   StaleRevisionFailure() => 'Phòng đã thay đổi. Tải lại trước khi thử tiếp.',
+  ScoreEngineFailure(:final code) => switch (code) {
+    ScoreEngineError.wrongActor => 'Người đánh đã thay đổi. Tải lại phòng.',
+    ScoreEngineError.invalidBalls =>
+      'Bi đã chọn không còn trên bàn hoặc bị trùng.',
+    ScoreEngineError.invalidFoul => 'Loại lỗi không khớp trạng thái chuỗi.',
+    _ => 'Trạng thái ván hoặc luật không hợp lệ.',
+  },
   RepositoryValidationFailure(:final issues) when issues.isNotEmpty =>
     issues.map((issue) => validationMessage(issue.code)).toSet().join('\n'),
   RepositoryValidationFailure() => 'Phòng chưa đủ điều kiện cho thao tác này.',
@@ -63,7 +71,7 @@ class RoomLoadError extends StatelessWidget {
   );
 }
 
-/// Committed state only. No scoring/edit controls before Phase 3.
+/// Committed state only; draft/command controls live in InRoom.
 class RoomDetails extends StatelessWidget {
   const RoomDetails({super.key, required this.room});
   final Room room;

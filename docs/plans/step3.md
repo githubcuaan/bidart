@@ -70,14 +70,40 @@ Kiểm tra CP2 ngày 2026-10-15: `flutter analyze` sạch; toàn bộ 146 tests 
 29 tests mới kiểm tra commands/lifecycle, concurrency, atomic failure/retry,
 undo barriers, ngưỡng/clock, edits và lựa chọn thay thế thủ công.
 Chạy riêng: `flutter test test/domain/services/room_commands_test.dart test/domain/services/next_game_test.dart`.
-Controllers/UI chưa gọi commands mới hoặc timer/resume; nối ở CP3. Vẫn RAM-only.
+Tại CP2 controllers/UI chưa nối commands mới; phần này được bổ sung trong CP3 bên dưới. Vẫn RAM-only.
 
 ### CP3 — Controllers và UI
-- [ ] Shared per-room queue; publish sau commit; refresh room/list reads.
-- [ ] Scoreboard/current player/balls, draft, preview, lỗi, xác nhận.
-- [ ] Undo có xác nhận khi mở lại ván; nhật ký; next game; finish/cancel.
-- [ ] Khoá submit đang xử lý; lỗi lưu giữ draft; closed room read-only.
-- [ ] Widget/controller tests và layout màn hình hẹp.
+- [x] Shared per-room queue; publish sau commit; refresh room/list reads.
+- [x] Scoreboard/current player/balls, draft, preview, lỗi, xác nhận.
+- [x] Undo có xác nhận khi mở lại ván; nhật ký; next game; finish/cancel.
+- [x] Khoá submit đang xử lý; lỗi lưu giữ draft; closed room read-only.
+- [x] Widget/controller tests và layout màn hình hẹp.
+
+CP3 API: `roomActionControllerProvider(roomId).notifier.submit(RoomAction(...),
+expectedRevision: revision)` trả committed room hoặc null, lỗi nằm trong AsyncValue.
+`RoomActionKind` gồm record/undo/finish/cancel/evaluate/add/remove/rules/order.
+Controller capture collections, dùng signature + revision để giữ command ID khi retry
+input không đổi; `.retry()` giữ cả payload và participant ID của edit đã thất bại.
+Double submit chia sẻ Future; tất cả đi qua `roomCommandQueueProvider`.
+`nextGameControllerProvider` nhận thêm replacementStarterId/replacementPayerId và `.retry()`.
+
+`InRoom` có scoreboard, draft chọn bi (gồm bi tắt điểm), toggle lỗi tự phân loại theo chain,
+preview từ engine, xác nhận, xoá draft, undo, lịch sử bi/transactions/undone/events,
+edit dialogs, xoá người giữa hai ván, replacement dialog, finish/cancel có xác nhận.
+Chọn bi không ghi dữ liệu; lỗi lưu giữ draft; chỉ clear sau commit thành công.
+Controls khoá khi action hoặc next-game đang lưu. Lỗi có retry payload cũ hoặc reload;
+draft không còn hợp lệ sau reload có thể xoá để nhập lại. Closed room không có controls ghi.
+
+Load/resume/timer so sánh `evaluateRoomEnd` với committed state; chỉ gửi command nếu
+có thay đổi. Timer huỷ khi rời màn hình/đổi phòng, đợi thao tác đang lưu trước khi đánh giá.
+Command tự kiểm tra end conditions nên không phụ thuộc UI timer để chặn ván mới.
+
+Kiểm tra CP3 ngày 2026-10-15: `flutter analyze` sạch; toàn bộ 172 tests pass.
+8 controller tests và 18 widget tests mới: draft/preview/atomic saves/retry, queue,
+TH2/undo, disabled balls, edits, replacements retry, read-only, timer/resume,
+rời màn khi đang lưu và layout 320px. Chưa khẳng định đã thử thiết bị/emulator thủ công.
+Chạy riêng:
+`flutter test test/features/scoring/provider/room_action_controller_test.dart test/screens/rooms/in_room_actions_test.dart`.
 
 ### CP4 — Regression và bàn giao
 - [ ] `flutter analyze`, `flutter test` đều sạch.
