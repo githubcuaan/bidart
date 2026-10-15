@@ -1,14 +1,41 @@
+import 'package:bidart/data/local/app_database.dart';
 import 'package:bidart/data/repositories/in_memory_game_repository.dart';
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/models/scoring/room_summary.dart';
+import 'package:bidart/domain/models/scoring/rule_template.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
+import 'package:bidart/domain/repositories/rule_template_repository.dart';
 import 'package:bidart/domain/services/room_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+/// Durable database. Overridden in `main` with the file-backed instance and
+/// in tests with `AppDatabase.memory()`.
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  throw StateError(
+    'appDatabaseProvider not overridden. Provide AppDatabase in main/tests.',
+  );
+});
+
 final gameRepositoryProvider = Provider<GameRepository>(
   (ref) => InMemoryGameRepository(),
+);
+final ruleTemplateRepositoryProvider = Provider<RuleTemplateRepository>(
+  (ref) {
+    final repository = ref.watch(gameRepositoryProvider);
+    if (repository is RuleTemplateRepository) {
+      return repository as RuleTemplateRepository;
+    }
+    throw StateError('GameRepository does not implement RuleTemplateRepository');
+  },
+);
+final ruleTemplateListProvider = FutureProvider<List<RuleTemplate>>(
+  (ref) => ref.watch(ruleTemplateRepositoryProvider).listRuleTemplates(),
+);
+final ruleTemplateByIdProvider =
+    FutureProvider.family<RuleTemplate, String>(
+  (ref, id) => ref.watch(ruleTemplateRepositoryProvider).getRuleTemplate(id),
 );
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 final idFactoryProvider = Provider<String Function()>((ref) => const Uuid().v4);

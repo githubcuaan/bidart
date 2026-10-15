@@ -23,7 +23,7 @@ class _RoomsState extends ConsumerState<Rooms> {
       const Padding(
         padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
         child: Text(
-          'Phòng lưu tạm trong bộ nhớ, không giữ sau khi khởi động lại.',
+          'Phòng tự lưu local; đóng/mở app vẫn giữ nguyên trạng thái.',
         ),
       ),
       Padding(

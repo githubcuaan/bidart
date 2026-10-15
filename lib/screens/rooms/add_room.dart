@@ -7,6 +7,7 @@ import 'package:bidart/domain/validation/room_validator.dart';
 import 'package:bidart/domain/validation/validation_issue.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
+import 'package:bidart/features/scoring/provider/rule_template_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,6 +25,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   late final TextEditingController _name;
   late final TextEditingController _duration;
   late final TextEditingController _threshold;
+  late final TextEditingController _templateName;
   final _names = <String, TextEditingController>{};
   final _points = <int, TextEditingController>{};
   final _enabled = <int, bool>{};
@@ -42,6 +44,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         : CreateRoomDraft();
     _ownerId = saved.ownerId;
     _name = TextEditingController(text: saved.name);
+    _templateName = TextEditingController();
     _duration = TextEditingController(
       text: saved.endConditions.durationSeconds?.toString() ?? '',
     );
@@ -78,6 +81,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   void dispose() {
     for (final controller in [
       _name,
+      _templateName,
       _duration,
       _threshold,
       ..._names.values,
@@ -203,7 +207,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         children: [
           const Text('Phòng local · 2–5 người · điểm cộng dồn qua các ván'),
           const Text(
-            'Dữ liệu chỉ lưu tạm; chưa khôi phục được sau khi khởi động lại.',
+            'Tự lưu sau mỗi thao tác; mở lại app để tiếp tục đúng trạng thái.',
           ),
           if (error != null) ...[
             Text(
@@ -413,6 +417,90 @@ class _AddRoomState extends ConsumerState<AddRoom> {
           ),
           const Text(
             'Bi tắt vẫn thuộc bàn chơi, chỉ không tạo điểm. Đạt thời gian/ngưỡng sẽ chờ hết ván.',
+          ),
+          const SizedBox(height: 16),
+          Text('Luật yêu thích', style: Theme.of(context).textTheme.titleMedium),
+          const Text(
+            'Lưu bản hiện tại để tái dùng cho phòng mới; không sửa phòng cũ.',
+          ),
+          TextField(
+            key: const ValueKey('template-name'),
+            controller: _templateName,
+            enabled: !saving,
+            decoration: const InputDecoration(labelText: 'Tên mẫu luật'),
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final saveState = ref.watch(ruleTemplateSaveControllerProvider);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextButton.icon(
+                    key: const ValueKey('save-template'),
+                    onPressed: saving || saveState.isLoading
+                        ? null
+                        : () async {
+                            final messenger = ScaffoldMessenger.of(context);
+                            final template = await ref
+                                .read(ruleTemplateSaveControllerProvider.notifier)
+                                .save(
+                                  name: _templateName.text,
+                                  ballPoints: draft.ballPoints,
+                                );
+                            if (!context.mounted) return;
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  template == null
+                                      ? roomFailureMessage(
+                                          saveState.error ??
+                                              const PersistenceFailure(
+                                                  'Không lưu được mẫu.'),
+                                        )
+                                      : 'Đã lưu mẫu “${template.name}”.',
+                                ),
+                              ),
+                            );
+                          },
+                    icon: const Icon(Icons.bookmark_add_outlined),
+                    label: Text(
+                      saveState.isLoading ? 'Đang lưu mẫu…' : 'Lưu mẫu luật',
+                    ),
+                  ),
+                  ref.watch(ruleTemplateListProvider).when(
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, _) => const SizedBox.shrink(),
+                        data: (templates) => templates.isEmpty
+                            ? const SizedBox.shrink()
+                            : Wrap(
+                                spacing: 8,
+                                children: [
+                                  for (final template in templates)
+                                    ActionChip(
+                                      key: ValueKey(
+                                          'apply-template-${template.id}'),
+                                      label: Text(template.name),
+                                      onPressed: saving
+                                          ? null
+                                          : () => _changed(() {
+                                                for (var ball = 1;
+                                                    ball <= 9;
+                                                    ball++) {
+                                                  final config = template
+                                                      .ballPoints[ball];
+                                                  _enabled[ball] =
+                                                      config?.enabled ?? true;
+                                                  _points[ball]!.text =
+                                                      '${config?.enabled == false ? ball : config?.points ?? ball}';
+                                                }
+                                              }),
+                                    ),
+                                ],
+                              ),
+                      ),
+                ],
+              );
+            },
           ),
         ],
       ),

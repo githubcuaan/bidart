@@ -41,6 +41,9 @@ String roomFailureMessage(Object error) => switch (error) {
   RoomNotFoundFailure() => 'Không tìm thấy phòng.',
   ActiveRoomExistsFailure() => 'Đã có một phòng đang chơi.',
   StaleRevisionFailure() => 'Phòng đã thay đổi. Tải lại trước khi thử tiếp.',
+  PersistenceFailure(:final message) when message.contains('hỏng') =>
+    'Dữ liệu đã lưu bị hỏng. Không tạo trận mới thay thế; thử lại hoặc xóa dữ liệu hỏng.',
+  PersistenceFailure() => 'Không thể đọc hoặc lưu phòng. Vui lòng thử lại.',
   ScoreEngineFailure(:final code) => switch (code) {
     ScoreEngineError.wrongActor => 'Người đánh đã thay đổi. Tải lại phòng.',
     ScoreEngineError.invalidBalls =>
@@ -140,7 +143,7 @@ class RoomDetails extends StatelessWidget {
           Text('Ngưỡng điểm: $threshold'),
         const SizedBox(height: 16),
         const Text(
-          'Lưu tạm trong bộ nhớ; khởi động lại ứng dụng sẽ mất dữ liệu.',
+          'Phòng tự lưu local; đóng/mở app vẫn giữ nguyên trạng thái.',
         ),
       ],
     );
