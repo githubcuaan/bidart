@@ -14,7 +14,7 @@ all the class is following the [class_design](./class_design.md)
 - [x] Room (aggregate nhiều ván)
 - [x] RoomStatus (enum)
 - [x] RoomEvent (edit/undo barrier theo revision; commands RAM đã kiểm thử)
-- [x] RuleTemplate (model; lưu mẫu ở Phase 4)
+- [x] RuleTemplate (model + lưu mẫu độc lập Phase 4; áp dụng cho phòng mới)
 - [x] BallPointConfig
 - [x] GameSession
 - [x] GameStatus (enum)
@@ -44,6 +44,8 @@ Models/serialization và Phase 3 RAM đã kiểm thử tự động; người d�
 - [x] RoomCommands (record/undo/finish/cancel/evaluate/edit)
 - [x] evaluateRoomEnd (lịch sử hiệu lực và clock)
 - [x] InMemoryGameRepository (atomic aggregate + receipt; không durable)
+- [x] DriftGameRepository + AppDatabase (Phase 4: rooms/receipts/templates, revision guard, retry idempotent, hỏng -> lỗi rõ)
+- [x] RuleTemplateRepository (RAM + Drift; validate, detach, độc lập phòng)
 - [x] RoomActionController / NextGameController / RoomCommandQueue
 - [x] InRoom và edit/replacement dialogs
 - [x] Regression nhiều ván: tái dựng ledger/bi từ history, JSON round-trip
