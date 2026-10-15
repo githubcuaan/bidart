@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import 'database_connection_native.dart'
+    if (dart.library.js_interop) 'database_connection_web.dart' as platform;
 
 part 'app_database.g.dart';
 
@@ -56,9 +54,10 @@ class TemplateRows extends Table {
 
 @DriftDatabase(tables: [RoomRows, ReceiptRows, TemplateRows])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor]) : super(executor ?? _open());
+  AppDatabase([QueryExecutor? executor])
+      : super(executor ?? platform.openDatabase());
 
-  AppDatabase.memory() : super(NativeDatabase.memory());
+  AppDatabase.memory() : super(platform.openMemoryDatabase());
 
   @override
   int get schemaVersion => 1;
@@ -68,9 +67,4 @@ class AppDatabase extends _$AppDatabase {
         onCreate: (m) async => m.createAll(),
       );
 
-  static LazyDatabase _open() => LazyDatabase(() async {
-        final dir = await getApplicationDocumentsDirectory();
-        final file = File(p.join(dir.path, 'bidart.sqlite'));
-        return NativeDatabase.createInBackground(file);
-      });
 }
