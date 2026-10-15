@@ -1,6 +1,6 @@
 # Phase 3 — Engine và thao tác trong phòng
 
-Trạng thái: đang triển khai. Branch: `sol/phase3`, stacked trên `step2`.
+Trạng thái: hoàn tất Phase 3 trong phạm vi RAM-only, gồm code, kiểm thử tự động và manual smoke trên emulator do người dùng xác nhận PASS. Branch triển khai: `sol/phase3`, stacked trên `step2`.
 
 Nguồn luật: [step1.md](step1.md) và [../rule.md](../rule.md).
 Storage vẫn RAM-only; Drift/khôi phục sau restart thuộc Phase 4.
@@ -106,9 +106,16 @@ Chạy riêng:
 `flutter test test/features/scoring/provider/room_action_controller_test.dart test/screens/rooms/in_room_actions_test.dart`.
 
 ### CP4 — Regression và bàn giao
-- [ ] `flutter analyze`, `flutter test` đều sạch.
-- [ ] Cập nhật project/entity checklist chỉ cho tính năng đã test.
-- [ ] Handoff API, lệnh kiểm tra và giới hạn RAM-only.
-- [ ] Kiểm tra thủ công trên thiết bị/emulator nếu môi trường cho phép; nếu chưa làm phải ghi rõ.
+- [x] `flutter analyze` sạch; toàn bộ 178 tests pass trong lần kiểm tra CP4.
+- [x] Cập nhật project/entity checklist chỉ cho tính năng đã test.
+- [x] Handoff API, lệnh kiểm tra và giới hạn RAM-only tại [step3-handoff.md](step3-handoff.md).
+- [x] Ghi quy trình và kết quả manual smoke trong handoff, phân biệt kiểm thử của agent và người dùng.
+- [x] Release gate: người dùng đã chạy manual smoke trên emulator và xác nhận mọi thứ PASS.
 
-Mỗi checkpoint triển khai có commit riêng kèm tests; không push hoặc tạo PR khi chưa được yêu cầu.
+CP4 bổ sung 6 regression tests trong `test/domain/services/scoring_regression_test.dart`:
+luồng ba ván, service recreation trên cùng RAM repository, và 400 bước seed cố định cho
+2–5 người. Tái dựng ledger/table độc lập với engine; không thay thế tests persistence.
+Manual smoke trên emulator đã được người dùng xác nhận toàn bộ PASS; agent không tự chạy lại.
+Model emulator, OS/API và build cụ thể chưa được cung cấp. Durable recovery vẫn thuộc Phase 4.
+
+Theo yêu cầu mới: dừng trước commit để người dùng đọc và xác nhận. Không commit/push/PR tự động.

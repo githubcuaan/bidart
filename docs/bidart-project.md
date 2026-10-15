@@ -87,19 +87,21 @@ views:
   - [x] Nối `rooms.dart` và `chose_room.dart` với danh sách/chọn phòng; xử lý empty/loading/error và phòng không tồn tại. Chốt trách nhiệm hai file để tránh hai danh sách trùng chức năng.
   - [x] Sau tạo thành công mới điều hướng bằng room ID; quay về danh sách không đóng hoặc làm mất phòng.
 
-- [ ] **Phase 3: Engine và thao tác trong phòng (P0)**
-  - [ ] Tạo `lib/domain/services/score_engine.dart` thuần Dart: nhận session + turn input, trả kết quả mới; không phụ thuộc Flutter/storage.
-  - [ ] Validate actor, trạng thái trận, bi còn trên bàn, bi trùng trong input, cấu hình lỗi và người chịu đền; lỗi không mutate state.
-  - [ ] Tính điểm bằng giao dịch có `amount > 0`: mỗi khoản cộng luôn có khoản trừ tương ứng; không cho UI nhập/sửa trực tiếp tổng điểm.
-  - [ ] Xử lý giữ cơ khi ăn hợp lệ, chuyển cơ khi không ăn và TH1/TH2 theo bảng luật đã duyệt; TH2 phải đổi vị trí hai người, không chỉ đổi highlight.
-  - [ ] Tách bi không tính điểm khỏi bi đã rời bàn: vẫn cần cách ghi nhận bi tắt để `remainingBalls` đúng, dù không xuất hiện trong bộ chọn cộng điểm.
-  - [ ] Lưu lịch sử có actor, bi, lỗi, giao dịch, score logs, thứ tự trước/sau và người nhận lượt; bi còn lại được suy ra từ lượt hiệu lực.
-  - [ ] Tạo `recordTurn`, `undoLastTurn`, `startNextGame`, `finishRoom`, `cancelRoom`, commands edit và `evaluateEndConditions` theo bước 1; validation/lỗi rõ ràng.
-  - [ ] Triển khai chuỗi đề-pa trả mỗi người, payer cố định suốt chuỗi, bi ăn sớm/đặt lại và thứ tự ván mới; không dùng luật WPA/mẫu UI thay biến thể đã chốt.
-  - [ ] Triển khai thời gian từ tạo phòng/ngưỡng điểm: đạt điều kiện chờ hết ván, ghi đủ điểm; undo tính lại pending-end nhưng không lùi clock.
-  - [ ] Undo lượt hiệu lực cuối: khôi phục toàn bộ state trước lượt, đánh dấu `isUndone`, không tính lại lượt đó vào điểm/bi còn lại. Không cho undo lặp cùng lượt.
-  - [ ] Tích hợp màn hình trong phòng mới (đề xuất `lib/screens/rooms/in_room.dart`): scoreboard, lượt hiện tại, chọn bi, preview cộng/trừ, ghi nhận lỗi, xác nhận, undo, nhật ký, kết thúc/huỷ.
-  - [ ] Chọn người/bi chỉ thay đổi draft; một lần xác nhận tạo đúng một lượt, khoá nút khi xử lý và giữ draft nếu lưu lỗi.
+- [x] **Phase 3: Engine và thao tác trong phòng (P0, RAM-only; automated tests và manual smoke PASS)**
+  - [x] Tạo `lib/domain/services/score_engine.dart` thuần Dart: nhận session + turn input, trả kết quả mới; không phụ thuộc Flutter/storage.
+  - [x] Validate actor, trạng thái trận, bi còn trên bàn, bi trùng trong input, cấu hình lỗi và người chịu đền; lỗi không mutate state.
+  - [x] Tính điểm bằng giao dịch có `amount > 0`: mỗi khoản cộng luôn có khoản trừ tương ứng; không cho UI nhập/sửa trực tiếp tổng điểm.
+  - [x] Xử lý giữ cơ khi ăn hợp lệ, chuyển cơ khi không ăn và TH1/TH2 theo bảng luật đã duyệt; TH2 đổi vị trí thật trong order.
+  - [x] Ghi nhận riêng bi tắt điểm để `remainingBalls` đúng; UI vẫn chọn được bi tắt nhưng không tạo giao dịch điểm.
+  - [x] Lưu lịch sử actor, bi, lỗi, giao dịch, score logs, snapshot trước/sau; regression tái dựng điểm và bi từ lượt hiệu lực.
+  - [x] Commands `recordTurn`, `undoLastTurn`, `startNextGame`, `finishRoom`, `cancelRoom`, edit và `evaluateEndConditions`; validation/lỗi rõ ràng.
+  - [x] Chuỗi đề-pa trả cả làng, payer cố định trong chuỗi, ăn sớm/đặt lại và thứ tự ván mới theo luật đã chốt.
+  - [x] Thời gian từ tạo phòng/ngưỡng điểm: đánh nốt ván, ghi đủ điểm; undo tính lại pending-end, không lùi clock.
+  - [x] Undo lượt hiệu lực cuối khôi phục state, giữ dấu `isUndone`; không vượt edit barrier/ván mới/phòng đóng, không undo lặp cùng lượt.
+  - [x] `lib/screens/rooms/in_room.dart`: scoreboard, lượt hiện tại, bi, preview, lỗi, xác nhận, undo, nhật ký, edits, kết thúc/huỷ.
+  - [x] Chọn bi/lỗi chỉ đổi draft; xác nhận tạo một lượt, khoá khi lưu và giữ draft nếu lỗi. Winner/payer rời roster được thay bằng lựa chọn thủ công cho ván mới.
+
+  Bàn giao: [plans/step3-handoff.md](./plans/step3-handoff.md). Người dùng đã kiểm thử thủ công trên emulator và xác nhận toàn bộ PASS; không coi RAM-only là persistence hoặc hoàn tất Phase 5.
 
 - [ ] **Phase 4: Persistence và phục hồi (P0 cho bản bàn giao)**
   - [ ] Định nghĩa `lib/domain/repositories/game_repository_interface.dart`: create/list/get/save room aggregate và commands atomic; local implementation ở `lib/data/repositories/game_repository.dart`.
@@ -191,6 +193,6 @@ Nguồn nghiệp vụ: [rule.md](./rule.md). Domain, lifecycle, commands, invari
 - 2026-10-12: Bổ sung kế hoạch chi tiết cho phần tạo/chọn phòng và core trong phòng dựa trên docs/code hiện tại. Chưa triển khai logic; checklist implementation giữ chưa hoàn thành.
 - Đã triển khai Riverpod cho state management/dependency injection; Drift/SQLite cho local storage vẫn chưa thêm dependency hoặc triển khai code.
 - Đã chốt Firebase cho backend online; tách local/online repository và nguồn dữ liệu chính. Online ban đầu cần mạng để ghi điểm/undo, backend kiểm tra quyền chủ phòng và xử lý command; chưa triển khai Firebase.
-- Phase 1 hoàn thành đặc tả: đã tổng hợp luật, room/nhiều ván, commands và bảng input/output tại `plans/step1.md`. Phase 2 đã triển khai trong giới hạn RAM-only; Phase 3–5 chưa hoàn thành.
+- Phase 1 hoàn thành đặc tả tại `plans/step1.md`. Phase 2–3 đã triển khai và kiểm thử tự động trong giới hạn RAM-only; Phase 4 persistence và các tiêu chí bàn giao cuối Phase 5 chưa hoàn thành.
 - 2026-10-15: Hoàn tất Step 2 UI và acceptance tự động; bàn giao API/giới hạn tại [plans/step2-handoff.md](./plans/step2-handoff.md). Chưa kiểm thử thủ công trên thiết bị/emulator, chưa có persistence.
 - Deadline và URL repository chưa xác nhận; không đặt mốc thời gian giả định. Chi tiết backend online để giai đoạn sau.
