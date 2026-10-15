@@ -2,7 +2,20 @@ import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/validation/validation_issue.dart';
 
-enum RoomCommandType { create, update, startNextGame }
+enum RoomCommandType {
+  create,
+  update,
+  startNextGame,
+  recordTurn,
+  undoLastTurn,
+  finishRoom,
+  cancelRoom,
+  evaluateEndConditions,
+  addPlayer,
+  removePlayer,
+  updateRules,
+  reorderPlayers,
+}
 
 /// Immutable result at commit time, not the room's latest state.
 class CommandReceipt {

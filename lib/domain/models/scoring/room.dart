@@ -6,6 +6,7 @@ import 'pending_end_reason.dart';
 import 'player_in_game.dart';
 import 'room_mode.dart';
 import 'room_status.dart';
+import 'room_event.dart';
 import 'rule_config.dart';
 
 part 'room.freezed.dart';
@@ -37,6 +38,7 @@ abstract class Room with _$Room {
     String? currentGameId,
     required EndConditions endConditions,
     required Set<PendingEndReason> pendingEndReasons,
+    @Default([]) List<RoomEvent> events,
   }) = _Room;
 
   factory Room.fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);

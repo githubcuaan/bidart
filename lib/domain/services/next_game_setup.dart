@@ -2,8 +2,8 @@ import 'package:bidart/domain/models/scoring/game_session.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/validation/room_validator.dart';
 
-/// Pure setup policy. Roster/order edits between games remain unsupported until
-/// replacement-payer and edited-order precedence are explicitly settled.
+/// Pure setup policy. Departed outcome roles require explicit user choices;
+/// historical outcomes never change. Room order supplies the next-game cycle.
 class NextGameSetup {
   NextGameSetup._(this.starterId, this.payerId, List<String> order)
     : playerOrder = List.unmodifiable(order);
@@ -16,31 +16,40 @@ class NextGameSetup {
     required GameSession previous,
     required List<String> activePlayerIds,
     required List<String> roomOrder,
+    String? replacementStarterId,
+    String? replacementPayerId,
   }) {
-    final winner = previous.winnerId;
-    final payer = previous.finalPayerId;
-    final order = previous.playerOrder;
+    final originalWinner = previous.winnerId;
+    final originalPayer = previous.finalPayerId;
+    final winnerPresent = activePlayerIds.contains(originalWinner);
+    final payerPresent = activePlayerIds.contains(originalPayer);
+    final winner = winnerPresent ? originalWinner : replacementStarterId;
+    final payer = payerPresent ? originalPayer : replacementPayerId;
+    final order = roomOrder;
 
-    if (winner == null ||
+    if (originalWinner == null ||
+        originalPayer == null ||
+        (winnerPresent && replacementStarterId != null) ||
+        (payerPresent && replacementPayerId != null) ||
+        winner == null ||
         payer == null ||
         RoomValidator.validateOrder(activePlayerIds, order).isNotEmpty ||
-        roomOrder.length != order.length ||
-        !List.generate(
-          order.length,
-          (i) => roomOrder[i] == order[i],
-        ).every((same) => same) ||
         RoomValidator.validateStarterPayer(
           activePlayerIds: activePlayerIds,
           starterId: winner,
           payerId: payer,
         ).isNotEmpty) {
       throw RepositoryValidationFailure(
-        'Unsupported or invalid next-game setup',
+        'Valid next-game roster and explicit replacements required',
       );
     }
 
     if (previous.isBreakClear) {
-      return NextGameSetup._(winner, payer, order);
+      final index = order.indexOf(winner);
+      return NextGameSetup._(winner, payer, [
+        ...order.skip(index),
+        ...order.take(index),
+      ]);
     }
 
     final index = order.indexOf(winner);

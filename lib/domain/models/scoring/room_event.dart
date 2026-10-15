@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'room_event_type.dart';
 import 'turn_state_snapshot.dart';
+import 'rule_config.dart';
 
 part 'room_event.freezed.dart';
 part 'room_event.g.dart';
@@ -21,6 +22,8 @@ abstract class RoomEvent with _$RoomEvent {
     required TurnStateSnapshot beforeSnapshot,
     required TurnStateSnapshot afterSnapshot,
     required DateTime createdAt,
+    RuleConfig? beforeRules,
+    RuleConfig? afterRules,
     @Default(true) bool isUndoBarrier,
   }) = _RoomEvent;
 

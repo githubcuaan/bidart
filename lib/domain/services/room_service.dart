@@ -13,6 +13,7 @@ import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/validation/room_validator.dart';
 
 import 'next_game_setup.dart';
+import 'end_condition_policy.dart';
 
 /// Creates committed aggregates only. Draft participant IDs belong to callers:
 /// preserve them across rename/reorder, and use a new command ID if input changes.
@@ -44,6 +45,8 @@ class RoomService {
     required String commandId,
     required String roomId,
     required int expectedRevision,
+    String? replacementStarterId,
+    String? replacementPayerId,
   }) async {
     final prior = await repository.getCommandReceipt(commandId);
     if (prior != null) {
@@ -84,24 +87,9 @@ class RoomService {
     }
 
     final now = clock();
-    final duration = room.endConditions.durationSeconds;
-    final threshold = room.endConditions.scoreThreshold;
-    bool reached(Map<String, int> scores) =>
-        threshold != null && scores.values.any((score) => score >= threshold);
-    final historicalThreshold = room.games.any(
-      (game) => game.turns.any(
-        (turn) =>
-            !turn.isUndone &&
-            (reached(turn.beforeSnapshot.scores) ||
-                reached(turn.afterSnapshot.scores)),
-      ),
-    );
-
+    final evaluated = evaluateRoomEnd(room, now);
     if (room.pendingEndReasons.isNotEmpty ||
-        (duration != null &&
-            !now.isBefore(room.createdAt.add(Duration(seconds: duration)))) ||
-        reached(room.scores) ||
-        historicalThreshold) {
+        evaluated.pendingEndReasons.isNotEmpty) {
       throw RepositoryValidationFailure('Room end condition reached');
     }
 
@@ -122,6 +110,8 @@ class RoomService {
       previous: previous,
       activePlayerIds: room.activePlayerIds,
       roomOrder: room.playerOrder,
+      replacementStarterId: replacementStarterId,
+      replacementPayerId: replacementPayerId,
     );
 
     final gameId = idFactory();

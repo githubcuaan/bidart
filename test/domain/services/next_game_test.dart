@@ -239,7 +239,7 @@ void main() {
       throwsA(isA<RepositoryValidationFailure>()),
     );
   });
-  test('missing winner and roster edits rejected', () async {
+  test('missing historical winner rejected', () async {
     await edit(
       room.copyWith(games: [room.games.single.copyWith(winnerId: null)]),
     );

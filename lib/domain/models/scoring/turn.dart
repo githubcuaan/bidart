@@ -33,6 +33,7 @@ abstract class Turn with _$Turn {
     required TurnStateSnapshot beforeSnapshot,
     required TurnStateSnapshot afterSnapshot,
     required DateTime createdAt,
+    @Default(0) int revision,
     @Default(false) bool isUndone,
   }) = _Turn;
 

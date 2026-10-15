@@ -38,6 +38,7 @@ _Turn _$TurnFromJson(Map<String, dynamic> json) => _Turn(
     json['afterSnapshot'] as Map<String, dynamic>,
   ),
   createdAt: DateTime.parse(json['createdAt'] as String),
+  revision: (json['revision'] as num?)?.toInt() ?? 0,
   isUndone: json['isUndone'] as bool? ?? false,
 );
 
@@ -59,6 +60,7 @@ Map<String, dynamic> _$TurnToJson(_Turn instance) => <String, dynamic>{
   'beforeSnapshot': instance.beforeSnapshot.toJson(),
   'afterSnapshot': instance.afterSnapshot.toJson(),
   'createdAt': instance.createdAt.toIso8601String(),
+  'revision': instance.revision,
   'isUndone': instance.isUndone,
 };
 
