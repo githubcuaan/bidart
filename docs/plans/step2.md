@@ -1,6 +1,6 @@
 # Step 2 — Models and create/select rooms
 
-**Status: implementation in progress; §1–7 domain work complete. Draft/UI integration remains §8–10.**
+**Status: implemented and tested through §11. In-memory integration complete; scoring/undo and durable persistence remain Phases 3–4.**
 
 Scope: Phase 2 in [../bidart-project.md](../bidart-project.md). Follow [step1.md](./step1.md) when older class designs or UI samples conflict.
 
@@ -129,7 +129,7 @@ Sequence:
 
 **Tests:** valid initialization; zero-sum scores; existing active room rejection; persistence failure; retry returns the same room without duplicates.
 
-Implemented `RoomService.createRoom` with injected ID factory/clock, normalized participants, local-mode room at revision 0, rule version 1 and exactly one initialized game. Caller-supplied participant IDs remain unchanged; mutable input collections are captured before asynchronous work. Committed receipts precede validation; concurrent same-command calls share an in-flight result, including receipt recovery across service instances. Only the committed room ID is returned; typed validation/storage failures propagate without publishing candidate state. Coverage in `test/domain/services/room_service_test.dart`. Stable draft-ID generation and navigation remain unchecked until §8–9; in-memory storage still does not survive restart.
+Implemented `RoomService.createRoom` with injected ID factory/clock, normalized participants, local-mode room at revision 0, rule version 1 and exactly one initialized game. Caller-supplied participant IDs remain unchanged; mutable input collections are captured before asynchronous work. Committed receipts precede validation; concurrent same-command calls share an in-flight result, including receipt recovery across service instances. Only the committed room ID is returned; typed validation/storage failures propagate without publishing candidate state. Coverage in `test/domain/services/room_service_test.dart`; stable draft IDs and navigation now covered by §9 widget tests. In-memory storage still does not survive restart.
 
 ## 7. Implement reads and `startNextGame`
 
@@ -159,10 +159,10 @@ Implemented reads and `startNextGame` in `RoomService`, immutable `RoomSummary`,
 
 Under `lib/features/scoring/provider/`:
 
-- [ ] Repository, room service, clock and ID providers.
-- [ ] Room list and room-by-ID async providers.
-- [ ] Create-room draft/controller.
-- [ ] Next-game command controller.
+- [x] Repository, room service, clock and ID providers.
+- [x] Room list and room-by-ID async providers.
+- [x] Create-room draft/controller.
+- [x] Next-game command controller.
 
 Rules:
 
@@ -175,33 +175,39 @@ Rules:
 
 **Tests:** loading → success/error; double submit; retained draft; failed save does not publish candidate room.
 
+Implemented in `lib/features/scoring/provider/`: injectable RAM repository/service/clock/UUID providers, filtered async room reads, immutable create draft and command controllers. Saving locks draft input; equivalent-input retries retain command IDs, changed input/revision allocates a new ID. Shared per-room queue serializes next-game commands and recovers after failures. Successful commits invalidate room/list reads; failures retain draft and expose errors without publishing candidates. Six tests cover loading, duplicate submits, failed-save retry, changed input, next-game success/idempotency and queue isolation. UI integration is delivered in §9–10; storage remains RAM-only.
+
 ## 9. Build `add_room.dart`
 
 File: `lib/screens/rooms/add_room.dart`.
 
-- [ ] Room name input.
-- [ ] Add/remove/reorder 2–5 guests.
-- [ ] Starter and initial payer selectors.
-- [ ] Ball 1–9 enabled/points controls.
-- [ ] Optional end conditions.
-- [ ] Order/rule preview and inline validation.
-- [ ] Preserve player IDs through rename/reorder.
-- [ ] Clear invalid selections when a player is removed.
-- [ ] Disable submit when invalid or saving.
-- [ ] Show active-room conflict with an action to open the existing room.
-- [ ] Navigate by room ID only after successful commit.
+- [x] Room name input.
+- [x] Add/remove/reorder 2–5 guests.
+- [x] Starter and initial payer selectors.
+- [x] Ball 1–9 enabled/points controls.
+- [x] Optional end conditions.
+- [x] Order/rule preview and inline validation.
+- [x] Preserve player IDs through rename/reorder.
+- [x] Clear invalid selections when a player is removed.
+- [x] Disable submit when invalid or saving.
+- [x] Show active-room conflict with an action to open the existing room.
+- [x] Navigate by room ID only after successful commit.
 
 **Widget tests:** invalid form, roster reorder, starter/payer conflict, loading lock, save failure retaining input and successful navigation.
 
+`AddRoom` generates guest IDs once through the injected factory, reorders with accessible up/down buttons, and clears removed starter/payer selections. Raw numeric input stays in text controllers; invalid numbers block submit without constructing invalid asserted models. Optional duration is entered in seconds; disabled balls persist as zero points but remain on the table. Draft/inputs survive save failure; successful creation replaces the form route with `ChoseRoom(roomId)`. An active-room failure offers navigation to the existing room. No candidate room is passed between screens.
+
 ## 10. Build list/select flow with distinct screen roles
 
-- [ ] `lib/screens/rooms/rooms.dart`: sole room list, create action, status filters, empty/loading/error/retry states.
-- [ ] `lib/screens/rooms/chose_room.dart`: selected-room gateway accepting `roomId`; details, resume/view action and not-found handling. No second room list.
-- [ ] `lib/screens/rooms/in_room.dart`: minimal room-ID destination showing committed roster/scores/current game. Full turn UI belongs to Phase 3.
-- [ ] Closed/cancelled room destinations are read-only.
-- [ ] Returning to the list does not close the room or discard its aggregate.
+- [x] `lib/screens/rooms/rooms.dart`: sole room list, create action, status filters, empty/loading/error/retry states.
+- [x] `lib/screens/rooms/chose_room.dart`: selected-room gateway accepting `roomId`; details, resume/view action and not-found handling. No second room list.
+- [x] `lib/screens/rooms/in_room.dart`: minimal room-ID destination showing committed roster/scores/current game. Full turn UI belongs to Phase 3.
+- [x] Closed/cancelled room destinations are read-only.
+- [x] Returning to the list does not close the room or discard its aggregate.
 
 **Widget tests:** empty list; active/closed rooms; missing ID; failed load/retry; create → gateway → room; back navigation preserves room.
+
+`Rooms` integrates into the existing tab without changing other tabs. Shared presentation in `room_presentation.dart` maps domain issues/statuses to Vietnamese messages and displays committed cumulative scores, roster/order, current game, rules and limits. `InRoom` exposes start-next-game only for an active room with a finished game; the service remains authoritative for end-condition checks. Closed/cancelled rooms expose no write controls. All screens disclose RAM-only storage.
 
 ## 11. Acceptance and handoff
 
@@ -210,15 +216,17 @@ flutter analyze
 flutter test
 ```
 
-- [ ] Valid room creates exactly one first game.
-- [ ] Invalid input/save failure creates nothing.
-- [ ] Same command never creates duplicates.
-- [ ] Only one room remains active.
-- [ ] List/open/back preserves committed state.
-- [ ] Next game keeps cumulative scores.
-- [ ] Historical rules remain unchanged.
-- [ ] Update Phase 2 and entity checklists only for implemented, tested items.
-- [ ] Record remaining decisions, baseline failures and temporary in-memory limitation.
+- [x] Valid room creates exactly one first game.
+- [x] Invalid input/save failure creates nothing.
+- [x] Same command never creates duplicates.
+- [x] Only one room remains active.
+- [x] List/open/back preserves committed state.
+- [x] Next game keeps cumulative scores.
+- [x] Historical rules remain unchanged.
+- [x] Update Phase 2 and entity checklists only for implemented, tested items.
+- [x] Record remaining decisions, baseline failures and temporary in-memory limitation.
+
+Acceptance coverage: domain/repository tests plus `test/features/scoring/provider/room_controllers_test.dart` and `test/screens/rooms/room_flow_test.dart`. Verified 2026-10-15: all 94 tests pass (18 room-screen widget tests), `flutter analyze` clean. Handoff/API map and remaining decisions: [step2-handoff.md](./step2-handoff.md). No baseline failures remain. No device/emulator restart-persistence validation is claimed.
 
 **Delivery limit:** in-memory state survives navigation, not app restart. Persistent templates, Drift storage and restart recovery remain Phase 4; scoring and undo remain Phase 3.
 
@@ -226,4 +234,4 @@ flutter test
 
 `Models → validators → repository fake → services/tests → Riverpod → create form → list/gateway → acceptance`
 
-Complete tests for each layer before integrating the next. Checked items record verified implementation; Phase 2 as a whole remains incomplete.
+Each layer has automated coverage. Checked items record implemented/tested behavior within the Step 2 RAM-only boundary; they do not claim Phase 3 scoring or Phase 4 persistence is complete.

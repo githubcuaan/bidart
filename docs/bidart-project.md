@@ -21,10 +21,10 @@ created: 2026-08-26
 
 ### Hiện trạng đã kiểm tra
 
-- `lib/screens/rooms/rooms.dart`: chỉ có widget placeholder, chưa có logic phòng.
-- `lib/screens/rooms/add_room.dart`, `lib/screens/rooms/chose_room.dart`: file trống.
-- Chưa có domain models, score engine hoặc repository cho scoring trong `lib/`.
-- `pubspec.yaml` đã khai báo `freezed_annotation`, `json_annotation`, `uuid` và generator; chưa khai báo Drift/SQLite hoặc thư viện quản lý state.
+- Step 2 hoàn tất: domain models/validators, repository contract + RAM implementation, room services và Riverpod providers/controllers đã có tests.
+- `rooms.dart` là danh sách duy nhất; `add_room.dart` là form; `chose_room.dart` là gateway một phòng; `in_room.dart` hiển thị state đã commit và thao tác ván tiếp khi hợp lệ.
+- Tạo/chọn/vào/quay lại giữ state trong cùng provider scope; phòng đóng/huỷ chỉ đọc. Chưa có scoring/undo hoặc finish/cancel commands.
+- `pubspec.yaml` có Riverpod, Freezed/JSON/UUID; chưa có Drift/SQLite. Dữ liệu RAM mất sau restart, chưa hoàn tất offline persistence.
 - Cấu trúc trong `folder_structure.md` là thiết kế mục tiêu, không phải toàn bộ code đã tồn tại. Giữ screens hiện tại khi tích hợp; không refactor các tab ngoài phạm vi.
 
 ### Tiêu chí hoàn thành
@@ -75,17 +75,17 @@ views:
   - [x] Chốt Drift/SQLite cho local storage, kết hợp Riverpod; lưu lượt và state liên quan trong cùng transaction, tự lưu và phục hồi khi mở lại app.
   - [x] Chốt Firebase cho backend giai đoạn online (Auth, Firestore, Security Rules, Cloud Functions). MVP vẫn làm local trước; quyền chủ phòng, command idempotency và offline policy ghi tại [plans/step1.md](./plans/step1.md).
 
-- [ ] **Phase 2: Models và tạo/chọn phòng (P0)**
-  - [ ] Tạo immutable models/enums cho `Room`, `RoomStatus`, `RoomEvent`, `RuleTemplate`, `GameSession`, `PlayerInGame`, `RuleConfig`, `GameStatus`, `Turn`, `PottedBall`, `ScoreTransaction`, `ScoreLog` theo contract bước 1.
-  - [ ] Triển khai cấu hình điểm theo từng bi (`ballNumber -> enabled/points`) và rule versions theo contract bước 1.
-  - [ ] Bổ sung IDs actor/người chịu đền, thứ tự player IDs, current player và dữ liệu trước/sau lượt để xử lý chuyển cơ/undo; không dùng tên làm khoá.
-  - [ ] Tạo validator: 2–5 người, ID duy nhất, tên trim không rỗng, thứ tự là hoán vị roster, người đề-pa thuộc roster, bi trong 1–9, điểm nguyên dương cho bi bật, bi tắt tính 0.
-  - [ ] Validate tên guest không trùng, ít nhất một bi bật; giới hạn điểm optional theo cấu hình; payer/starter thuộc roster và khác nhau.
-  - [ ] Viết `createRoom`: validate -> tạo IDs/timestamp -> rule version -> điểm 0 -> lưu Room active + ván đầu đang chơi atomically -> trả room ID. Không tạo phòng nếu lưu thất bại.
-  - [ ] Viết `listRooms/getRoom/startNextGame`; ván tiếp chỉ sau ván hoàn tất và khi chưa có điều kiện đóng phòng, không reset điểm phòng.
-  - [ ] Nối `add_room.dart` với form, thêm/xoá/sắp xếp guest, chọn người đầu và preview luật; disable submit khi invalid/đang lưu.
-  - [ ] Nối `rooms.dart` và `chose_room.dart` với danh sách/chọn phòng; xử lý empty/loading/error và phòng không tồn tại. Chốt trách nhiệm hai file để tránh hai danh sách trùng chức năng.
-  - [ ] Sau tạo thành công mới điều hướng bằng room ID; quay về danh sách không đóng hoặc làm mất phòng.
+- [x] **Phase 2: Models và tạo/chọn phòng (P0, RAM-only)**
+  - [x] Tạo immutable models/enums cho `Room`, `RoomStatus`, `RoomEvent`, `RuleTemplate`, `GameSession`, `PlayerInGame`, `RuleConfig`, `GameStatus`, `Turn`, `PottedBall`, `ScoreTransaction`, `ScoreLog` theo contract bước 1.
+  - [x] Triển khai cấu hình điểm theo từng bi (`ballNumber -> enabled/points`) và rule versions theo contract bước 1.
+  - [x] Bổ sung IDs actor/người chịu đền, thứ tự player IDs, current player và dữ liệu trước/sau lượt để xử lý chuyển cơ/undo; không dùng tên làm khoá.
+  - [x] Tạo validator: 2–5 người, ID duy nhất, tên trim không rỗng, thứ tự là hoán vị roster, người đề-pa thuộc roster, bi trong 1–9, điểm nguyên dương cho bi bật, bi tắt tính 0.
+  - [x] Validate tên guest không trùng, ít nhất một bi bật; giới hạn điểm optional theo cấu hình; payer/starter thuộc roster và khác nhau.
+  - [x] Viết `createRoom`: validate -> tạo IDs/timestamp -> rule version -> điểm 0 -> lưu Room active + ván đầu đang chơi atomically -> trả room ID. Không tạo phòng nếu lưu thất bại.
+  - [x] Viết `listRooms/getRoom/startNextGame`; ván tiếp chỉ sau ván hoàn tất và khi chưa có điều kiện đóng phòng, không reset điểm phòng.
+  - [x] Nối `add_room.dart` với form, thêm/xoá/sắp xếp guest, chọn người đầu và preview luật; disable submit khi invalid/đang lưu.
+  - [x] Nối `rooms.dart` và `chose_room.dart` với danh sách/chọn phòng; xử lý empty/loading/error và phòng không tồn tại. Chốt trách nhiệm hai file để tránh hai danh sách trùng chức năng.
+  - [x] Sau tạo thành công mới điều hướng bằng room ID; quay về danh sách không đóng hoặc làm mất phòng.
 
 - [ ] **Phase 3: Engine và thao tác trong phòng (P0)**
   - [ ] Tạo `lib/domain/services/score_engine.dart` thuần Dart: nhận session + turn input, trả kết quả mới; không phụ thuộc Flutter/storage.
@@ -189,7 +189,8 @@ Nguồn nghiệp vụ: [rule.md](./rule.md). Domain, lifecycle, commands, invari
 
 - 2026-08-26: Khởi tạo dự án.
 - 2026-10-12: Bổ sung kế hoạch chi tiết cho phần tạo/chọn phòng và core trong phòng dựa trên docs/code hiện tại. Chưa triển khai logic; checklist implementation giữ chưa hoàn thành.
-- Đã chốt Drift/SQLite cho local storage và Riverpod cho state management/dependency injection; chưa thêm dependency hoặc triển khai code.
+- Đã triển khai Riverpod cho state management/dependency injection; Drift/SQLite cho local storage vẫn chưa thêm dependency hoặc triển khai code.
 - Đã chốt Firebase cho backend online; tách local/online repository và nguồn dữ liệu chính. Online ban đầu cần mạng để ghi điểm/undo, backend kiểm tra quyền chủ phòng và xử lý command; chưa triển khai Firebase.
-- Phase 1 hoàn thành đặc tả: đã tổng hợp luật, room/nhiều ván, commands và bảng input/output tại `plans/step1.md`. Phase 2–5 chưa hoàn thành.
+- Phase 1 hoàn thành đặc tả: đã tổng hợp luật, room/nhiều ván, commands và bảng input/output tại `plans/step1.md`. Phase 2 đã triển khai trong giới hạn RAM-only; Phase 3–5 chưa hoàn thành.
+- 2026-10-15: Hoàn tất Step 2 UI và acceptance tự động; bàn giao API/giới hạn tại [plans/step2-handoff.md](./plans/step2-handoff.md). Chưa kiểm thử thủ công trên thiết bị/emulator, chưa có persistence.
 - Deadline và URL repository chưa xác nhận; không đặt mốc thời gian giả định. Chi tiết backend online để giai đoạn sau.
