@@ -13,6 +13,7 @@ import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/screens/rooms/add_room.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
 import 'package:bidart/screens/rooms/in_room.dart';
+import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -330,6 +331,34 @@ void main() {
     },
   );
 
+  testWidgets(
+    'leaving during save does not navigate later; new form is fresh',
+    (tester) async {
+      await pump(tester, const Rooms());
+      await tester.tap(key('create-room'));
+      await tester.pumpAndSettle();
+      await fill(tester);
+      repository.saveGate = Completer<void>();
+      await tester.tap(key('submit-room'));
+      await tester.pump();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      repository.saveGate!.complete();
+      await tester.pumpAndSettle();
+      expect(find.byType(ChoseRoom), findsNothing);
+      expect(find.byType(AddRoom), findsNothing);
+      expect(find.text('Bàn 1'), findsOneWidget);
+      await tester.tap(key('create-room'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(key('room-name')).controller!.text,
+        isEmpty,
+      );
+      expect(submit(tester).onPressed, isNull);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('save failure retains text and retry succeeds', (tester) async {
     await pump(tester, const AddRoom());
     await fill(tester);
@@ -368,6 +397,80 @@ void main() {
       expect(await repository.listRooms(), hasLength(1));
     },
   );
+
+  testWidgets('list loading, error, retry, empty state', (tester) async {
+    repository.readGate = Completer<void>();
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: Scaffold(body: Rooms())),
+      ),
+    );
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    repository.failList = true;
+    repository.readGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Thử lại'), findsOneWidget);
+    repository.failList = false;
+    await tester.tap(find.text('Thử lại'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chưa có phòng trong danh sách này.'), findsOneWidget);
+  });
+
+  testWidgets('status filters select active, finished, cancelled and all', (
+    tester,
+  ) async {
+    await seed(name: 'Phòng kết thúc', status: RoomStatus.finished);
+    await seed(name: 'Phòng hủy', status: RoomStatus.cancelled);
+    await seed(name: 'Phòng đang chơi');
+    await pump(tester, const Rooms());
+    expect(find.byType(ListTile), findsNWidgets(3));
+    for (final entry in {
+      'Đang chơi': 'Phòng đang chơi',
+      'Đã kết thúc': 'Phòng kết thúc',
+      'Đã hủy': 'Phòng hủy',
+    }.entries) {
+      await choose(tester, 'room-status-filter', entry.key);
+      expect(find.byType(ListTile), findsOneWidget);
+      expect(find.text(entry.value), findsOneWidget);
+    }
+    await choose(tester, 'room-status-filter', 'Tất cả');
+    expect(find.byType(ListTile), findsNWidgets(3));
+  });
+
+  testWidgets('create → gateway → room → back preserves committed aggregate', (
+    tester,
+  ) async {
+    await pump(tester, const Rooms());
+    await tester.tap(key('create-room'));
+    await tester.pumpAndSettle();
+    await fill(tester);
+    await tester.tap(key('submit-room'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AddRoom), findsNothing);
+    expect(find.byType(ChoseRoom), findsOneWidget);
+    final room = (await repository.listRooms()).single;
+    expect(tester.widget<ChoseRoom>(find.byType(ChoseRoom)).roomId, room.id);
+    await tester.tap(key('open-room'));
+    await tester.pumpAndSettle();
+    expect(find.byType(InRoom), findsOneWidget);
+    expect(find.text('Người đánh: An'), findsOneWidget);
+    expect(find.text('Người trả: Bình'), findsOneWidget);
+    expect(key('next-game'), findsNothing);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(key('room-${room.id}'), findsOneWidget);
+    expect(await repository.getRoom(room.id), room);
+    await tester.tap(key('room-${room.id}'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ChoseRoom), findsOneWidget);
+    expect(await repository.getRoom(room.id), room);
+  });
 
   for (final gateway in [true, false]) {
     testWidgets(
