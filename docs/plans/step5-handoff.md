@@ -1,7 +1,8 @@
 # Phase 5 — Kiểm thử và bàn giao
 
 Ngày kiểm chứng tự động: 2026-10-15. Automated PASS; người dùng xác nhận
-manual Web toàn bộ chuỗi kiểm thử bên dưới PASS. Android/iOS chưa kiểm chứng.
+manual Web PASS và toàn bộ manual Android PASS (xác nhận 2026-10-16).
+Phase 5 hoàn tất acceptance Web + Android; iOS chưa kiểm chứng.
 
 ## Xác nhận Web sau sửa kết nối database
 
@@ -58,29 +59,30 @@ trên Android/iOS. Tests RAM trước đây chỉ mô phỏng tạo service/repo
 - UI không sửa tổng điểm trực tiếp; commands lưu aggregate + receipt atomically.
 - Thêm/sửa luật không tính lại lịch sử; edit chặn undo; phòng đóng/huỷ chỉ xem.
 
-## Manual acceptance — checklist thiết bị còn chờ
+## Manual acceptance Android — PASS theo xác nhận người dùng
 
-`flutter devices` hiện chỉ thấy Linux; không có Android/iOS kết nối.
-Chạy trên thiết bị/emulator mục tiêu, tắt mạng, dùng dữ liệu thử (không clear app data):
+Người dùng đã chạy offline trên Android và xác nhận toàn bộ checklist PASS,
+gồm force-stop từ Settings (không clear app data). Model/OS chưa được cung cấp;
+đây là kết quả người dùng xác nhận, không phải agent trực tiếp chạy thiết bị.
 
 | Bước | Kỳ vọng | Kết quả |
 | --- | --- | --- |
-| Tạo 3 người A/B/C, starter A, payer B; mọi bi 10 điểm | Phòng active, điểm 0 | Chưa chạy |
-| A ăn bi 1 rồi miss | A +20, B/C -10; current B | Chưa chạy |
-| B lỗi TH2 | Order swap thật với payer A | Chưa chạy |
-| Undo | Order A/B/C, current B, điểm/bi như trước TH2; history đánh dấu undone | Chưa chạy |
-| Ghi lại điểm/bi/order/history; force-stop rồi mở lại/chọn phòng | Khôi phục chính xác, không tạo phòng/lượt trùng | Chưa chạy |
-| Kết thúc phòng, mở lại và xem | Giữ điểm/history, không ghi lượt/undo/edit | Chưa chạy |
-| Lưu mẫu luật, force-stop rồi tạo phòng từ mẫu | Mẫu còn; phòng cũ không thay đổi | Chưa chạy |
+| Tạo 3 người A/B/C, starter A, payer B; mọi bi 10 điểm | Phòng active, điểm 0 | PASS |
+| A ăn bi 1 rồi miss | A +20, B/C -10; current B | PASS |
+| B lỗi TH2 | Order swap thật với payer A | PASS |
+| Undo | Order A/B/C, current B, điểm/bi như trước TH2; history đánh dấu undone | PASS |
+| Ghi lại điểm/bi/order/history; force-stop rồi mở lại/chọn phòng | Khôi phục chính xác, không tạo phòng/lượt trùng | PASS |
+| Kết thúc phòng, force-stop, mở lại và xem | Giữ điểm/history, không ghi lượt/undo/edit | PASS |
+| Lưu mẫu luật bi 1 = 25, force-stop rồi tạo phòng từ mẫu | Mẫu còn; phòng cũ không thay đổi | PASS |
 
-Ghi model thiết bị, OS, build, ngày, PASS/FAIL từng bước và lỗi tái hiện trước khi
-đóng checklist Phase 5. Manual Phase 3 đã PASS không thay thế acceptance persistence.
+Nên bổ sung model thiết bị, OS và build để tăng khả năng tái hiện. Manual Android
+này kiểm chứng persistence, độc lập với manual RAM-only Phase 3 trước đó.
 
 ## Giới hạn
 
 - Chỉ local; chưa Firebase/online, export hoặc telemetry.
 - Schema v1 có onCreate; khi đổi schema cần migration + migration tests.
 - Dữ liệu hỏng hiện lỗi rõ; chưa UI sửa/xoá dữ liệu hỏng.
-- Web manual flow và reload đã được người dùng xác nhận PASS; chưa xác nhận
-  force-stop/relaunch trên Android/iOS; chưa chứng minh mọi tình huống
+- Web reload và Android offline/force-stop/relaunch đã được người dùng xác nhận
+  PASS; iOS chưa kiểm chứng; chưa chứng minh mọi tình huống
   mất điện hoặc OS kill giữa commit bằng test file reopen.

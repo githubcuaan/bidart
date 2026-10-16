@@ -115,16 +115,16 @@ views:
   Chi tiết: [plans/step4.md](./plans/step4.md). Code + tests tự động xong; manual
   force-stop/relaunch trên thiết bị thuộc Phase 5.
 
-- [ ] **Phase 5: Kiểm thử và bàn giao (P0)**
+- [x] **Phase 5: Kiểm thử và bàn giao (P0; Web + Android)**
   - [x] Unit tests cho validator, create/startNextGame và các nhánh engine; test map tại `plans/step5-handoff.md`.
   - [x] Repository tests cho save/load, atomicity SQL rollback, retry không trùng và restore sau undo trên SQLite file.
   - [x] Widget tests: form invalid, sắp xếp roster, tạo/chọn phòng, xác nhận lượt, loading/lỗi, undo và xem trận kết thúc.
-  - [ ] Chạy thử offline trên thiết bị/emulator: tạo -> ghi lượt -> TH2 -> undo -> đóng/mở app -> kết thúc -> xem lại.
+  - [x] Chạy thử offline trên Android: tạo -> ghi lượt -> TH2 -> undo -> force-stop/mở lại -> kết thúc -> xem lại; mẫu luật sau force-stop PASS theo người dùng.
     Web: người dùng xác nhận toàn bộ manual điểm/chuyển cơ, TH2, undo,
-    reload sau undo và kết thúc/xem lại/read-only PASS. Android/iOS force-stop
-    chưa kiểm chứng; chi tiết tại `plans/step5-handoff.md`.
+    reload sau undo và kết thúc/xem lại/read-only PASS. Android toàn bộ manual
+    PASS ngày 2026-10-16; iOS chưa kiểm chứng. Chi tiết tại `plans/step5-handoff.md`.
   - [x] Chạy `flutter analyze` sạch, `flutter test` 188 pass; cập nhật `class_checklist.md`.
-  - [x] Bàn giao API, bảng luật, test map và giới hạn tại [plans/step5-handoff.md](./plans/step5-handoff.md). Manual acceptance còn chờ; Phase 5 chưa hoàn tất.
+  - [x] Bàn giao API, bảng luật, test map và giới hạn tại [plans/step5-handoff.md](./plans/step5-handoff.md). Acceptance Web + Android PASS.
 
 ### Thứ tự triển khai đề xuất
 
