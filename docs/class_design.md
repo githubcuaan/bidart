@@ -1,6 +1,8 @@
 # Thiết kế Class & Entity — App Bida (Flutter)
 
 Tài liệu này mô tả domain model chi tiết cho từng module, kèm UML class diagram (Mermaid).
+
+> Thiết kế ban đầu. Đặc tả scoring đã chốt bổ sung `Room -> GameSession -> Turn`, nhiều ván/điểm cộng dồn, rule versions, edit events và undo barriers. Khi Module 2 hoặc chữ ký cũ mâu thuẫn, ưu tiên [rule.md](./rule.md) và [plans/step1.md](./plans/step1.md), đặc biệt domain contract §2 và commands §4. `GameSession` là một ván, không phải toàn bộ phòng; không dùng PENDING trong luồng tạo phòng mới.
 Đơn vị đo: `GeoPoint` = {lat, lng}. Các trường có `?` là nullable/optional.
 
 ---
@@ -62,6 +64,8 @@ classDiagram
 classDiagram
     class GameSession {
         +String id
+        +String roomId
+        +int gameNumber
         +RuleConfig ruleConfig
         +List~PlayerInGame~ players
         +List~Turn~ turns
@@ -69,7 +73,6 @@ classDiagram
         +DateTime startTime
         +DateTime? endTime
         +String? winnerId
-        +startGame()
         +addTurn(turn)
         +undoLastTurn()
         +finishGame()
@@ -80,18 +83,40 @@ classDiagram
 
     class GameStatus {
         <<enumeration>>
-        PENDING
         IN_PROGRESS
+        FINISHED
+        INCOMPLETE
+        CANCELLED
+    }
+
+    class Room {
+        +String id
+        +String ownerId
+        +RoomStatus status
+        +List~GameSession~ games
+        +List~String~ activePlayerIds
+        +List~String~ playerOrder
+        +bool pendingEnd
+        +createRoom()
+        +startNextGame()
+        +finishRoom()
+        +cancelRoom()
+    }
+
+    class RoomStatus {
+        <<enumeration>>
+        ACTIVE
         FINISHED
         CANCELLED
     }
 
     class RuleConfig {
         +String id
+        +int version
         +String name
         +RulePreset presetType
         +int totalBalls
-        +int pointsPerBall
+        +Map~int,BallPointConfig~ ballPoints
         +List~PenaltyRule~ penaltyRules
         +List~PocketRule~ pocketRules
         +validate() bool
@@ -153,6 +178,9 @@ classDiagram
 
     class Turn {
         +String id
+        +String commandId
+        +String actorId
+        +int ruleVersion
         +int turnNumber
         +List~PottedBall~ pottedBalls
         +bool isFoul
@@ -202,7 +230,9 @@ classDiagram
         +DateTime timestamp
     }
 
-    GameSession "1" --> "1" RuleConfig
+    Room "1" --> "1..*" GameSession
+    Room --> RoomStatus
+    GameSession "1" --> "1..*" RuleConfig : versions referenced by turns
     GameSession "1" --> "2..*" PlayerInGame : has
     GameSession "1" --> "*" Turn : contains
     GameSession --> GameStatus
@@ -228,7 +258,7 @@ classDiagram
 **1. Bổ sung `PottedBall` + `PocketPosition` (thay cho `ballsPottedThisTurn: int`)**
 
 - Mỗi lượt (`Turn`) giờ ghi nhận **danh sách bi ăn cụ thể** (`pottedBalls`), mỗi bi biết rõ: ăn bi số mấy (`ballNumber`), vào lỗ nào trong 6 lỗ chuẩn (`PocketPosition`), có phải bi đền/bi chỉ định không (`isDenBall`), và giá trị điểm của riêng bi đó (`pointValue`) — vì `PocketRule` cho phép lỗ giữa nhân hệ số khác lỗ góc.
-- `GameSession.getRemainingBalls()` và `getCurrentDenBallNumber()` được **tính toán (derived)** từ toàn bộ `PottedBall` đã ghi nhận trừ đi `RuleConfig.totalBalls`, chứ không lưu state riêng — tránh 2 nguồn dữ liệu bị lệch nhau (số bi còn lại phải luôn nhất quán với lịch sử lượt bắn).
+- `GameSession.getRemainingBalls()` được tính từ kết quả bi của các lượt hiệu lực trong ván, gồm bi giữ ngoài bàn và bi được đặt lại. Không lấy tổng số lần ăn trừ `totalBalls`: bi ăn sớm có thể được đặt lại và ăn tiếp. Payer là người vừa mất cơ, không suy ra chỉ từ số bi hoặc actor cú ngay trước.
 
 **2. Bổ sung `ScoreTransaction` (thay cho `Turn.scoreChange: int`)**
 
@@ -236,7 +266,7 @@ classDiagram
 - **Đền cả làng** (`DenType.DEN_CA_LANG`, ví dụ bàn 4 người): 1 `Turn` sinh ra **N-1 `ScoreTransaction`** (người phạm lỗi trả cho từng người còn lại), tất cả share chung `transactionGroupId` để UI có thể hiển thị gộp ("A đền cả làng lượt 12") dù về data là nhiều dòng riêng lẻ.
 - **Đền chỉ định** (`DenType.DEN_CHI_DINH`, ví dụ ăn bi đền của B): chỉ sinh **1 `ScoreTransaction`** từ A → B.
 - `Turn.calculateOutcome()` là nơi rule engine thực thi toàn bộ logic: đọc `pottedBalls` + `denType` + tra `RuleConfig` (cả `PenaltyRule` lẫn `PocketRule`) → trả về danh sách `ScoreTransaction` → áp dụng vào `PlayerInGame.currentScore` của từng người liên quan.
-- `ScoreLog` được giữ lại nhưng đổi vai trò: không còn gắn 1-1 với `Turn` như cũ, mà là **snapshot điểm số sau khi nettinng tất cả transaction trong lượt đó, cho từng người chơi bị ảnh hưởng** (1 `Turn` với đền cả làng sẽ tạo ra N dòng `ScoreLog`, mỗi người 1 dòng). Nhờ vậy `undoLastTurn()` chỉ cần lặp qua các `ScoreLog` của `Turn` đó để revert `previousScore` cho từng người và đánh dấu `Turn.isUndone = true`, bất kể lượt đó có bao nhiêu giao dịch.
+- `ScoreLog` lưu điểm trước/sau cho từng người bị ảnh hưởng. Undo phải phục hồi thêm order, current player, payer, chuỗi giữ cơ/đề-pa, bi và trạng thái ván từ before-state; đánh dấu turn undone và tính lại pending-end theo lịch sử hiệu lực/đồng hồ hiện tại. Không chỉ revert điểm và không vượt mốc chỉnh sửa người/luật/thứ tự.
 
 ---
 
@@ -404,7 +434,7 @@ classDiagram
 - `PlayerProfile.isCompatibleWith(other)` dùng `SkillLevel.rankDistance()` (Module 1) + `maxRankDistance` do user tự set (vd: chỉ muốn gặp người trong ±2 hạng) — lọc ngay ở tầng query feed, tránh hiện người hạng K ghép với người hạng A gây trải nghiệm tệ cho cả hai bên.
 - **Vá lỗ hổng — Pass vĩnh viễn:** ràng buộc `UNIQUE(fromProfile, toProfile)` trên `SwipeAction` đảm bảo mỗi cặp chỉ có tối đa 1 record. Query lấy feed luôn `WHERE toProfile NOT IN (SELECT toProfile FROM SwipeAction WHERE fromProfile = :me)` — nghĩa là bất kể Like hay Pass, người đó **không bao giờ hiện lại** trong feed của mình nữa. Nếu sau này muốn tính năng "xem lại người đã Pass" (kiểu Tinder Rewind trả phí) thì mới cần query riêng trên bảng này, không cần đổi schema.
 - **Vá lỗ hổng — vòng đời `Match`:** trước đây chỉ có `ACTIVE/ARCHIVED` không đủ. Giờ có `UNMATCHED` (1 trong 2 bên chủ động huỷ, lưu `unmatchedBy` để biết ai huỷ) và `EXPIRED` (match tạo ra nhưng không ai nhắn tin trong X ngày, dùng `expiresAt` để job nền tự chuyển trạng thái — khuyến khích người dùng chủ động nhắn sớm). `Conversation.isConversationLocked()` suy ra từ `match.status != ACTIVE` (không lưu field riêng để tránh 2 nguồn state lệch nhau) — khi khoá thì UI chỉ cho xem lại lịch sử chat, không cho gửi tin mới.
-- `Match` chỉ được tạo khi tồn tại **2 `SwipeAction` LIKE** (hoặc ít nhất 1 `SUPER_LIKE`) giữa 2 profile theo cả 2 chiều — nên xử lý ở backend (Supabase function/trigger), không nên tính ở client để tránh gian lận.
+- `Match` chỉ được tạo khi tồn tại **2 `SwipeAction` LIKE** (hoặc ít nhất 1 `SUPER_LIKE`) giữa 2 profile theo cả 2 chiều — nên xử lý ở backend (Firebase Cloud Functions), không nên tính ở client để tránh gian lận.
 - `Report` và `BlockList` tách riêng vì mục đích khác nhau: Report cần workflow duyệt (moderation), Block chỉ là hành động 1 chiều ẩn user khỏi feed — cần có từ đầu vì tính năng này tiếp xúc người lạ ngoài đời thật.
 
 ---
@@ -484,11 +514,13 @@ classDiagram
 
 ## 7. Mapping sang tầng dữ liệu Flutter
 
-| Module                                     | Local (Drift/SQLite)     | Remote (Supabase/Firebase)                |
+| Module                                     | Local (Drift/SQLite)     | Remote (Firebase)                        |
 | ------------------------------------------ | ------------------------ | ----------------------------------------- |
-| Scoring (GameSession, Turn, RuleConfig...) | Bắt buộc — offline-first | Optional (sync sau nếu cần backup)        |
+| Scoring (GameSession, Turn, RuleConfig...) | Nguồn chính cho phòng local — offline-first | Firestore là nguồn chính cho phòng online; Functions xử lý command |
 | History & Statistics                       | Tính từ local trước      | Optional sync                             |
 | Matchmaking                                |                          | Bắt buộc — cần realtime + auth            |
 | Venue Map                                  | Cache local (đọc nhanh)  | Nguồn chính (crowdsource + Google Places) |
 
 **Khuyến nghị code:** dùng `freezed` cho immutable model classes (map trực tiếp từ các class ở trên), `drift` generate table từ model cho Scoring, và 1 lớp `Mapper`/`Repository` riêng để chuyển đổi giữa model local ↔ model remote (tránh model bị "dính" logic của cả 2 nguồn dữ liệu).
+
+**Quyết định backend:** dùng Firebase Authentication, Cloud Firestore, Security Rules và Cloud Functions; Riverpod quản lý state/dependency phía Flutter. MVP làm local trước. Phòng online cần mạng để ghi điểm/undo, chỉ chủ phòng có quyền ghi; command có ID duy nhất và state version, được backend xác thực và ghi atomically. Không cho client sửa trực tiếp điểm hoặc lịch sử có thẩm quyền. Chi tiết và các quyết định online để giai đoạn sau: [plans/step1.md](./plans/step1.md), §7.

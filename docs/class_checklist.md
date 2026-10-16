@@ -11,21 +11,47 @@ all the class is following the [class_design](./class_design.md)
 
 ## Module 2: Scoring
 
-- [ ] GameSession
-- [ ] GameStatus (enum)
-- [ ] RuleConfig
+- [x] Room (aggregate nhiều ván)
+- [x] RoomStatus (enum)
+- [x] RoomEvent (edit/undo barrier theo revision; commands RAM đã kiểm thử)
+- [x] RuleTemplate (model + lưu mẫu độc lập Phase 4; áp dụng cho phòng mới)
+- [x] BallPointConfig
+- [x] GameSession
+- [x] GameStatus (enum)
+- [x] RuleConfig
 - [ ] RulePreset (enum)
 - [ ] PenaltyRule
 - [ ] PocketRule
 - [ ] PocketPosition (enum)
 - [ ] FoulType (enum)
-- [ ] PlayerInGame
-- [ ] Turn
-- [ ] PottedBall
+- [x] PlayerInGame
+- [x] Turn (model/snapshot/revision, engine và undo đã kiểm thử)
+- [x] PottedBall
 - [ ] DenType (enum)
-- [ ] ScoreTransaction
-- [ ] TransactionType (enum)
-- [ ] ScoreLog
+- [x] ScoreTransaction
+- [x] TransactionType (enum)
+- [x] ScoreLog
+- [x] FoulClassification (enum theo contract Step 1, thay FoulType/DenType cũ)
+- [x] RoomMode, EndConditions, PendingEndReason, ChainState, TurnStateSnapshot
+- [x] RoomSummary
+
+Models/serialization và Phase 3 RAM đã kiểm thử tự động; người dùng xác nhận manual smoke trên emulator toàn bộ PASS. Phase 4–5 persistence automated PASS, gồm SQLite file reopen sau undo/finish và SQL rollback; chưa manual force-stop/relaunch. Các mục RulePreset/PenaltyRule/PocketRule/PocketPosition là thiết kế P1 cũ, chưa triển khai; FoulType/DenType cũ không dùng trong contract hiện tại.
+
+### Services và tích hợp Phase 3
+
+- [x] ScoreEngine, TurnInput, ScoreEngineResult (thuần Dart)
+- [x] RoomService / NextGameSetup (create/read/next game; thay thế thủ công)
+- [x] RoomCommands (record/undo/finish/cancel/evaluate/edit)
+- [x] evaluateRoomEnd (lịch sử hiệu lực và clock)
+- [x] InMemoryGameRepository (atomic aggregate + receipt; không durable)
+- [x] DriftGameRepository + AppDatabase (Phase 4: rooms/receipts/templates, revision guard, retry idempotent, hỏng -> lỗi rõ)
+- [x] RuleTemplateRepository (RAM + Drift; validate, detach, độc lập phòng)
+- [x] RoomActionController / NextGameController / RoomCommandQueue
+- [x] InRoom và edit/replacement dialogs
+- [x] Regression nhiều ván: tái dựng ledger/bi từ history, JSON round-trip
+
+API và test map: [plans/step3-handoff.md](./plans/step3-handoff.md).
+Phase 5: [bàn giao và manual acceptance](./plans/step5-handoff.md); 188 tests pass, analyze sạch.
 
 ## Module 3: History & Statistics
 
