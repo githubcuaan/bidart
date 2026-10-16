@@ -19,6 +19,12 @@ _RoomEvent _$RoomEventFromJson(Map<String, dynamic> json) => _RoomEvent(
     json['afterSnapshot'] as Map<String, dynamic>,
   ),
   createdAt: DateTime.parse(json['createdAt'] as String),
+  beforeRules: json['beforeRules'] == null
+      ? null
+      : RuleConfig.fromJson(json['beforeRules'] as Map<String, dynamic>),
+  afterRules: json['afterRules'] == null
+      ? null
+      : RuleConfig.fromJson(json['afterRules'] as Map<String, dynamic>),
   isUndoBarrier: json['isUndoBarrier'] as bool? ?? true,
 );
 
@@ -32,6 +38,8 @@ Map<String, dynamic> _$RoomEventToJson(_RoomEvent instance) =>
       'beforeSnapshot': instance.beforeSnapshot.toJson(),
       'afterSnapshot': instance.afterSnapshot.toJson(),
       'createdAt': instance.createdAt.toIso8601String(),
+      'beforeRules': instance.beforeRules?.toJson(),
+      'afterRules': instance.afterRules?.toJson(),
       'isUndoBarrier': instance.isUndoBarrier,
     };
 

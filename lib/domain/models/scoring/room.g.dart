@@ -41,6 +41,11 @@ _Room _$RoomFromJson(Map<String, dynamic> json) => _Room(
   pendingEndReasons: (json['pendingEndReasons'] as List<dynamic>)
       .map((e) => $enumDecode(_$PendingEndReasonEnumMap, e))
       .toSet(),
+  events:
+      (json['events'] as List<dynamic>?)
+          ?.map((e) => RoomEvent.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$RoomToJson(_Room instance) => <String, dynamic>{
@@ -64,6 +69,7 @@ Map<String, dynamic> _$RoomToJson(_Room instance) => <String, dynamic>{
   'pendingEndReasons': instance.pendingEndReasons
       .map((e) => _$PendingEndReasonEnumMap[e]!)
       .toList(),
+  'events': instance.events.map((e) => e.toJson()).toList(),
 };
 
 const _$RoomModeEnumMap = {RoomMode.local: 'local', RoomMode.online: 'online'};

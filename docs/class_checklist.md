@@ -13,7 +13,7 @@ all the class is following the [class_design](./class_design.md)
 
 - [x] Room (aggregate nhiều ván)
 - [x] RoomStatus (enum)
-- [x] RoomEvent (edit/undo barrier model; commands ở Phase 3–4)
+- [x] RoomEvent (edit/undo barrier theo revision; commands RAM đã kiểm thử)
 - [x] RuleTemplate (model; lưu mẫu ở Phase 4)
 - [x] BallPointConfig
 - [x] GameSession
@@ -25,7 +25,7 @@ all the class is following the [class_design](./class_design.md)
 - [ ] PocketPosition (enum)
 - [ ] FoulType (enum)
 - [x] PlayerInGame
-- [x] Turn (model/snapshot; engine ở Phase 3)
+- [x] Turn (model/snapshot/revision, engine và undo đã kiểm thử)
 - [x] PottedBall
 - [ ] DenType (enum)
 - [x] ScoreTransaction
@@ -35,7 +35,20 @@ all the class is following the [class_design](./class_design.md)
 - [x] RoomMode, EndConditions, PendingEndReason, ChainState, TurnStateSnapshot
 - [x] RoomSummary
 
-Step 2 models/serialization đã kiểm thử. Các mục RulePreset/PenaltyRule/PocketRule/PocketPosition là thiết kế P1 cũ, chưa triển khai; FoulType/DenType cũ không dùng trong contract hiện tại. Checklist này xác nhận models, không xác nhận engine, edit commands hoặc persistence hoàn tất.
+Models/serialization và Phase 3 RAM đã kiểm thử tự động; người dùng xác nhận manual smoke trên emulator toàn bộ PASS. Các mục RulePreset/PenaltyRule/PocketRule/PocketPosition là thiết kế P1 cũ, chưa triển khai; FoulType/DenType cũ không dùng trong contract hiện tại. Không xác nhận persistence hoàn tất.
+
+### Services và tích hợp Phase 3
+
+- [x] ScoreEngine, TurnInput, ScoreEngineResult (thuần Dart)
+- [x] RoomService / NextGameSetup (create/read/next game; thay thế thủ công)
+- [x] RoomCommands (record/undo/finish/cancel/evaluate/edit)
+- [x] evaluateRoomEnd (lịch sử hiệu lực và clock)
+- [x] InMemoryGameRepository (atomic aggregate + receipt; không durable)
+- [x] RoomActionController / NextGameController / RoomCommandQueue
+- [x] InRoom và edit/replacement dialogs
+- [x] Regression nhiều ván: tái dựng ledger/bi từ history, JSON round-trip
+
+API và test map: [plans/step3-handoff.md](./plans/step3-handoff.md).
 
 ## Module 3: History & Statistics
 

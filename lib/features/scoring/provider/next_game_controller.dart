@@ -13,16 +13,33 @@ class NextGameController extends Notifier<AsyncValue<Room?>> {
   final String roomId;
   String? _commandId;
   int? _revision;
+  String? _starter, _payer;
   Future<Room?>? _pending;
 
   @override
   AsyncValue<Room?> build() => const AsyncData(null);
 
-  Future<Room?> submit({required int expectedRevision}) {
+  Future<Room?> retry() => _revision == null
+      ? Future.value(null)
+      : submit(
+          expectedRevision: _revision!,
+          replacementStarterId: _starter,
+          replacementPayerId: _payer,
+        );
+
+  Future<Room?> submit({
+    required int expectedRevision,
+    String? replacementStarterId,
+    String? replacementPayerId,
+  }) {
     if (_pending != null) return _pending!;
-    if (_revision != expectedRevision) {
+    if (_revision != expectedRevision ||
+        _starter != replacementStarterId ||
+        _payer != replacementPayerId) {
       _commandId = null;
       _revision = expectedRevision;
+      _starter = replacementStarterId;
+      _payer = replacementPayerId;
     }
     _commandId ??= ref.read(idFactoryProvider)();
     state = const AsyncLoading();
@@ -42,6 +59,8 @@ class NextGameController extends Notifier<AsyncValue<Room?>> {
               commandId: commandId,
               roomId: roomId,
               expectedRevision: revision,
+              replacementStarterId: _starter,
+              replacementPayerId: _payer,
             ),
           );
       if (ref.mounted) {
