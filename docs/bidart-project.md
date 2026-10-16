@@ -115,13 +115,16 @@ views:
   Chi tiết: [plans/step4.md](./plans/step4.md). Code + tests tự động xong; manual
   force-stop/relaunch trên thiết bị thuộc Phase 5.
 
-- [ ] **Phase 5: Kiểm thử và bàn giao (P0)**
-  - [ ] Unit tests cho validator, create/startNextGame và mọi nhánh engine theo bảng input/output tại `plans/step1.md` §6.
-  - [ ] Repository tests cho save/load, atomicity, retry không trùng và restore sau undo.
-  - [ ] Widget tests: form invalid, sắp xếp roster, tạo/chọn phòng, xác nhận lượt, loading/lỗi, undo và xem trận kết thúc.
-  - [ ] Chạy thử offline trên thiết bị/emulator: tạo -> ghi lượt -> TH2 -> undo -> đóng/mở app -> kết thúc -> xem lại.
-  - [ ] Chạy `flutter analyze`, `flutter test`; cập nhật tiến độ entity trong `class_checklist.md` khi code thực sự hoàn thành.
-  - [ ] Bàn giao API, bảng luật đã chốt, test cases và giới hạn còn lại; không đánh dấu xong tính năng chỉ có UI mẫu.
+- [x] **Phase 5: Kiểm thử và bàn giao (P0; Web + Android)**
+  - [x] Unit tests cho validator, create/startNextGame và các nhánh engine; test map tại `plans/step5-handoff.md`.
+  - [x] Repository tests cho save/load, atomicity SQL rollback, retry không trùng và restore sau undo trên SQLite file.
+  - [x] Widget tests: form invalid, sắp xếp roster, tạo/chọn phòng, xác nhận lượt, loading/lỗi, undo và xem trận kết thúc.
+  - [x] Chạy thử offline trên Android: tạo -> ghi lượt -> TH2 -> undo -> force-stop/mở lại -> kết thúc -> xem lại; mẫu luật sau force-stop PASS theo người dùng.
+    Web: người dùng xác nhận toàn bộ manual điểm/chuyển cơ, TH2, undo,
+    reload sau undo và kết thúc/xem lại/read-only PASS. Android toàn bộ manual
+    PASS ngày 2026-10-16; iOS chưa kiểm chứng. Chi tiết tại `plans/step5-handoff.md`.
+  - [x] Chạy `flutter analyze` sạch, `flutter test` 188 pass; cập nhật `class_checklist.md`.
+  - [x] Bàn giao API, bảng luật, test map và giới hạn tại [plans/step5-handoff.md](./plans/step5-handoff.md). Acceptance Web + Android PASS.
 
 ### Thứ tự triển khai đề xuất
 
@@ -196,6 +199,6 @@ Nguồn nghiệp vụ: [rule.md](./rule.md). Domain, lifecycle, commands, invari
 - 2026-10-12: Bổ sung kế hoạch chi tiết cho phần tạo/chọn phòng và core trong phòng dựa trên docs/code hiện tại. Chưa triển khai logic; checklist implementation giữ chưa hoàn thành.
 - Đã triển khai Riverpod cho state management/dependency injection; Drift/SQLite cho local storage vẫn chưa thêm dependency hoặc triển khai code.
 - Đã chốt Firebase cho backend online; tách local/online repository và nguồn dữ liệu chính. Online ban đầu cần mạng để ghi điểm/undo, backend kiểm tra quyền chủ phòng và xử lý command; chưa triển khai Firebase.
-- Phase 1 hoàn thành đặc tả tại `plans/step1.md`. Phase 2–3 đã triển khai và kiểm thử tự động trong giới hạn RAM-only; Phase 4 persistence và các tiêu chí bàn giao cuối Phase 5 chưa hoàn thành.
+- Cập nhật 2026-10-15: Phase 4 persistence hoàn tất code/tests; Phase 5 automated PASS (188 tests), còn manual offline force-stop/relaunch. Chi tiết `plans/step5-handoff.md`.
 - 2026-10-15: Hoàn tất Step 2 UI và acceptance tự động; bàn giao API/giới hạn tại [plans/step2-handoff.md](./plans/step2-handoff.md). Chưa kiểm thử thủ công trên thiết bị/emulator, chưa có persistence.
 - Deadline và URL repository chưa xác nhận; không đặt mốc thời gian giả định. Chi tiết backend online để giai đoạn sau.

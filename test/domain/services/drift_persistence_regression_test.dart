@@ -1,27 +1,133 @@
+import 'dart:io';
+
+import 'package:drift/native.dart';
 import 'package:bidart/data/local/app_database.dart';
 import 'package:bidart/data/repositories/game_repository.dart';
 import 'package:bidart/domain/models/scoring/ball_point_config.dart';
 import 'package:bidart/domain/models/scoring/foul_classification.dart';
 import 'package:bidart/domain/models/scoring/player_in_game.dart';
+import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/services/room_commands.dart';
 import 'package:bidart/domain/services/room_service.dart';
 import 'package:bidart/domain/services/score_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Phase 4 gate: full command flow on Drift, then "restart" with a new
-/// service on the same database. Scores, balls, order, history, undo
-/// barriers and receipts must restore exactly.
+/// Persistence gates: real file close/reopen and in-memory service recreation.
+/// Scores, balls, order, history, undo barriers and receipts restore exactly.
 void main() {
+  test(
+    'file reopen restores TH2 undo, receipts and closed room history',
+    () async {
+      final directory = await Directory.systemTemp.createTemp('bidart-phase5-');
+      final file = File('${directory.path}/game.sqlite');
+      var db = AppDatabase(NativeDatabase(file));
+      addTearDown(() async {
+        await db.close();
+        await directory.delete(recursive: true);
+      });
+      var serial = 0;
+      final now = DateTime.utc(2026, 10, 15);
+      RoomService service() => RoomService(
+        repository: DriftGameRepository(database: db),
+        clock: () => now,
+        idFactory: () => 'disk-${++serial}',
+      );
+      var svc = service();
+      final id = await svc.createRoom(
+        commandId: 'create',
+        name: 'Offline',
+        ownerId: 'owner',
+        participants: [
+          for (final id in ['A', 'B', 'C'])
+            PlayerInGame(id: id, displayName: id, joinedAt: now),
+        ],
+        playerOrder: ['A', 'B', 'C'],
+        starterId: 'A',
+        payerId: 'B',
+        ballPoints: {
+          for (var i = 1; i <= 9; i++)
+            i: const BallPointConfig(enabled: true, points: 10),
+        },
+      );
+      var room = await svc.getRoom(id);
+      for (final command in ['pot', 'miss', 'th2']) {
+        room = await svc.recordTurn(
+          commandId: command,
+          roomId: id,
+          expectedRevision: room.revision,
+          gameId: room.currentGameId!,
+          input: TurnInput(
+            turnId: command,
+            actorId: room.games.last.currentPlayerId,
+            balls: command == 'pot' ? [1] : [],
+            foul: command == 'th2'
+                ? FoulClassification.th2
+                : FoulClassification.none,
+          ),
+        );
+      }
+      final beforeUndo = room.toJson();
+      await db.close();
+      db = AppDatabase(NativeDatabase(file));
+      svc = service();
+      expect((await svc.getRoom(id)).toJson(), beforeUndo);
+      room = await svc.undoLastTurn(
+        commandId: 'undo',
+        roomId: id,
+        expectedRevision: room.revision,
+        gameId: room.currentGameId!,
+      );
+      expect(room.playerOrder, ['A', 'B', 'C']);
+      expect(room.games.last.currentPlayerId, 'B');
+      expect(room.games.last.turns.last.isUndone, isTrue);
+      expect(room.scores, {'A': 20, 'B': -10, 'C': -10});
+      final undone = room.toJson();
+      await db.close();
+      db = AppDatabase(NativeDatabase(file));
+      svc = service();
+      expect((await svc.getRoom(id)).toJson(), undone);
+      final replay = await svc.undoLastTurn(
+        commandId: 'undo',
+        roomId: id,
+        expectedRevision: 0,
+        gameId: room.currentGameId!,
+      );
+      expect(replay.toJson(), undone);
+      room = await svc.finishRoom(
+        commandId: 'finish',
+        roomId: id,
+        expectedRevision: room.revision,
+        confirmed: true,
+      );
+      final closed = room.toJson();
+      await db.close();
+      db = AppDatabase(NativeDatabase(file));
+      svc = service();
+      expect((await svc.getRoom(id)).toJson(), closed);
+      expect((await svc.getRoom(id)).status, RoomStatus.finished);
+      await expectLater(
+        svc.undoLastTurn(
+          commandId: 'closed-undo',
+          roomId: id,
+          expectedRevision: room.revision,
+          gameId: room.currentGameId!,
+        ),
+        throwsA(isA<Exception>()),
+      );
+      expect((await svc.getRoom(id)).toJson(), closed);
+    },
+  );
+
   test('record + TH2 + edit barrier survive restart with receipts', () async {
     final db = AppDatabase.memory();
     addTearDown(() => db.close());
     var serial = 0;
     final now = DateTime.utc(2026, 10, 15);
     RoomService service() => RoomService(
-          repository: DriftGameRepository(database: db, clock: () => now),
-          clock: () => now,
-          idFactory: () => 'id-${++serial}',
-        );
+      repository: DriftGameRepository(database: db, clock: () => now),
+      clock: () => now,
+      idFactory: () => 'id-${++serial}',
+    );
 
     var svc = service();
     final roomId = await svc.createRoom(
@@ -95,7 +201,7 @@ void main() {
     );
     final committedJson = room.toJson();
 
-    // Simulate app restart: new service, same database file.
+    // Recreate service only; the file-backed test above closes/reopens the DB.
     svc = service();
     final restored = await svc.getRoom(roomId);
     expect(restored.toJson(), committedJson);

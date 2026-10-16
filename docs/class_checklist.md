@@ -35,7 +35,7 @@ all the class is following the [class_design](./class_design.md)
 - [x] RoomMode, EndConditions, PendingEndReason, ChainState, TurnStateSnapshot
 - [x] RoomSummary
 
-Models/serialization và Phase 3 RAM đã kiểm thử tự động; người dùng xác nhận manual smoke trên emulator toàn bộ PASS. Các mục RulePreset/PenaltyRule/PocketRule/PocketPosition là thiết kế P1 cũ, chưa triển khai; FoulType/DenType cũ không dùng trong contract hiện tại. Không xác nhận persistence hoàn tất.
+Models/serialization và Phase 3 RAM đã kiểm thử tự động; người dùng xác nhận manual smoke trên emulator toàn bộ PASS. Phase 4–5 persistence automated PASS, gồm SQLite file reopen sau undo/finish và SQL rollback; chưa manual force-stop/relaunch. Các mục RulePreset/PenaltyRule/PocketRule/PocketPosition là thiết kế P1 cũ, chưa triển khai; FoulType/DenType cũ không dùng trong contract hiện tại.
 
 ### Services và tích hợp Phase 3
 
@@ -51,6 +51,7 @@ Models/serialization và Phase 3 RAM đã kiểm thử tự động; người d�
 - [x] Regression nhiều ván: tái dựng ledger/bi từ history, JSON round-trip
 
 API và test map: [plans/step3-handoff.md](./plans/step3-handoff.md).
+Phase 5: [bàn giao và manual acceptance](./plans/step5-handoff.md); 188 tests pass, analyze sạch.
 
 ## Module 3: History & Statistics
 
