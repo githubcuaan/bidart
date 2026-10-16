@@ -1,7 +1,7 @@
 import 'package:bidart/screens/home.dart';
 import 'package:bidart/screens/maps.dart';
-import 'package:bidart/screens/people.dart';
-import 'package:bidart/screens/profile.dart';
+import 'package:bidart/screens/people/people.dart';
+import 'package:bidart/screens/profile/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:bidart/widgets/naviBar.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,9 @@ class _MainscreenState extends State<Mainscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_indexSelected])),
+      appBar: (_indexSelected == 3 || _indexSelected == 4)
+          ? null
+          : AppBar(title: Text(_titles[_indexSelected])),
       body: IndexedStack(
         index: _indexSelected,
         children: [Home(), Rooms(), Maps(), People(), Profile()],

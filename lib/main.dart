@@ -10,6 +10,9 @@ class BidartApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Mainscreen());
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Mainscreen()
+    );
   }
 }
