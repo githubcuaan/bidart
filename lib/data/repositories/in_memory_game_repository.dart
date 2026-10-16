@@ -1,12 +1,21 @@
+import 'package:bidart/domain/models/scoring/ball_point_config.dart';
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
+import 'package:bidart/domain/models/scoring/rule_template.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
+import 'package:bidart/domain/repositories/rule_template_repository.dart';
 
 /// Single-isolate fake. Check-and-commit has no await, so concurrent Future
 /// callers cannot interleave writes. Not durable storage or cross-isolate sync.
-class InMemoryGameRepository implements GameRepository {
+class InMemoryGameRepository
+    implements GameRepository, RuleTemplateRepository {
+  InMemoryGameRepository({DateTime Function()? clock})
+      : _clock = clock ?? DateTime.now;
+
+  final DateTime Function() _clock;
   final Map<String, Room> _rooms = {};
   final Map<String, CommandReceipt> _receipts = {};
+  final Map<String, RuleTemplate> _templates = {};
   PersistenceFailure? _nextFailure;
 
   /// Fails the next otherwise-valid, non-retry write before any mutation.
@@ -133,5 +142,42 @@ class InMemoryGameRepository implements GameRepository {
     _rooms[room.id] = detached;
     _receipts[commandId] = receipt;
     return result;
+  }
+
+  RuleTemplate _copyTemplate(RuleTemplate template) =>
+      RuleTemplate.fromJson(template.toJson());
+
+  @override
+  Future<RuleTemplate> saveRuleTemplate({
+    required String templateId,
+    required String name,
+    required Map<int, BallPointConfig> ballPoints,
+  }) async {
+    final template = buildRuleTemplate(
+      templateId: templateId,
+      name: name,
+      ballPoints: ballPoints,
+      now: _clock(),
+    );
+    final detached = _copyTemplate(template);
+    _templates[detached.id] = detached;
+    return _copyTemplate(detached);
+  }
+
+  @override
+  Future<List<RuleTemplate>> listRuleTemplates() async {
+    final templates = _templates.values.map(_copyTemplate).toList()
+      ..sort((a, b) {
+        final date = b.createdAt.compareTo(a.createdAt);
+        return date != 0 ? date : a.id.compareTo(b.id);
+      });
+    return List.unmodifiable(templates);
+  }
+
+  @override
+  Future<RuleTemplate> getRuleTemplate(String templateId) async {
+    final template = _templates[templateId];
+    if (template == null) throw RuleTemplateNotFoundFailure(templateId);
+    return _copyTemplate(template);
   }
 }

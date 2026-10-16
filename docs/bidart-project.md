@@ -103,14 +103,17 @@ views:
 
   Bàn giao: [plans/step3-handoff.md](./plans/step3-handoff.md). Người dùng đã kiểm thử thủ công trên emulator và xác nhận toàn bộ PASS; không coi RAM-only là persistence hoặc hoàn tất Phase 5.
 
-- [ ] **Phase 4: Persistence và phục hồi (P0 cho bản bàn giao)**
-  - [ ] Định nghĩa `lib/domain/repositories/game_repository_interface.dart`: create/list/get/save room aggregate và commands atomic; local implementation ở `lib/data/repositories/game_repository.dart`.
-  - [ ] Dùng in-memory repository cho tests và tích hợp sớm, sau đó local repository; in-memory không được tính là hoàn thành offline persistence.
-  - [ ] Thêm Drift/Riverpod; schema Room -> GameSession -> Turn, rule versions/templates, roster/events, transactions và undo barrier; có schema version/migration.
-  - [ ] Lưu lượt + state trong cùng transaction. Dùng command/turn ID chống lưu trùng khi retry; UI chỉ công bố state mới sau lưu thành công.
-  - [ ] Reload theo session ID, phục hồi lượt/điểm/bi/trạng thái; hiển thị lỗi dữ liệu hỏng thay vì tạo trận mới âm thầm.
-  - [ ] Cho thêm người/sửa luật/thứ tự khi chơi; xoá người chỉ giữa hai ván, giữ ledger/lịch sử. Edit là mốc chặn undo; phòng đóng/huỷ read-only.
-  - [ ] Lưu luật yêu thích độc lập, không mutate cấu hình/lịch sử phòng cũ.
+- [x] **Phase 4: Persistence và phục hồi (P0 cho bản bàn giao)**
+  - [x] Định nghĩa `lib/domain/repositories/game_repository_interface.dart`: create/list/get/save room aggregate và commands atomic; local implementation ở `lib/data/repositories/game_repository.dart` (Drift).
+  - [x] Dùng in-memory repository cho tests và tích hợp sớm, sau đó local repository; in-memory không được tính là hoàn thành offline persistence.
+  - [x] Thêm Drift/Riverpod; schema Room -> GameSession -> Turn, rule versions/templates, roster/events, transactions và undo barrier; có schema version/migration (v1 onCreate; migration v2 thuộc Phase 5 khi đổi schema).
+  - [x] Lưu lượt + state trong cùng transaction. Dùng command/turn ID chống lưu trùng khi retry; UI chỉ công bố state mới sau lưu thành công.
+  - [x] Reload theo session ID, phục hồi lượt/điểm/bi/trạng thái; hiển thị lỗi dữ liệu hỏng thay vì tạo trận mới âm thầm.
+  - [x] Cho thêm người/sửa luật/thứ tự khi chơi; xoá người chỉ giữa hai ván, giữ ledger/lịch sử. Edit là mốc chặn undo; phòng đóng/huỷ read-only.
+  - [x] Lưu luật yêu thích độc lập, không mutate cấu hình/lịch sử phòng cũ.
+
+  Chi tiết: [plans/step4.md](./plans/step4.md). Code + tests tự động xong; manual
+  force-stop/relaunch trên thiết bị thuộc Phase 5.
 
 - [ ] **Phase 5: Kiểm thử và bàn giao (P0)**
   - [ ] Unit tests cho validator, create/startNextGame và mọi nhánh engine theo bảng input/output tại `plans/step1.md` §6.

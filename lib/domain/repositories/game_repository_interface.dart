@@ -90,3 +90,8 @@ class PersistenceFailure extends RepositoryFailure {
   const PersistenceFailure(this.message);
   final String message;
 }
+
+class RuleTemplateNotFoundFailure extends RepositoryFailure {
+  const RuleTemplateNotFoundFailure(this.templateId);
+  final String templateId;
+}
