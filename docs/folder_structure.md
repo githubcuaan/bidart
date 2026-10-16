@@ -10,7 +10,7 @@ Docs: [class_design.md](./class_design.md) | [class_checklist.md](./class_checkl
 - Không đặt luật tính điểm trong widget/provider: engine ở `domain/services/`, repository interface ở `domain/repositories/`.
 - Dùng **Drift/SQLite** cho local storage; lưu cú đánh và state liên quan trong cùng transaction, tự lưu sau mỗi cú và phục hồi khi mở lại app. Riverpod không thay thế database hoặc cơ chế đồng bộ online.
 - Dùng **Firebase** cho backend online: Authentication, Cloud Firestore, Security Rules và Cloud Functions. Local repository dùng Drift; online repository dùng Firebase làm nguồn dữ liệu chính. Chi tiết quyền, command idempotency và offline policy xem [plans/step1.md](./plans/step1.md).
-- Quyết định chi tiết: [plans/step1.md](./plans/step1.md), câu 25. Cây thư mục là thiết kế mục tiêu, không phải toàn bộ code hiện có.
+- Quyết định chi tiết: [plans/step1.md](./plans/step1.md), §1–7. Cây thư mục là thiết kế mục tiêu, không phải toàn bộ code hiện có.
 
 ```
 lib/
@@ -72,6 +72,11 @@ lib/
 │   │   ├── user/
 │   │   │   └── user.dart
 │   │   ├── scoring/
+│   │   │   ├── room.dart               # aggregate: nhiều ván, điểm cộng dồn
+│   │   │   ├── room_status.dart
+│   │   │   ├── room_event.dart         # edits và undo barriers
+│   │   │   ├── rule_template.dart
+│   │   │   ├── ball_point_config.dart
 │   │   │   ├── game_session.dart
 │   │   │   ├── game_status.dart
 │   │   │   ├── rule_config.dart

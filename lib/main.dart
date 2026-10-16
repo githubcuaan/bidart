@@ -1,8 +1,9 @@
 import 'package:bidart/screens/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const BidartApp());
+  runApp(const ProviderScope(child: BidartApp()));
 }
 
 class BidartApp extends StatelessWidget {
@@ -10,6 +11,6 @@ class BidartApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Mainscreen());
+    return const MaterialApp(title: 'Bidart', home: Mainscreen());
   }
 }
