@@ -1,7 +1,7 @@
 import 'package:bidart/screens/home.dart';
 import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/people/people.dart';
-import 'package:bidart/screens/profile.dart';
+import 'package:bidart/screens/profile/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:bidart/widgets/navi_bar.dart';
 import 'package:flutter/material.dart';

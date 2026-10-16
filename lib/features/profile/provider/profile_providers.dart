@@ -14,25 +14,25 @@ final userProfileStreamProvider = StreamProvider<User>((ref) {
   return repository.watchCurrentUser();
 });
 
-class ProfileController extends StateNotifier<AsyncValue<void>> {
-  ProfileController({required this.repository}) : super(const AsyncValue.data(null));
-
-  final UserRepository repository;
+class ProfileController extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
 
   Future<bool> updateProfile(User user) async {
-    state = const AsyncValue.loading();
+    state = const AsyncLoading();
     try {
+      final repository = ref.read(userRepositoryProvider);
       await repository.updateProfile(user);
-      state = const AsyncValue.data(null);
+      state = const AsyncData(null);
       return true;
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncError(e, st);
       return false;
     }
   }
 }
 
 final profileControllerProvider =
-    StateNotifierProvider<ProfileController, AsyncValue<void>>((ref) {
-  return ProfileController(repository: ref.watch(userRepositoryProvider));
-});
+    NotifierProvider<ProfileController, AsyncValue<void>>(
+  ProfileController.new,
+);
