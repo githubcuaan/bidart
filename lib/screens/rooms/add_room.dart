@@ -2,6 +2,7 @@ import 'package:bidart/domain/models/scoring/ball_point_config.dart';
 import 'package:bidart/domain/models/scoring/end_conditions.dart';
 import 'package:bidart/domain/models/scoring/player_in_game.dart';
 import 'package:bidart/domain/models/scoring/rule_config.dart';
+import 'package:bidart/domain/models/scoring/rule_template.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/validation/room_validator.dart';
 import 'package:bidart/domain/validation/validation_issue.dart';
@@ -10,6 +11,9 @@ import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/features/scoring/provider/rule_template_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:bidart/widgets/async/async_content.dart';
+import 'package:bidart/widgets/screen/app_screen.dart';
 
 import 'chose_room.dart';
 import 'room_presentation.dart';
@@ -192,7 +196,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         !invalidThreshold;
     final error = state.result.error;
 
-    return Scaffold(
+    return AppScreen(
       appBar: AppBar(title: const Text('Tạo phòng')),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(16),
@@ -419,7 +423,10 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             'Bi tắt vẫn thuộc bàn chơi, chỉ không tạo điểm. Đạt thời gian/ngưỡng sẽ chờ hết ván.',
           ),
           const SizedBox(height: 16),
-          Text('Luật yêu thích', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Luật yêu thích',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const Text(
             'Lưu bản hiện tại để tái dùng cho phòng mới; không sửa phòng cũ.',
           ),
@@ -442,7 +449,9 @@ class _AddRoomState extends ConsumerState<AddRoom> {
                         : () async {
                             final messenger = ScaffoldMessenger.of(context);
                             final template = await ref
-                                .read(ruleTemplateSaveControllerProvider.notifier)
+                                .read(
+                                  ruleTemplateSaveControllerProvider.notifier,
+                                )
                                 .save(
                                   name: _templateName.text,
                                   ballPoints: draft.ballPoints,
@@ -455,7 +464,8 @@ class _AddRoomState extends ConsumerState<AddRoom> {
                                       ? roomFailureMessage(
                                           saveState.error ??
                                               const PersistenceFailure(
-                                                  'Không lưu được mẫu.'),
+                                                'Không lưu được mẫu.',
+                                              ),
                                         )
                                       : 'Đã lưu mẫu “${template.name}”.',
                                 ),
@@ -467,37 +477,41 @@ class _AddRoomState extends ConsumerState<AddRoom> {
                       saveState.isLoading ? 'Đang lưu mẫu…' : 'Lưu mẫu luật',
                     ),
                   ),
-                  ref.watch(ruleTemplateListProvider).when(
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, _) => const SizedBox.shrink(),
-                        data: (templates) => templates.isEmpty
-                            ? const SizedBox.shrink()
-                            : Wrap(
-                                spacing: 8,
-                                children: [
-                                  for (final template in templates)
-                                    ActionChip(
-                                      key: ValueKey(
-                                          'apply-template-${template.id}'),
-                                      label: Text(template.name),
-                                      onPressed: saving
-                                          ? null
-                                          : () => _changed(() {
-                                                for (var ball = 1;
-                                                    ball <= 9;
-                                                    ball++) {
-                                                  final config = template
-                                                      .ballPoints[ball];
-                                                  _enabled[ball] =
-                                                      config?.enabled ?? true;
-                                                  _points[ball]!.text =
-                                                      '${config?.enabled == false ? ball : config?.points ?? ball}';
-                                                }
-                                              }),
-                                    ),
-                                ],
-                              ),
-                      ),
+                  AsyncContent<List<RuleTemplate>>(
+                    value: ref.watch(ruleTemplateListProvider),
+                    loadingBuilder: (_) => const SizedBox.shrink(),
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                    dataBuilder: (_, templates) => templates.isEmpty
+                        ? const SizedBox.shrink()
+                        : Wrap(
+                            spacing: 8,
+                            children: [
+                              for (final template in templates)
+                                ActionChip(
+                                  key: ValueKey(
+                                    'apply-template-${template.id}',
+                                  ),
+                                  label: Text(template.name),
+                                  onPressed: saving
+                                      ? null
+                                      : () => _changed(() {
+                                          for (
+                                            var ball = 1;
+                                            ball <= 9;
+                                            ball++
+                                          ) {
+                                            final config =
+                                                template.ballPoints[ball];
+                                            _enabled[ball] =
+                                                config?.enabled ?? true;
+                                            _points[ball]!.text =
+                                                '${config?.enabled == false ? ball : config?.points ?? ball}';
+                                          }
+                                        }),
+                                ),
+                            ],
+                          ),
+                  ),
                 ],
               );
             },

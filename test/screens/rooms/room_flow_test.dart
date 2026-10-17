@@ -6,6 +6,7 @@ import 'package:bidart/domain/models/scoring/game_status.dart';
 import 'package:bidart/domain/models/scoring/player_in_game.dart';
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
+import 'package:bidart/domain/models/scoring/rule_template.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/services/room_service.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
@@ -14,6 +15,8 @@ import 'package:bidart/screens/rooms/add_room.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
 import 'package:bidart/screens/rooms/in_room.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
+import 'package:bidart/widgets/async/async_content.dart';
+import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,6 +50,12 @@ class ScreenRepository extends InMemoryGameRepository {
     await readGate?.future;
     if (failGet) throw const PersistenceFailure('get failed');
     return super.getRoom(roomId);
+  }
+
+  @override
+  Future<List<RuleTemplate>> listRuleTemplates() async {
+    await readGate?.future;
+    return super.listRuleTemplates();
   }
 }
 
@@ -441,6 +450,49 @@ void main() {
     expect(find.byType(ListTile), findsNWidgets(3));
   });
 
+  testWidgets('filtered retry shows loading and preserves selected status', (
+    tester,
+  ) async {
+    final finished = await seed(
+      name: 'Phòng kết thúc',
+      status: RoomStatus.finished,
+    );
+    await seed(name: 'Phòng đang chơi');
+    await pump(tester, const Rooms());
+    expect(find.byType(Scaffold), findsOneWidget);
+
+    repository.failList = true;
+    await choose(tester, 'room-status-filter', 'Đã kết thúc');
+    expect(find.text('Thử lại'), findsOneWidget);
+
+    repository.failList = false;
+    repository.readGate = Completer<void>();
+    await tester.tap(find.text('Thử lại'));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Thử lại'), findsNothing);
+    expect(
+      tester
+          .widget<DropdownButton<RoomStatus?>>(key('room-status-filter'))
+          .value,
+      RoomStatus.finished,
+    );
+
+    repository.readGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(ListTile), findsOneWidget);
+    expect(key('room-${finished.id}'), findsOneWidget);
+    expect(find.text('Phòng đang chơi'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    await tester.tap(key('room-${finished.id}'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<ChoseRoom>(find.byType(ChoseRoom)).roomId,
+      finished.id,
+    );
+  });
+
   testWidgets('create → gateway → room → back preserves committed aggregate', (
     tester,
   ) async {
@@ -472,7 +524,90 @@ void main() {
     expect(await repository.getRoom(room.id), room);
   });
 
+  testWidgets('AddRoom shell keeps submit bar and template chips', (
+    tester,
+  ) async {
+    final template = await repository.saveRuleTemplate(
+      templateId: 'tpl-1',
+      name: 'Mẫu chuẩn',
+      ballPoints: {
+        for (var ball = 1; ball <= 9; ball++)
+          ball: BallPointConfig(enabled: true, points: ball),
+      },
+    );
+    await tester.binding.setSurfaceSize(const Size(1000, 2600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    repository.readGate = Completer<void>();
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: AddRoom()),
+      ),
+    );
+    await tester.pump();
+    expect(find.byType(AppScreen), findsOneWidget);
+    expect(find.byType(Scaffold), findsOneWidget);
+    expect(find.text('Tạo phòng'), findsOneWidget);
+    expect(submit(tester).onPressed, isNull);
+    expect(find.byType(AsyncContent<List<RuleTemplate>>), findsOneWidget);
+    // Loading templates hides chips without blocking the form.
+    expect(key('apply-template-${template.id}'), findsNothing);
+
+    repository.readGate!.complete();
+    await tester.pumpAndSettle();
+    expect(key('apply-template-${template.id}'), findsOneWidget);
+
+    await tester.tap(key('apply-template-${template.id}'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tạo và bắt đầu'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final gateway in [true, false]) {
+    testWidgets(
+      '${gateway ? 'gateway' : 'in-room'} standalone shell preserves load and refresh',
+      (tester) async {
+        final room = await seed();
+        repository.readGate = Completer<void>();
+        await tester.binding.setSurfaceSize(const Size(1000, 2600));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              home: gateway
+                  ? ChoseRoom(roomId: room.id)
+                  : InRoom(roomId: room.id),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(AppScreen), findsOneWidget);
+        expect(find.byType(Scaffold), findsOneWidget);
+        expect(find.byType(AsyncContent<Room>), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(
+          find.text(gateway ? 'Chi tiết phòng' : 'Trong phòng'),
+          findsOneWidget,
+        );
+
+        repository.readGate!.complete();
+        await tester.pumpAndSettle();
+        expect(find.text(room.name), findsOneWidget);
+
+        repository.readGate = Completer<void>();
+        container.invalidate(roomByIdProvider(room.id));
+        await tester.pump();
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.text(room.name), findsNothing);
+        repository.readGate!.complete();
+        await tester.pumpAndSettle();
+        expect(find.text(room.name), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets(
       '${gateway ? 'gateway' : 'in-room'} missing ID and failed load/retry',
       (tester) async {

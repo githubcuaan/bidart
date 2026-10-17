@@ -1,4 +1,5 @@
 import 'package:bidart/core/enum/skill_level.dart';
+import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 
 /// Nội dung drawer phải (§5 docs/ui_description.md): 5.1 xem + 5.2 sửa.
@@ -57,11 +58,17 @@ class Profile extends StatelessWidget {
         // 5.1.3 Thống kê nhanh
         const Row(
           children: [
-            Expanded(child: _StatBox(value: '142', label: 'Tổng trận')),
+            Expanded(
+              child: _StatBox(value: '142', label: 'Tổng trận'),
+            ),
             SizedBox(width: 8),
-            Expanded(child: _StatBox(value: '68%', label: 'Thắng')),
+            Expanded(
+              child: _StatBox(value: '68%', label: 'Thắng'),
+            ),
             SizedBox(width: 8),
-            Expanded(child: _StatBox(value: '1680', label: 'ELO')),
+            Expanded(
+              child: _StatBox(value: '1680', label: 'ELO'),
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -144,15 +151,11 @@ class _StatBox extends StatelessWidget {
           children: [
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
+            Text(label, style: Theme.of(context).textTheme.labelSmall),
           ],
         ),
       ),
@@ -194,14 +197,13 @@ class _ProfileEditState extends State<ProfileEdit> {
     if (!mounted) return;
     setState(() => _saving = false);
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Đã lưu thay đổi')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Đã lưu thay đổi')));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScreen(
       appBar: AppBar(title: const Text('Chỉnh sửa hồ sơ')),
       body: Form(
         key: _formKey,
@@ -255,8 +257,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                     items: const ['Nam', 'Nữ', 'Khác']
                         .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                         .toList(),
-                    onChanged: (v) =>
-                        setState(() => _gender = v ?? _gender),
+                    onChanged: (v) => setState(() => _gender = v ?? _gender),
                   ),
                 ),
               ],
