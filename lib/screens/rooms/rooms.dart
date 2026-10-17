@@ -1,5 +1,6 @@
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
+import 'package:bidart/widgets/async/async_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -59,39 +60,35 @@ class _RoomsState extends ConsumerState<Rooms> {
         ),
       ),
       Expanded(
-        child: ref
-            .watch(roomListProvider(_status))
-            .when(
-              skipLoadingOnRefresh: false,
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => RoomLoadError(
-                error: error,
-                onRetry: () => ref.invalidate(roomListProvider(_status)),
-              ),
-              data: (rooms) => rooms.isEmpty
-                  ? const Center(
-                      child: Text('Chưa có phòng trong danh sách này.'),
-                    )
-                  : ListView.builder(
-                      itemCount: rooms.length,
-                      itemBuilder: (context, index) {
-                        final room = rooms[index];
-                        return ListTile(
-                          key: ValueKey('room-${room.id}'),
-                          title: Text(room.name),
-                          subtitle: Text(
-                            '${roomStatusLabel(room.status)} · ${room.activePlayerCount} người · ${room.gameCount} ván',
-                          ),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => ChoseRoom(roomId: room.id),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
+        child: AsyncContent(
+          value: ref.watch(roomListProvider(_status)),
+          skipLoadingOnRefresh: false,
+          errorBuilder: (context, error, _) => RoomLoadError(
+            error: error,
+            onRetry: () => ref.invalidate(roomListProvider(_status)),
+          ),
+          dataBuilder: (context, rooms) => rooms.isEmpty
+              ? const Center(child: Text('Chưa có phòng trong danh sách này.'))
+              : ListView.builder(
+                  itemCount: rooms.length,
+                  itemBuilder: (context, index) {
+                    final room = rooms[index];
+                    return ListTile(
+                      key: ValueKey('room-${room.id}'),
+                      title: Text(room.name),
+                      subtitle: Text(
+                        '${roomStatusLabel(room.status)} · ${room.activePlayerCount} người · ${room.gameCount} ván',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ChoseRoom(roomId: room.id),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
       ),
     ],
   );

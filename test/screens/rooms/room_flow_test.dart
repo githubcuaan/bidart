@@ -441,6 +441,49 @@ void main() {
     expect(find.byType(ListTile), findsNWidgets(3));
   });
 
+  testWidgets('filtered retry shows loading and preserves selected status', (
+    tester,
+  ) async {
+    final finished = await seed(
+      name: 'Phòng kết thúc',
+      status: RoomStatus.finished,
+    );
+    await seed(name: 'Phòng đang chơi');
+    await pump(tester, const Rooms());
+    expect(find.byType(Scaffold), findsOneWidget);
+
+    repository.failList = true;
+    await choose(tester, 'room-status-filter', 'Đã kết thúc');
+    expect(find.text('Thử lại'), findsOneWidget);
+
+    repository.failList = false;
+    repository.readGate = Completer<void>();
+    await tester.tap(find.text('Thử lại'));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Thử lại'), findsNothing);
+    expect(
+      tester
+          .widget<DropdownButton<RoomStatus?>>(key('room-status-filter'))
+          .value,
+      RoomStatus.finished,
+    );
+
+    repository.readGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(ListTile), findsOneWidget);
+    expect(key('room-${finished.id}'), findsOneWidget);
+    expect(find.text('Phòng đang chơi'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    await tester.tap(key('room-${finished.id}'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<ChoseRoom>(find.byType(ChoseRoom)).roomId,
+      finished.id,
+    );
+  });
+
   testWidgets('create → gateway → room → back preserves committed aggregate', (
     tester,
   ) async {
