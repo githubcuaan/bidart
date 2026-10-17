@@ -9,6 +9,7 @@ part of 'room.dart';
 _Room _$RoomFromJson(Map<String, dynamic> json) => _Room(
   id: json['id'] as String,
   name: json['name'] as String,
+  description: json['description'] as String? ?? '',
   ownerId: json['ownerId'] as String,
   mode: $enumDecode(_$RoomModeEnumMap, json['mode']),
   status: $enumDecode(_$RoomStatusEnumMap, json['status']),
@@ -51,6 +52,7 @@ _Room _$RoomFromJson(Map<String, dynamic> json) => _Room(
 Map<String, dynamic> _$RoomToJson(_Room instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
+  'description': instance.description,
   'ownerId': instance.ownerId,
   'mode': _$RoomModeEnumMap[instance.mode]!,
   'status': _$RoomStatusEnumMap[instance.status]!,
