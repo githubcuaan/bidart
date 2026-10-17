@@ -219,18 +219,20 @@ Kết quả: 54 tests pass khi chạy `flutter test --no-pub test/screens/rooms 
 
 ### Profile
 
-File: `lib/screens/profile/profile.dart`.
+File hiện tại: `lib/screens/profile.dart`.
 
-- [ ] Thay `userAsync.when(...)` bằng `AsyncContent`.
-- [ ] Giữ các card hiện có và thông báo lỗi đặc thù.
-- [ ] Không thêm `AppScreen`: đây là nội dung drawer.
+- [x] Xác nhận Profile hiện render dữ liệu đồng bộ, không có `userAsync.when(...)`; chưa cần `AsyncContent` hoặc provider mới.
+- [x] Giữ các card và nội dung hiện có.
+- [x] Không thêm `AppScreen`: đây là nội dung drawer.
 
-### ProfileEditScreen
+### ProfileEdit
 
-File: `lib/screens/profile/widgets/profile_edit_screen.dart`.
+File hiện tại: `lib/screens/profile.dart`, lớp `ProfileEdit`.
 
-- [ ] Chỉ thay shell bằng `AppScreen`.
-- [ ] Giữ form key, controllers, validation, save và dispose.
+- [x] Chỉ thay shell bằng `AppScreen`.
+- [x] Giữ form key, controllers, validation, save và dispose.
+
+Kết quả: 19 tests pass khi chạy profile và widget component tests. Bổ sung 4 tests cho drawer → editor, validation, save/loading/confirmation, hủy và mở lại form, dispose trong khi save. Save vẫn là hành vi giả lập hiện có, không bổ sung persistence.
 
 **Điều kiện hoàn thành:** drawer tải đúng; sửa/lưu hồ sơ không regression.
 
