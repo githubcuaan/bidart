@@ -200,16 +200,18 @@ Thứ tự:
 1. `lib/screens/rooms/chose_room.dart`.
 2. `lib/screens/rooms/in_room.dart`.
 
-- [ ] Thay `Scaffold` bằng `AppScreen` nếu API đáp ứng nguyên trạng.
-- [ ] Thay `.when(...)` phần tải dữ liệu bằng `AsyncContent<T>`.
-- [ ] Giữ navigation, widget keys và nội dung riêng của từng screen.
+- [x] Thay `Scaffold` bằng `AppScreen` nếu API đáp ứng nguyên trạng.
+- [x] Thay `.when(...)` phần tải dữ liệu bằng `AsyncContent<Room>` với kiểu tường minh.
+- [x] Giữ navigation, widget keys và nội dung riêng của từng screen.
 
 Riêng InRoom:
 
-- [ ] Giữ `ConsumerStatefulWidget`.
-- [ ] Giữ `WidgetsBindingObserver`, lifecycle và cleanup.
-- [ ] Không đưa scoring actions, listener hoặc side effects vào generic widget.
-- [ ] Giữ trạng thái loading của từng action.
+- [x] Giữ `ConsumerStatefulWidget`.
+- [x] Giữ `WidgetsBindingObserver`, lifecycle và cleanup.
+- [x] Không đưa scoring actions, listener hoặc side effects vào generic widget.
+- [x] Giữ trạng thái loading của từng action.
+
+Kết quả: 54 tests pass khi chạy `flutter test --no-pub test/screens/rooms test/widgets`; analyze hai screen và room flow tests không có lỗi. Thêm hai test mount trang độc lập, xác nhận một Scaffold, loading ban đầu và loading khi refresh. Các test hiện có kiểm tra navigation/back, retry, scoring actions, lifecycle và cleanup tiếp tục pass.
 
 **Điều kiện hoàn thành:** mở phòng, cập nhật dữ liệu, quay lại và lifecycle không đổi.
 
