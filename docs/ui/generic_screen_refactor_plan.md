@@ -279,30 +279,32 @@ Kết quả: không có thay đổi code ở bước này vì các tab đã đú
 
 ## Bước 10 — Kiểm thử tổng và dọn code
 
-- [ ] Format các file được thay đổi bằng `dart format`.
-- [ ] Chạy `flutter analyze`, đối chiếu baseline.
-- [ ] Chạy `flutter test`, đối chiếu baseline.
-- [ ] Chỉ dọn imports/helper khi không còn sử dụng.
+- [x] Format các file được thay đổi bằng `dart format`: 13 file, không cần thay đổi format.
+- [x] Chạy `flutter analyze`: No issues found; không có lỗi cần đối chiếu baseline.
+- [x] Chạy toàn bộ `flutter test --no-pub`: 215 tests pass, không có test thất bại.
+- [x] Rà soát imports/helper: không có unused imports được analyzer báo; không xóa helper còn sử dụng. Sửa assertion loading template để kiểm tra key template thật thay vì key giả.
+
+Kết quả kiểm tra tự động ngày 2026-10-17: analyze sạch và toàn bộ 215 tests pass. Người dùng xác nhận toàn bộ checklist emulator pass, bao gồm smoke test thủ công; không phải xác nhận chạy emulator bởi agent. Bước 10 hoàn thành.
 
 Manual smoke test:
 
-- [ ] Chuyển tab rồi quay lại, state được giữ.
-- [ ] Mở/đóng drawer và sửa hồ sơ.
-- [ ] Danh sách phòng: loading/error/empty/data.
-- [ ] Filter rồi retry đúng danh sách đang chọn.
-- [ ] Tạo phòng → mở chi tiết → vào phòng.
-- [ ] People: pass/challenge đến empty rồi reload.
-- [ ] Form khi bàn phím mở và trên màn hình nhỏ.
+- [x] Chuyển tab rồi quay lại, state được giữ.
+- [x] Mở/đóng drawer và sửa hồ sơ.
+- [x] Danh sách phòng: loading/error/empty/data.
+- [x] Filter rồi retry đúng danh sách đang chọn.
+- [x] Tạo phòng → mở chi tiết → vào phòng.
+- Không áp dụng People pass/challenge/reload: screen hiện chỉ là placeholder, chưa có các chức năng này.
+- [x] Form khi bàn phím mở và trên màn hình nhỏ.
 
 ## Thứ tự triển khai
 
-| Đợt | Phạm vi |
-|---|---|
-| 1 | Baseline, AppScreen, AsyncContent<T> và tests |
-| 2 | Rooms pilot và ChoseRoom |
-| 3 | InRoom và regression tests |
-| 4 | Profile, ProfileEditScreen và AddRoom |
-| 5 | People và kiểm thử tổng |
+| Đợt | Phạm vi                                       |
+| --- | --------------------------------------------- |
+| 1   | Baseline, AppScreen, AsyncContent<T> và tests |
+| 2   | Rooms pilot và ChoseRoom                      |
+| 3   | InRoom và regression tests                    |
+| 4   | Profile, ProfileEditScreen và AddRoom         |
+| 5   | People và kiểm thử tổng                       |
 
 ## Tiêu chí nghiệm thu
 
