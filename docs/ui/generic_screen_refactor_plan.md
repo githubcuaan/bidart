@@ -253,25 +253,27 @@ Kết quả: 59 tests pass khi chạy `flutter test --no-pub test/screens test/w
 
 ### People
 
-File: `lib/screens/people/people.dart`.
+File hiện tại: `lib/screens/people.dart`.
 
-Hiện có hai nhánh trả về `Scaffold`, trong khi `Mainscreen` đã có shell.
+Rà soát lại cho thấy `People` hiện chỉ là placeholder `StatelessWidget` trả về `Center(child: Text('he'))`, không còn hai nhánh `Scaffold` như mô tả ban đầu. Không có challenge/pass/reload/mock data để migrate.
 
-- [ ] Kiểm tra mọi nơi sử dụng trước khi bỏ shell.
-- [ ] Nếu chỉ là tab, bỏ `Scaffold` con.
-- [ ] Gộp `PeopleTopBar` chung; thay đổi phần nội dung theo empty/data.
-- [ ] Giữ challenge/pass/reload và SnackBar.
-- [ ] Không đổi mock data sang provider trong refactor này.
+- [x] Kiểm tra mọi nơi sử dụng: chỉ dùng trong `IndexedStack` của `Mainscreen`.
+- [x] Xác nhận không có `Scaffold` con cần bỏ.
+- [x] Không thêm `AppScreen` hay `PeopleTopBar` cho placeholder.
+- [x] Không thay đổi nội dung hoặc thêm state ngoài phạm vi refactor.
+- [x] Ghi nhận challenge/pass/reload chưa tồn tại trong workspace hiện tại.
 
 ### Home và Maps
 
-- [ ] Giữ widget nội dung đơn giản.
-- [ ] Không thêm generic hoặc wrapper không cần thiết.
+- [x] Giữ widget nội dung đơn giản.
+- [x] Không thêm generic hoặc wrapper không cần thiết.
 
 ### Mainscreen
 
-- [ ] Giữ `Scaffold`, drawer, bottom navigation và `IndexedStack`.
-- [ ] Không bắt buộc migrate shell đặc thù sang `AppScreen`.
+- [x] Giữ `Scaffold`, drawer, bottom navigation và `IndexedStack`.
+- [x] Không migrate shell đặc thù sang `AppScreen`.
+
+Kết quả: không có thay đổi code ở bước này vì các tab đã đúng kiến trúc đích. Bổ sung `test/screens/main_screen_test.dart` với 4 tests: một AppBar/Scaffold duy nhất, đổi tab không mất state lọc phòng, drawer mở đúng và đóng lại, và các tab placeholder không có shell lồng nhau.
 
 **Điều kiện hoàn thành:** không có app bar kép, mất SnackBar hoặc reset state tab.
 
