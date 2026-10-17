@@ -143,13 +143,13 @@ class AsyncContent<T> extends StatelessWidget {
 }
 ```
 
-- [ ] Chỉ render trạng thái; screen tiếp tục gọi `ref.watch`.
-- [ ] Loading mặc định là `Center(child: CircularProgressIndicator())`.
-- [ ] Retry nằm trong `errorBuilder`; screen truyền đúng `ref.invalidate`.
-- [ ] Giữ chính sách refresh/reload hiện tại của từng screen.
-- [ ] Không dùng `dynamic` hoặc ép kiểu.
-- [ ] Không tự coi `null` hoặc danh sách rỗng là lỗi.
-- [ ] Chưa tạo `AsyncListScreen<T>`: `AsyncContent<List<T>>` đủ cho Rooms.
+- [x] Chỉ render trạng thái; screen tiếp tục gọi `ref.watch`.
+- [x] Loading mặc định là `Center(child: CircularProgressIndicator())`.
+- [x] Retry nằm trong `errorBuilder`; screen truyền đúng `ref.invalidate` khi migrate.
+- [x] Hỗ trợ cấu hình refresh/reload để giữ chính sách hiện tại khi migrate từng screen.
+- [x] Không dùng `dynamic` hoặc ép kiểu.
+- [x] Không tự coi `null` hoặc danh sách rỗng là lỗi.
+- [x] Chưa tạo `AsyncListScreen<T>`: `AsyncContent<List<T>>` đủ cho Rooms.
 
 **Điều kiện hoàn thành:** hoạt động với dữ liệu đơn, danh sách và kiểu nullable.
 
