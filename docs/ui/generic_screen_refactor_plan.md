@@ -181,13 +181,15 @@ Kết quả: 15 widget tests pass (4 AppScreen, 11 AsyncContent); analyze các c
 
 File: `lib/screens/rooms/rooms.dart`.
 
-- [ ] Thay phần `ref.watch(...).when(...)` bằng `AsyncContent`.
-- [ ] Giữ `_status`, dropdown và nút tạo phòng.
-- [ ] Giữ `Expanded` bao vùng danh sách.
-- [ ] Giữ empty message, `ListView.builder`, widget keys và navigation.
-- [ ] Giữ `RoomLoadError` và retry đúng provider đang lọc.
-- [ ] Giữ `skipLoadingOnRefresh: false`.
-- [ ] Không bọc `AppScreen`: Rooms nằm trong shell `Mainscreen`.
+- [x] Thay phần `ref.watch(...).when(...)` bằng `AsyncContent`.
+- [x] Giữ `_status`, dropdown và nút tạo phòng.
+- [x] Giữ `Expanded` bao vùng danh sách.
+- [x] Giữ empty message, `ListView.builder`, widget keys và navigation.
+- [x] Giữ `RoomLoadError` và retry đúng provider đang lọc.
+- [x] Giữ `skipLoadingOnRefresh: false`.
+- [x] Không bọc `AppScreen`: Rooms nằm trong shell `Mainscreen`.
+
+Kết quả: 34 tests pass khi chạy room flow và widget component tests; analyze `rooms.dart` và `room_flow_test.dart` không có lỗi. Bổ sung regression test retry sau lỗi khi lọc phòng: hiển thị loading, giữ trạng thái lọc, trả đúng phòng và mở đúng chi tiết.
 
 **Điều kiện hoàn thành:** loading/error/empty/data, filter và retry đều pass.
 
