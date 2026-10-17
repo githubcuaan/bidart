@@ -162,15 +162,18 @@ test/widgets/screen/app_screen_test.dart
 test/widgets/async/async_content_test.dart
 ```
 
-- [ ] AppScreen hiển thị đúng body, app bar và FAB.
-- [ ] Loading hiển thị indicator mặc định.
-- [ ] Custom loading được dùng khi truyền vào.
-- [ ] Data truyền đúng giá trị vào builder.
-- [ ] Error truyền đúng lỗi và stack trace.
-- [ ] Nút retry gọi callback.
-- [ ] Refresh/reload giữ đúng chính sách hiển thị.
-- [ ] Danh sách rỗng vẫn đi qua `dataBuilder`.
-- [ ] Dữ liệu nullable do screen xử lý, không bị wrapper diễn giải lại.
+- [x] AppScreen hiển thị đúng body, app bar và FAB.
+- [x] Loading hiển thị indicator mặc định.
+- [x] Custom loading được dùng khi truyền vào.
+- [x] Data truyền đúng giá trị vào builder.
+- [x] Error truyền đúng lỗi và stack trace.
+- [x] Nút retry gọi callback.
+- [x] Refresh/reload giữ đúng chính sách hiển thị.
+- [x] Danh sách rỗng vẫn đi qua `dataBuilder`.
+- [x] Dữ liệu nullable do screen xử lý, không bị wrapper diễn giải lại.
+- [x] Cùng component rebuild đúng qua loading → error → retry → data; giao diện trạng thái cũ được gỡ bỏ.
+
+Kết quả: 15 widget tests pass (4 AppScreen, 11 AsyncContent); analyze các component và test tương ứng không có lỗi. Chưa migrate screen.
 
 **Điều kiện hoàn thành:** test component pass độc lập.
 
