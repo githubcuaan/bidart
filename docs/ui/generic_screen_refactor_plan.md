@@ -26,34 +26,34 @@ AppScreen                          ← shell cho trang push riêng
 Profile                            ← nội dung drawer + AsyncContent<...>
 ```
 
-| Component | Trách nhiệm |
-|---|---|
-| `AppScreen` | `Scaffold`, app bar, actions, FAB |
+| Component         | Trách nhiệm                                      |
+| ----------------- | ------------------------------------------------ |
+| `AppScreen`       | `Scaffold`, app bar, actions, FAB                |
 | `AsyncContent<T>` | Hiển thị loading/error/data theo `AsyncValue<T>` |
 
 `AppScreen` không cần type parameter: layout không phụ thuộc kiểu dữ liệu.
 
 ## Bước 1 — Chốt baseline và hành vi cần giữ
 
-- [ ] Chạy `flutter analyze`.
-- [ ] Chạy `flutter test`.
-- [ ] Ghi nhận lỗi có sẵn; không trộn sửa lỗi ngoài phạm vi.
+- [x] Chạy `flutter analyze`.
+- [x] Chạy `flutter test`.
+- [x] Ghi nhận lỗi có sẵn; không trộn sửa lỗi ngoài phạm vi.
 - [x] Kiểm tra các nơi sử dụng screen trước khi thay shell.
 
 ### Kết quả rà soát call sites (2026-10-17)
 
 Rà soát constructor, imports và navigation trong `lib/` và `test/`. Chưa thay shell hoặc chạy kiểm thử trong bước này.
 
-| Screen | Nơi sử dụng hiện tại | Quyết định shell |
-|---|---|---|
-| `Mainscreen` | `lib/main.dart`, `MaterialApp.home` | Giữ shell gốc, drawer, bottom navigation và `IndexedStack` |
-| `Home`, `Maps`, `People` | `lib/screens/main_screen.dart`, children của `IndexedStack` | Chỉ nội dung, không thêm `AppScreen` |
-| `Rooms` | `Mainscreen`; tests trong `test/screens/rooms/room_flow_test.dart` | Chỉ nội dung; giữ shell do cha/test cung cấp |
-| `Profile` | `Mainscreen.endDrawer`, bên trong `Drawer` | Không thêm `Scaffold` |
-| `ProfileEdit` | `lib/screens/profile.dart`, `Navigator.push` từ Profile | Trang độc lập, có thể dùng `AppScreen` |
-| `AddRoom` | `Rooms`, `Navigator.push`; room flow tests | Trang độc lập, giữ app bar và thanh submit đáy |
-| `ChoseRoom` | `Rooms` qua `push`; `AddRoom` qua `pushReplacement` sau tạo phòng hoặc mở phòng từ lỗi; room flow tests | Trang độc lập, có thể dùng `AppScreen`; giữ route replacement |
-| `InRoom` | `ChoseRoom`, `Navigator.push`; room flow và in-room action tests | Trang độc lập, có thể dùng `AppScreen`; giữ lifecycle |
+| Screen                   | Nơi sử dụng hiện tại                                                                                    | Quyết định shell                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `Mainscreen`             | `lib/main.dart`, `MaterialApp.home`                                                                     | Giữ shell gốc, drawer, bottom navigation và `IndexedStack`    |
+| `Home`, `Maps`, `People` | `lib/screens/main_screen.dart`, children của `IndexedStack`                                             | Chỉ nội dung, không thêm `AppScreen`                          |
+| `Rooms`                  | `Mainscreen`; tests trong `test/screens/rooms/room_flow_test.dart`                                      | Chỉ nội dung; giữ shell do cha/test cung cấp                  |
+| `Profile`                | `Mainscreen.endDrawer`, bên trong `Drawer`                                                              | Không thêm `Scaffold`                                         |
+| `ProfileEdit`            | `lib/screens/profile.dart`, `Navigator.push` từ Profile                                                 | Trang độc lập, có thể dùng `AppScreen`                        |
+| `AddRoom`                | `Rooms`, `Navigator.push`; room flow tests                                                              | Trang độc lập, giữ app bar và thanh submit đáy                |
+| `ChoseRoom`              | `Rooms` qua `push`; `AddRoom` qua `pushReplacement` sau tạo phòng hoặc mở phòng từ lỗi; room flow tests | Trang độc lập, có thể dùng `AppScreen`; giữ route replacement |
+| `InRoom`                 | `ChoseRoom`, `Navigator.push`; room flow và in-room action tests                                        | Trang độc lập, có thể dùng `AppScreen`; giữ lifecycle         |
 
 Các điều chỉnh cần áp dụng khi triển khai:
 
