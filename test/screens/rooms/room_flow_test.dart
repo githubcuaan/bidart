@@ -14,6 +14,8 @@ import 'package:bidart/screens/rooms/add_room.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
 import 'package:bidart/screens/rooms/in_room.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
+import 'package:bidart/widgets/async/async_content.dart';
+import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -516,6 +518,50 @@ void main() {
   });
 
   for (final gateway in [true, false]) {
+    testWidgets(
+      '${gateway ? 'gateway' : 'in-room'} standalone shell preserves load and refresh',
+      (tester) async {
+        final room = await seed();
+        repository.readGate = Completer<void>();
+        await tester.binding.setSurfaceSize(const Size(1000, 2600));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              home: gateway
+                  ? ChoseRoom(roomId: room.id)
+                  : InRoom(roomId: room.id),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(AppScreen), findsOneWidget);
+        expect(find.byType(Scaffold), findsOneWidget);
+        expect(find.byType(AsyncContent<Room>), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(
+          find.text(gateway ? 'Chi tiết phòng' : 'Trong phòng'),
+          findsOneWidget,
+        );
+
+        repository.readGate!.complete();
+        await tester.pumpAndSettle();
+        expect(find.text(room.name), findsOneWidget);
+
+        repository.readGate = Completer<void>();
+        container.invalidate(roomByIdProvider(room.id));
+        await tester.pump();
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.text(room.name), findsNothing);
+        repository.readGate!.complete();
+        await tester.pumpAndSettle();
+        expect(find.text(room.name), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets(
       '${gateway ? 'gateway' : 'in-room'} missing ID and failed load/retry',
       (tester) async {
