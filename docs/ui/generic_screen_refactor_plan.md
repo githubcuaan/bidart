@@ -229,10 +229,12 @@ File: `lib/screens/profile/widgets/profile_edit_screen.dart`.
 
 File: `lib/screens/rooms/add_room.dart`.
 
-- [ ] Thay shell bằng `AppScreen`.
-- [ ] Giữ state và controller hiện tại.
-- [ ] Có thể dùng `AsyncContent` cho rule template nếu giữ nguyên layout và hành vi.
-- [ ] Không tạo `BaseFormScreen` lúc này: form tạo phòng và sửa hồ sơ chưa có abstraction chung đủ rõ.
+- [x] Thay shell bằng `AppScreen`, giữ `bottomNavigationBar` chứa nút submit.
+- [x] Giữ state và controller hiện tại.
+- [x] Dùng `AsyncContent<List<RuleTemplate>>` cho danh sách mẫu luật, giữ hành vi ẩn (shrink) khi loading, lỗi hoặc rỗng.
+- [x] Không tạo `BaseFormScreen` lúc này: form tạo phòng và sửa hồ sơ chưa có abstraction chung đủ rõ.
+
+Kết quả: 59 tests pass khi chạy `flutter test --no-pub test/screens test/widgets`; analyze `add_room.dart` và `room_flow_test.dart` không có lỗi. Test mới xác nhận AddRoom có đúng một Scaffold qua AppScreen, thanh submit bị khóa khi form chưa hợp lệ, loading mẫu luật không chặn form, và áp dụng mẫu vẫn hoạt động.
 
 **Điều kiện hoàn thành:** chọn template, validation, submit và bàn phím hoạt động như trước.
 

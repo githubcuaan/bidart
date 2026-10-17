@@ -6,6 +6,7 @@ import 'package:bidart/domain/models/scoring/game_status.dart';
 import 'package:bidart/domain/models/scoring/player_in_game.dart';
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
+import 'package:bidart/domain/models/scoring/rule_template.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/services/room_service.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
@@ -49,6 +50,12 @@ class ScreenRepository extends InMemoryGameRepository {
     await readGate?.future;
     if (failGet) throw const PersistenceFailure('get failed');
     return super.getRoom(roomId);
+  }
+
+  @override
+  Future<List<RuleTemplate>> listRuleTemplates() async {
+    await readGate?.future;
+    return super.listRuleTemplates();
   }
 }
 
@@ -515,6 +522,45 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ChoseRoom), findsOneWidget);
     expect(await repository.getRoom(room.id), room);
+  });
+
+  testWidgets('AddRoom shell keeps submit bar and template chips', (
+    tester,
+  ) async {
+    final template = await repository.saveRuleTemplate(
+      templateId: 'tpl-1',
+      name: 'Mẫu chuẩn',
+      ballPoints: {
+        for (var ball = 1; ball <= 9; ball++)
+          ball: BallPointConfig(enabled: true, points: ball),
+      },
+    );
+    await tester.binding.setSurfaceSize(const Size(1000, 2600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    repository.readGate = Completer<void>();
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: AddRoom()),
+      ),
+    );
+    await tester.pump();
+    expect(find.byType(AppScreen), findsOneWidget);
+    expect(find.byType(Scaffold), findsOneWidget);
+    expect(find.text('Tạo phòng'), findsOneWidget);
+    expect(submit(tester).onPressed, isNull);
+    expect(find.byType(AsyncContent<List<RuleTemplate>>), findsOneWidget);
+    // Loading templates hides chips without blocking the form.
+    expect(key('apply-template-${template.id}'), findsNothing);
+
+    repository.readGate!.complete();
+    await tester.pumpAndSettle();
+    expect(key('apply-template-${template.id}'), findsOneWidget);
+
+    await tester.tap(key('apply-template-${template.id}'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tạo và bắt đầu'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   for (final gateway in [true, false]) {
