@@ -114,6 +114,55 @@ void main() {
     expect(find.text('No value'), findsOneWidget);
   });
 
+  testWidgets('Rebuilds through loading, error, retry and data', (
+    tester,
+  ) async {
+    final value = ValueNotifier<AsyncValue<int>>(const AsyncLoading());
+    addTearDown(value.dispose);
+    var retryCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ValueListenableBuilder<AsyncValue<int>>(
+          valueListenable: value,
+          builder: (context, state, child) => AsyncContent<int>(
+            value: state,
+            dataBuilder: (_, data) => Text('Result: $data'),
+            errorBuilder: (_, error, stackTrace) => TextButton(
+              onPressed: () {
+                retryCount++;
+                value.value = const AsyncLoading();
+              },
+              child: const Text('Retry'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final element = tester.element(find.byType(AsyncContent<int>));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Retry'), findsNothing);
+
+    value.value = AsyncError(StateError('Failed'), StackTrace.current);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.text('Result: 42'), findsNothing);
+
+    await tester.tap(find.text('Retry'));
+    await tester.pump();
+    expect(retryCount, 1);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Retry'), findsNothing);
+
+    value.value = const AsyncData(42);
+    await tester.pump();
+    expect(find.text('Result: 42'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('Retry'), findsNothing);
+    expect(tester.element(find.byType(AsyncContent<int>)), same(element));
+  });
+
   for (final isRefresh in [true, false]) {
     for (final skipLoading in [true, false]) {
       testWidgets(
