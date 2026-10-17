@@ -90,23 +90,25 @@ class AppScreen extends StatelessWidget {
     required this.body,
     this.appBar,
     this.floatingActionButton,
+    this.bottomNavigationBar,
     this.resizeToAvoidBottomInset,
   });
 
   final Widget body;
   final PreferredSizeWidget? appBar;
   final Widget? floatingActionButton;
+  final Widget? bottomNavigationBar;
   final bool? resizeToAvoidBottomInset;
 
   // build trả về Scaffold.
 }
 ```
 
-- [ ] Nhận `appBar` thay vì bắt buộc `title`, hỗ trợ tiêu đề động/actions/back riêng.
-- [ ] Không tự thêm padding, `SafeArea` hoặc scroll.
-- [ ] Chưa thêm drawer/bottom navigation: `Mainscreen` sở hữu chúng.
-- [ ] Không chứa provider hoặc nghiệp vụ.
-- [ ] Kiểm tra các thuộc tính Scaffold hiện có trước khi migrate; chỉ mở rộng API khi có nhu cầu thực tế.
+- [x] Nhận `appBar` thay vì bắt buộc `title`, hỗ trợ tiêu đề động/actions/back riêng.
+- [x] Không tự thêm padding, `SafeArea` hoặc scroll.
+- [x] Không thêm drawer hoặc logic điều hướng tab; hỗ trợ `bottomNavigationBar` tùy chọn để giữ thanh submit của `AddRoom`.
+- [x] Không chứa provider hoặc nghiệp vụ.
+- [x] Kiểm tra các thuộc tính Scaffold hiện có trước khi migrate; thêm `bottomNavigationBar` theo nhu cầu thực tế.
 
 **Điều kiện hoàn thành:** test xác nhận body, app bar và FAB hiển thị đúng.
 
