@@ -104,19 +104,22 @@ class _SectionCardState extends State<SectionCard>
         widget.trailing != null;
     final canCollapse = widget.collapsible && hasTopRow;
 
-    return Container(
-      padding: const EdgeInsets.all(SectionCard.padding),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        border: Border.all(color: scheme.outlineVariant),
+    return Material(
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (hasTopRow) _header(context, scheme, canCollapse),
-          if (canCollapse) _collapsibleBody(hasTopRow) else _body(hasTopRow),
-        ],
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(SectionCard.padding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (hasTopRow) _header(context, scheme, canCollapse),
+            if (canCollapse) _collapsibleBody(hasTopRow) else _body(hasTopRow),
+          ],
+        ),
       ),
     );
   }

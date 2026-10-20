@@ -9,14 +9,15 @@ class RoomHistoryPanel extends StatelessWidget {
   final Room room;
 
   @override
-  Widget build(BuildContext context) => ExpansionTile(
+  Widget build(BuildContext context) => Column(
     key: const ValueKey('room-history'),
-    title: const Text('Nhật ký'),
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       for (final history in room.games) ...[
         Text('Ván ${history.gameNumber}'),
         for (final turn in history.turns)
           ListTile(
+            contentPadding: EdgeInsets.zero,
             title: Text(
               '#${turn.turnNumber} ${playerName(room, turn.actorId)} · ${turn.foulClassification.name}${turn.isUndone ? ' · Đã hoàn tác' : ''}',
             ),
@@ -28,6 +29,7 @@ class RoomHistoryPanel extends StatelessWidget {
       ],
       for (final event in room.events)
         ListTile(
+          contentPadding: EdgeInsets.zero,
           title: Text('Edit: ${event.type.name} · revision ${event.revision}'),
           subtitle: const Text('Mốc chặn undo'),
         ),
