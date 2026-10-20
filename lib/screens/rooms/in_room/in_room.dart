@@ -13,15 +13,16 @@ import 'package:bidart/screens/rooms/dialogs/order_dialog.dart';
 import 'package:bidart/screens/rooms/dialogs/replacement_dialog.dart';
 import 'package:bidart/screens/rooms/dialogs/rules_dialog.dart';
 import 'package:bidart/screens/rooms/in_room/room_end_timer.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_error_panel.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_history_panel.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_lifecycle_actions.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_management_actions.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/turn_draft_panel.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/end_conditions_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/next_game_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_error_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_history_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_info_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_lifecycle_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_management_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/turn_section.dart';
 import 'package:bidart/widgets/async/async_content.dart';
-import 'package:bidart/widgets/card/section_card.dart';
 import 'package:bidart/widgets/dialog/confirm_dialog.dart';
-import 'package:bidart/widgets/room/room_details.dart';
 import 'package:bidart/widgets/room/room_load_error.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
@@ -169,21 +170,10 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
               if (active &&
                   game.status == GameStatus.finished &&
                   room.pendingEndReasons.isEmpty) ...[
-                SectionCard(
-                  icon: Icons.skip_next,
-                  title: 'Ván tiếp theo',
-                  description: 'Ván ${game.gameNumber} đã kết thúc',
-                  collapsible: false,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      key: const ValueKey('next-game'),
-                      onPressed: busy ? null : () => _next(room),
-                      child: Text(
-                        next.isLoading ? 'Đang lưu…' : 'Bắt đầu ván tiếp',
-                      ),
-                    ),
-                  ),
+                NextGameSection(
+                  gameNumber: game.gameNumber,
+                  loading: next.isLoading,
+                  onStart: busy ? null : () => _next(room),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -194,123 +184,86 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
               ],
 
               if (active && error != null) ...[
-                SectionCard(
-                  icon: Icons.error_outline,
-                  title: 'Không thể lưu thay đổi',
-                  collapsible: false,
-                  child: RoomErrorPanel(
-                    message: roomFailureMessage(error),
-                    enabled: !busy,
-                    fromNextGame: next.hasError,
-                    onRetry: _retry,
-                    onReload: () {
-                      _endTimer.invalidateSchedule();
-                      ref.invalidate(roomByIdProvider(room.id));
-                    },
-                  ),
+                RoomErrorSection(
+                  message: roomFailureMessage(error),
+                  enabled: !busy,
+                  fromNextGame: next.hasError,
+                  onRetry: _retry,
+                  onReload: () {
+                    _endTimer.invalidateSchedule();
+                    ref.invalidate(roomByIdProvider(room.id));
+                  },
                 ),
                 const SizedBox(height: 16),
               ],
 
               if (room.pendingEndReasons.isNotEmpty) ...[
-                SectionCard(
-                  icon: Icons.timer_outlined,
-                  title: 'Điều kiện kết thúc',
-                  collapsible: false,
-                  child: const Text(
-                    'Đã đạt điều kiện kết thúc — đánh hết ván rồi đóng phòng.',
-                  ),
-                ),
+                const EndConditionsSection(),
                 const SizedBox(height: 16),
               ],
 
-              SectionCard(
-                icon: Icons.meeting_room_outlined,
-                title: 'Thông tin phòng',
-                description: 'Điểm số, thứ tự và luật áp dụng.',
-                child: RoomDetails(room: room),
-              ),
+              RoomInfoSection(room: room),
 
               if (playing) ...[
                 const SizedBox(height: 16),
-                SectionCard(
-                  icon: Icons.sports_esports_outlined,
-                  title: 'Ghi nhận lượt',
-                  description: 'Chọn bi đã ăn, thêm lỗi nếu có rồi xác nhận.',
-                  child: TurnDraftPanel(
-                    room: room,
-                    remainingBalls: game.remainingBalls.toList()..sort(),
-                    selectedBalls: _balls,
-                    foul: _foul,
-                    foulLabel: foul.name,
-                    busy: busy,
-                    preview: preview,
-                    previewError: previewError,
-                    onToggleBall: (ball) => setState(
-                      () => _balls.contains(ball)
-                          ? _balls.remove(ball)
-                          : _balls.add(ball),
-                    ),
-                    onToggleFoul: (value) => setState(() => _foul = value),
-                    onClear: _clearDraft,
-                    onRecord: () async {
-                      final result = await _act(
-                        room,
-                        RoomAction(
-                          RoomActionKind.record,
-                          gameId: game.id,
-                          actorId: game.currentPlayerId,
-                          balls: _balls.toList(),
-                          foul: foul,
-                        ),
-                      );
-                      if (result != null && mounted) _clearDraft();
-                    },
+                TurnSection(
+                  room: room,
+                  remainingBalls: game.remainingBalls.toList()..sort(),
+                  selectedBalls: _balls,
+                  foul: _foul,
+                  foulLabel: foul.name,
+                  busy: busy,
+                  preview: preview,
+                  previewError: previewError,
+                  onToggleBall: (ball) => setState(
+                    () => _balls.contains(ball)
+                        ? _balls.remove(ball)
+                        : _balls.add(ball),
                   ),
+                  onToggleFoul: (value) => setState(() => _foul = value),
+                  onClear: _clearDraft,
+                  onRecord: () async {
+                    final result = await _act(
+                      room,
+                      RoomAction(
+                        RoomActionKind.record,
+                        gameId: game.id,
+                        actorId: game.currentPlayerId,
+                        balls: _balls.toList(),
+                        foul: foul,
+                      ),
+                    );
+                    if (result != null && mounted) _clearDraft();
+                  },
                 ),
               ],
 
               if (active) ...[
                 const SizedBox(height: 16),
-                SectionCard(
-                  icon: Icons.tune_outlined,
-                  title: 'Quản lý phòng',
-                  description: 'Hoàn tác, người chơi, luật và thứ tự.',
-                  child: RoomManagementActions(
-                    room: room,
-                    enabled: !busy,
-                    canUndo: canUndo,
-                    canAddPlayer: room.activePlayerIds.length < 5,
-                    canRemovePlayers:
-                        game.status == GameStatus.finished &&
-                        room.activePlayerIds.length > 2,
-                    onUndo: () => _undo(room),
-                    onAddPlayer: () => _edit(room, RoomActionKind.add),
-                    onEditRules: () => _edit(room, RoomActionKind.rules),
-                    onEditOrder: () => _edit(room, RoomActionKind.order),
-                    onRemovePlayer: (id) => _removePlayer(room, id),
-                  ),
+                RoomManagementSection(
+                  room: room,
+                  enabled: !busy,
+                  canUndo: canUndo,
+                  canAddPlayer: room.activePlayerIds.length < 5,
+                  canRemovePlayers:
+                      game.status == GameStatus.finished &&
+                      room.activePlayerIds.length > 2,
+                  onUndo: () => _undo(room),
+                  onAddPlayer: () => _edit(room, RoomActionKind.add),
+                  onEditRules: () => _edit(room, RoomActionKind.rules),
+                  onEditOrder: () => _edit(room, RoomActionKind.order),
+                  onRemovePlayer: (id) => _removePlayer(room, id),
                 ),
                 const SizedBox(height: 16),
-                SectionCard(
-                  icon: Icons.flag_outlined,
-                  title: 'Kết thúc phòng',
-                  description: 'Đóng phòng và chuyển sang chế độ chỉ đọc.',
-                  child: RoomLifecycleActions(
-                    enabled: !busy,
-                    onFinish: () => _finish(room, cancel: false),
-                    onCancel: () => _finish(room, cancel: true),
-                  ),
+                RoomLifecycleSection(
+                  enabled: !busy,
+                  onFinish: () => _finish(room, cancel: false),
+                  onCancel: () => _finish(room, cancel: true),
                 ),
               ],
 
               const SizedBox(height: 16),
-              SectionCard(
-                icon: Icons.history,
-                title: 'Nhật ký',
-                description: 'Các cú đánh, sự kiện và mốc hoàn tác.',
-                child: RoomHistoryPanel(room: room),
-              ),
+              RoomHistorySection(room: room),
             ],
           );
         },
