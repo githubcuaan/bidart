@@ -1,13 +1,16 @@
+import 'package:bidart/core/labels/room_labels.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
+import 'package:bidart/screens/rooms/add_room/add_room.dart';
+import 'package:bidart/screens/rooms/chose_room.dart';
 import 'package:bidart/widgets/async/async_content.dart';
+import 'package:bidart/widgets/room/room_load_error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'add_room.dart';
-import 'chose_room.dart';
-import 'room_presentation.dart';
+import 'widgets/room_list_item.dart';
 
+/// Room list tab: create a room or open an existing one.
 class Rooms extends ConsumerStatefulWidget {
   const Rooms({super.key});
 
@@ -59,6 +62,7 @@ class _RoomsState extends ConsumerState<Rooms> {
           ],
         ),
       ),
+
       Expanded(
         child: AsyncContent(
           value: ref.watch(roomListProvider(_status)),
@@ -71,22 +75,14 @@ class _RoomsState extends ConsumerState<Rooms> {
               ? const Center(child: Text('Chưa có phòng trong danh sách này.'))
               : ListView.builder(
                   itemCount: rooms.length,
-                  itemBuilder: (context, index) {
-                    final room = rooms[index];
-                    return ListTile(
-                      key: ValueKey('room-${room.id}'),
-                      title: Text(room.name),
-                      subtitle: Text(
-                        '${roomStatusLabel(room.status)} · ${room.activePlayerCount} người · ${room.gameCount} ván',
+                  itemBuilder: (context, index) => RoomListItem(
+                    room: rooms[index],
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ChoseRoom(roomId: rooms[index].id),
                       ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ChoseRoom(roomId: room.id),
-                        ),
-                      ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
         ),
       ),
