@@ -14,6 +14,7 @@ import 'package:bidart/screens/rooms/add_room/widgets/role_selectors.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/room_draft_preview.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/rule_template_section.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
+import 'package:bidart/widgets/card/section_card.dart';
 import 'package:bidart/widgets/room/ball_rules_editor/ball_rules_editor.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
@@ -251,26 +252,42 @@ class _AddRoomState extends ConsumerState<AddRoom> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Phòng local · 2–5 người · điểm cộng dồn qua các ván'),
-          const Text(
-            'Tự lưu sau mỗi thao tác; mở lại app để tiếp tục đúng trạng thái.',
+          Text(
+            'Cài đặt & Tạo phòng bắn đền',
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
-          if (error != null)
+          const SizedBox(height: 4),
+          Text(
+            'Phòng local · 2–5 người · điểm cộng dồn qua các ván. '
+            'Tự lưu sau mỗi thao tác; mở lại app để tiếp tục đúng trạng thái.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SectionCard(
+            title: 'Thông tin phòng',
+            description: 'Nhập tên phòng',
+            child: TextField(
+              key: const ValueKey('room-name'),
+              controller: _name,
+              enabled: !saving,
+              decoration: InputDecoration(
+                labelText: 'Tên phòng',
+                errorText: _name.text.trim().isEmpty ? 'Nhận tên phòng.' : null,
+              ),
+              onChanged: (_) => _changed(),
+            ),
+          ),
+          if (error != null) ...[
+            const SizedBox(height: 16),
             CreateRoomErrorPanel(
               error: error,
               enabled: !saving,
               onOpenExisting: _openExisting,
             ),
-          TextField(
-            key: const ValueKey('room-name'),
-            controller: _name,
-            enabled: !saving,
-            decoration: InputDecoration(
-              labelText: 'Tên phòng',
-              errorText: _name.text.trim().isEmpty ? 'Nhận tên phòng.' : null,
-            ),
-            onChanged: (_) => _changed(),
-          ),
+          ],
           const SizedBox(height: 16),
           PlayerRosterEditor(
             players: _players,
@@ -286,6 +303,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               _names[player.id] = TextEditingController();
             }),
           ),
+          const SizedBox(height: 16),
           RoleSelectors(
             players: _players,
             starter: _starter,
