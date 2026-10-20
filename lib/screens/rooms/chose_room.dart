@@ -1,13 +1,13 @@
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
+import 'package:bidart/screens/rooms/in_room/in_room.dart';
+import 'package:bidart/widgets/room/room_details.dart';
+import 'package:bidart/widgets/room/room_load_error.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/widgets/async/async_content.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'in_room.dart';
-import 'room_presentation.dart';
 
 /// One selected room, never a second room list.
 class ChoseRoom extends ConsumerWidget {

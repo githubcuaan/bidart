@@ -9,11 +9,12 @@ import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/models/scoring/rule_template.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/services/room_service.dart';
+import 'package:bidart/widgets/room/ball_rules_editor/ball_toggle_dot.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
-import 'package:bidart/screens/rooms/add_room.dart';
+import 'package:bidart/screens/rooms/add_room/add_room.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
-import 'package:bidart/screens/rooms/in_room.dart';
+import 'package:bidart/screens/rooms/in_room/in_room.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:bidart/widgets/async/async_content.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
@@ -329,7 +330,10 @@ void main() {
             .onChanged,
         isNull,
       );
-      expect(tester.widget<Switch>(key('ball-enabled-1')).onChanged, isNull);
+      expect(
+        tester.widget<BallToggleDot>(key('ball-enabled-1')).onToggle,
+        isNull,
+      );
       await tester.tap(key('submit-room'));
       expect(await repository.listRooms(), isEmpty);
       repository.saveGate!.complete();
