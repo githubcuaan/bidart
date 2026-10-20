@@ -40,18 +40,58 @@ class SectionCard extends StatefulWidget {
   State<SectionCard> createState() => _SectionCardState();
 }
 
-class _SectionCardState extends State<SectionCard> {
+class _SectionCardState extends State<SectionCard>
+    with SingleTickerProviderStateMixin {
+  static const _animationDuration = Duration(milliseconds: 220);
+
   late bool _expanded = widget.initiallyExpanded;
+  late final AnimationController _controller;
+  late final CurvedAnimation _sizeAnimation;
+  late final CurvedAnimation _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: _animationDuration,
+      value: _expanded ? 1 : 0,
+    );
+    _sizeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutCubic,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.2, 1, curve: Curves.easeOut),
+    );
+  }
 
   @override
   void didUpdateWidget(covariant SectionCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initiallyExpanded != widget.initiallyExpanded) {
       _expanded = widget.initiallyExpanded;
+      _controller.value = _expanded ? 1 : 0;
     }
   }
 
-  void _toggle() => setState(() => _expanded = !_expanded);
+  @override
+  void dispose() {
+    _sizeAnimation.dispose();
+    _fadeAnimation.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _expanded = !_expanded);
+    if (_expanded) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,17 +115,29 @@ class _SectionCardState extends State<SectionCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (hasTopRow) _header(context, scheme, canCollapse),
-          if (canCollapse)
-            Visibility(
-              visible: _expanded,
-              maintainState: true,
-              maintainAnimation: true,
-              child: _body(hasTopRow),
-            )
-          else
-            _body(hasTopRow),
+          if (canCollapse) _collapsibleBody(hasTopRow) else _body(hasTopRow),
         ],
       ),
+    );
+  }
+
+  Widget _collapsibleBody(bool hasTopRow) {
+    return AnimatedBuilder(
+      animation: _controller,
+      child: _body(hasTopRow),
+      builder: (context, child) {
+        // Keep the body in the tree once collapsed so its state survives, but
+        // take it out of the widgets tree's semantics and finders.
+        final collapsed = _controller.value == 0;
+        return SizeTransition(
+          sizeFactor: _sizeAnimation,
+          alignment: Alignment.topLeft,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Offstage(offstage: collapsed, child: child),
+          ),
+        );
+      },
     );
   }
 
@@ -154,7 +206,7 @@ class _SectionCardState extends State<SectionCard> {
             visualDensity: VisualDensity.compact,
             icon: AnimatedRotation(
               turns: _expanded ? 0 : 0.5,
-              duration: const Duration(milliseconds: 200),
+              duration: _animationDuration,
               child: const Icon(Icons.expand_less),
             ),
           ),
