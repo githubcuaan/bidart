@@ -254,7 +254,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester.widget<Text>(key('order-preview')).data,
-      'Thứ tự: An → Bình → Khách 3 → Khách 5 → Khách 4',
+      'An → Bình → Khách 3 → Khách 5 → Khách 4',
     );
     await tester.tap(key('submit-room'));
     await tester.pumpAndSettle();
