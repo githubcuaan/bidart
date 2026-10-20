@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 ///
 /// Matches the frame of [BallRulesEditor] so every large block on a page reads
 /// as the same kind of card.
-class SectionCard extends StatelessWidget {
+class SectionCard extends StatefulWidget {
   const SectionCard({
     super.key,
     required this.child,
@@ -13,6 +13,8 @@ class SectionCard extends StatelessWidget {
     this.description,
     this.header,
     this.trailing,
+    this.collapsible = true,
+    this.initiallyExpanded = true,
   });
 
   static const padding = 12.0;
@@ -28,18 +30,42 @@ class SectionCard extends StatelessWidget {
   /// Rendered between the top header row and [child] (e.g. a validation error).
   final Widget? header;
 
+  /// Cards with a header can collapse. Defaults to enabled.
+  final bool collapsible;
+
+  /// Initial state for collapsible cards. Defaults to open.
+  final bool initiallyExpanded;
+
+  @override
+  State<SectionCard> createState() => _SectionCardState();
+}
+
+class _SectionCardState extends State<SectionCard> {
+  late bool _expanded = widget.initiallyExpanded;
+
+  @override
+  void didUpdateWidget(covariant SectionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initiallyExpanded != widget.initiallyExpanded) {
+      _expanded = widget.initiallyExpanded;
+    }
+  }
+
+  void _toggle() => setState(() => _expanded = !_expanded);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final hasTopRow =
-        icon != null ||
-        title != null ||
-        description != null ||
-        trailing != null;
+        widget.icon != null ||
+        widget.title != null ||
+        widget.description != null ||
+        widget.trailing != null;
+    final canCollapse = widget.collapsible && hasTopRow;
 
     return Container(
-      padding: const EdgeInsets.all(padding),
+      padding: const EdgeInsets.all(SectionCard.padding),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow,
         border: Border.all(color: scheme.outlineVariant),
@@ -48,11 +74,33 @@ class SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (hasTopRow)
-            Row(
+          if (hasTopRow) _header(context, scheme, canCollapse),
+          if (canCollapse)
+            Visibility(
+              visible: _expanded,
+              maintainState: true,
+              maintainAnimation: true,
+              child: _body(hasTopRow),
+            )
+          else
+            _body(hasTopRow),
+        ],
+      ),
+    );
+  }
+
+  Widget _header(BuildContext context, ColorScheme scheme, bool canCollapse) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: InkWell(
+            onTap: canCollapse ? _toggle : null,
+            borderRadius: BorderRadius.circular(12),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (icon != null) ...[
+                if (widget.icon != null) ...[
                   Container(
                     width: 40,
                     height: 40,
@@ -60,47 +108,69 @@ class SectionCard extends StatelessWidget {
                       color: scheme.primaryContainer.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(icon, size: 22, color: scheme.primary),
+                    child: Icon(widget.icon, size: 22, color: scheme.primary),
                   ),
-                  if (title != null || description != null)
+                  if (widget.title != null || widget.description != null) ...[
                     const SizedBox(width: 12),
+                  ],
                 ],
-                if (title != null || description != null)
+                if (widget.title != null || widget.description != null)
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (title != null)
+                        if (widget.title != null)
                           Text(
-                            title!,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            widget.title!,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
-                        if (title != null && description != null)
+                        if (widget.title != null &&
+                            widget.description != null) ...[
                           const SizedBox(height: 2),
-                        if (description != null)
+                        ],
+                        if (widget.description != null)
                           Text(
-                            description!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
+                            widget.description!,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
                           ),
                       ],
                     ),
                   ),
-                if (trailing != null) ...[const SizedBox(width: 8), trailing!],
               ],
             ),
-          if (header != null) ...[
-            if (hasTopRow) const SizedBox(height: 6),
-            header!,
-          ],
-          if (hasTopRow || header != null) const SizedBox(height: 12),
-          child,
+          ),
+        ),
+        if (widget.trailing != null) ...[
+          const SizedBox(width: 8),
+          widget.trailing!,
         ],
-      ),
+        if (canCollapse)
+          IconButton(
+            tooltip: _expanded ? 'Thu gọn' : 'Mở rộng',
+            onPressed: _toggle,
+            visualDensity: VisualDensity.compact,
+            icon: AnimatedRotation(
+              turns: _expanded ? 0 : 0.5,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(Icons.expand_less),
+            ),
+          ),
+      ],
     );
   }
+
+  Widget _body(bool hasTopRow) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (widget.header != null) ...[
+        if (hasTopRow) const SizedBox(height: 6),
+        widget.header!,
+      ],
+      if (hasTopRow || widget.header != null) const SizedBox(height: 12),
+      widget.child,
+    ],
+  );
 }
