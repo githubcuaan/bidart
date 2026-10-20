@@ -189,32 +189,51 @@ void main() {
     expect(await repository.listRooms(), isEmpty);
   });
 
-  testWidgets(
-    'rename/reorder preserves IDs; removing selected player clears selection',
-    (tester) async {
-      await pump(tester, const AddRoom());
-      await fill(tester);
-      await tester.tap(key('move-up-draft-2'));
-      await tester.pump();
-      var draft = container.read(createRoomControllerProvider).draft;
-      expect(draft.playerOrder, ['draft-2', 'draft-1']);
-      expect(draft.starterId, 'draft-1');
-      expect(draft.payerId, 'draft-2');
-      await tester.enterText(key('player-name-draft-1'), 'An mới');
-      await tester.tap(key('add-player'));
-      await tester.pump();
-      await tester.enterText(key('player-name-draft-3'), 'Chi');
-      await tester.tap(key('remove-player-draft-1'));
-      await tester.pump();
-      draft = container.read(createRoomControllerProvider).draft;
-      expect(draft.playerOrder, ['draft-2', 'draft-3']);
-      expect(draft.starterId, isEmpty);
-      expect(draft.payerId, 'draft-2');
-      expect(find.text('Chọn người đề-pa.'), findsOneWidget);
-      expect(submit(tester).onPressed, isNull);
-      expect(tester.takeException(), isNull);
-    },
-  );
+  testWidgets('fixed roles stay first two; only later players can reorder', (
+    tester,
+  ) async {
+    await pump(tester, const AddRoom());
+    await fill(tester);
+    expect(tester.widget<IconButton>(key('move-up-draft-2')).onPressed, isNull);
+    expect(
+      tester.widget<IconButton>(key('move-down-draft-1')).onPressed,
+      isNull,
+    );
+    await tester.tap(key('move-up-draft-2'));
+    await tester.pump();
+    var draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.playerOrder, ['draft-1', 'draft-2']);
+    expect(draft.starterId, 'draft-1');
+    expect(draft.payerId, 'draft-2');
+
+    await tester.tap(key('add-player'));
+    await tester.pump();
+    await tester.enterText(key('player-name-draft-3'), 'Chi');
+    await tester.tap(key('add-player'));
+    await tester.pump();
+    await tester.enterText(key('player-name-draft-4'), 'Dũng');
+    await tester.tap(key('move-up-draft-4'));
+    await tester.pump();
+    draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.playerOrder, ['draft-1', 'draft-2', 'draft-4', 'draft-3']);
+    expect(draft.starterId, 'draft-1');
+    expect(draft.payerId, 'draft-2');
+
+    await choose(tester, 'payer-selector', 'Chi');
+    draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.playerOrder, ['draft-1', 'draft-3', 'draft-2', 'draft-4']);
+    expect(draft.payerId, 'draft-3');
+
+    await tester.enterText(key('player-name-draft-1'), 'An mới');
+    await tester.tap(key('remove-player-draft-1'));
+    await tester.pump();
+    draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.starterId, isEmpty);
+    expect(draft.payerId, 'draft-3');
+    expect(find.text('Chọn người đề-pa.'), findsOneWidget);
+    expect(submit(tester).onPressed, isNull);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('starter/payer conflict is inline and disables submit', (
     tester,

@@ -202,6 +202,35 @@ void main() {
         isTrue,
       );
     });
+
+    test('opening order must start with starter then payer', () {
+      expect(
+        RoomValidator.validateOpeningOrder(
+          playerOrder: ['a', 'b', 'c'],
+          starterId: 'a',
+          payerId: 'b',
+        ),
+        isEmpty,
+      );
+      for (final order in [
+        ['b', 'a', 'c'],
+        ['a', 'c', 'b'],
+        ['c', 'a', 'b'],
+      ]) {
+        expect(
+          hasCode(
+            RoomValidator.validateOpeningOrder(
+              playerOrder: order,
+              starterId: 'a',
+              payerId: 'b',
+            ),
+            ValidationCode.invalidOpeningOrder,
+          ),
+          isTrue,
+          reason: order.toString(),
+        );
+      }
+    });
   });
 
   group('rules/end conditions', () {

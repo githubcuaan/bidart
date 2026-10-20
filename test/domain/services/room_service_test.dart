@@ -8,6 +8,7 @@ import 'package:bidart/domain/models/scoring/room_mode.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/services/room_service.dart';
+import 'package:bidart/domain/validation/validation_issue.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -52,7 +53,7 @@ void main() {
     name: ' Table 1 ',
     ownerId: 'local-owner',
     participants: participants ?? players,
-    playerOrder: order ?? ['b', 'a'],
+    playerOrder: order ?? ['a', 'b'],
     starterId: 'a',
     payerId: payerId,
     ballPoints: balls,
@@ -77,7 +78,7 @@ void main() {
       expect(room.participants.first.displayName, 'An');
       expect(players.first.displayName, ' An ');
       expect(room.activePlayerIds, ['a', 'b']);
-      expect(room.playerOrder, ['b', 'a']);
+      expect(room.playerOrder, ['a', 'b']);
       expect(room.scores, {'a': 0, 'b': 0});
       expect(room.scores.values.reduce((a, b) => a + b), 0);
       expect(room.ruleVersions.single.id, 'id-3');
@@ -229,28 +230,49 @@ void main() {
   test(
     'captures draft collections before asynchronous receipt lookup',
     () async {
-      final order = ['b', 'a'];
+      final order = ['a', 'b'];
       final pending = create(order: order);
       players.clear();
       order.clear();
       balls.clear();
       final room = await repository.getRoom(await pending);
       expect(room.participants, hasLength(2));
-      expect(room.playerOrder, ['b', 'a']);
+      expect(room.playerOrder, ['a', 'b']);
       expect(room.ruleVersions.single.ballPoints, hasLength(9));
     },
   );
 
-  test('five-player roster keeps identity and caller-selected order', () async {
+  test('five-player roster keeps identity and fixed opening order', () async {
     players.addAll([
       for (final id in ['c', 'd', 'e'])
         PlayerInGame(id: id, displayName: id, joinedAt: now),
     ]);
-    final id = await create(order: ['c', 'b', 'd', 'e', 'a']);
+    final id = await create(order: ['a', 'b', 'c', 'd', 'e']);
     final room = await repository.getRoom(id);
     expect(room.scores, {'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0});
-    expect(room.playerOrder, ['c', 'b', 'd', 'e', 'a']);
+    expect(room.playerOrder, ['a', 'b', 'c', 'd', 'e']);
     expect(room.games.single.playerOrder, room.playerOrder);
+  });
+
+  test('rejects opening order that moves starter or payer', () async {
+    await expectLater(
+      create(order: ['b', 'a']),
+      throwsA(
+        isA<RepositoryValidationFailure>().having(
+          (e) => e.issues.any(
+            (issue) => issue.code == ValidationCode.invalidOpeningOrder,
+          ),
+          'invalid opening order issue',
+          isTrue,
+        ),
+      ),
+    );
+    await expectLater(
+      create(order: ['c', 'a', 'b']),
+      throwsA(isA<RepositoryValidationFailure>()),
+    );
+    expect(idCalls, 0);
+    expect(await repository.listRooms(), isEmpty);
   });
 
   test('distinct concurrent commands cannot create two active rooms', () async {
