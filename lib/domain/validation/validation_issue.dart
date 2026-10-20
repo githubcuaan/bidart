@@ -8,6 +8,7 @@ enum ValidationCode {
   emptyName,
   duplicateName,
   invalidOrder,
+  invalidOpeningOrder,
   starterNotInRoster,
   payerNotInRoster,
   starterEqualsPayer,

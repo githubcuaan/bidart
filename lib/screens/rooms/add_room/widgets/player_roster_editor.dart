@@ -16,6 +16,9 @@ class PlayerRosterEditor extends StatelessWidget {
     required this.onAdd,
   });
 
+  /// First break player, second initial payer. Their rows never move.
+  static const lockedCount = 2;
+
   final List<PlayerInGame> players;
   final Map<String, TextEditingController> names;
   final String? Function(int index) errorFor;
@@ -29,6 +32,8 @@ class PlayerRosterEditor extends StatelessWidget {
   Widget build(BuildContext context) => SectionCard(
     icon: Icons.group_outlined,
     title: 'Người chơi (${players.length}/5)',
+    description:
+        'Người 1 đề-pa, người 2 đền đầu. Chỉ đổi thứ tự từ người 3 trở đi.',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -51,16 +56,23 @@ class PlayerRosterEditor extends StatelessWidget {
               ),
               IconButton(
                 key: ValueKey('move-up-${players[index].id}'),
-                tooltip: 'Đưa lên',
-                onPressed: enabled && index != 0
+                tooltip: index < lockedCount
+                    ? 'Cố định theo vai trò'
+                    : 'Đưa lên',
+                onPressed: enabled && index > lockedCount
                     ? () => onMove(index, -1)
                     : null,
                 icon: const Icon(Icons.arrow_upward),
               ),
               IconButton(
                 key: ValueKey('move-down-${players[index].id}'),
-                tooltip: 'Đưa xuống',
-                onPressed: enabled && index != players.length - 1
+                tooltip: index < lockedCount
+                    ? 'Cố định theo vai trò'
+                    : 'Đưa xuống',
+                onPressed:
+                    enabled &&
+                        index >= lockedCount &&
+                        index != players.length - 1
                     ? () => onMove(index, 1)
                     : null,
                 icon: const Icon(Icons.arrow_downward),

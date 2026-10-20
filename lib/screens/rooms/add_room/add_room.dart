@@ -80,7 +80,8 @@ class _AddRoomState extends ConsumerState<AddRoom> {
       _names[player.id] = TextEditingController(text: player.displayName);
     }
     _starter = saved.participants.isEmpty ? _players.first.id : saved.starterId;
-    _payer = saved.participants.isEmpty ? _players.last.id : saved.payerId;
+    _payer = saved.participants.isEmpty ? _players[1].id : saved.payerId;
+    _fixRoleOrder();
     for (final ball in _balls) {
       final config = saved.ballPoints[ball];
       _enabled[ball] = config?.enabled ?? true;
@@ -141,13 +142,43 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   }
 
   void _changed([VoidCallback? update]) {
-    setState(() => update?.call());
+    setState(() {
+      update?.call();
+      _fixRoleOrder();
+    });
     ref.read(createRoomControllerProvider.notifier).setDraft(_draft);
   }
 
+  /// The opening order is always starter, initial payer, then the rest. The
+  /// starter and payer rows stay fixed; only later rows can be reordered.
+  void _fixRoleOrder() {
+    if (_starter.isEmpty ||
+        _payer.isEmpty ||
+        _starter == _payer ||
+        !_players.any((player) => player.id == _starter) ||
+        !_players.any((player) => player.id == _payer)) {
+      return;
+    }
+    final starter = _players.firstWhere((player) => player.id == _starter);
+    final payer = _players.firstWhere((player) => player.id == _payer);
+    _players = [
+      starter,
+      payer,
+      ..._players.where(
+        (player) => player.id != _starter && player.id != _payer,
+      ),
+    ];
+  }
+
   void _move(int index, int offset) => _changed(() {
+    final target = index + offset;
+    if (index < PlayerRosterEditor.lockedCount ||
+        target < PlayerRosterEditor.lockedCount ||
+        target >= _players.length) {
+      return;
+    }
     final player = _players.removeAt(index);
-    _players.insert(index + offset, player);
+    _players.insert(target, player);
   });
 
   void _remove(String id) => _changed(() {
