@@ -16,6 +16,7 @@ import 'package:bidart/screens/rooms/in_room/room_end_timer.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/end_conditions_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/next_game_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_error_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_header_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_history_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_info_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_lifecycle_section.dart';
@@ -201,6 +202,12 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                 const EndConditionsSection(),
                 const SizedBox(height: 16),
               ],
+
+              RoomHeaderSection(
+                room: room,
+                now: () => ref.read(clockProvider)(),
+              ),
+              const SizedBox(height: 16),
 
               RoomInfoSection(room: room),
 
