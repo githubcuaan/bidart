@@ -21,6 +21,7 @@
 - Cho thêm người và sửa luật trong lúc chơi; chỉ xoá người giữa hai ván. Người mới bắt đầu 0 điểm và đứng cuối thứ tự; giữ điểm/lịch sử người rời để tổng điểm toàn phòng bằng 0. Guest không được trùng tên; cần 2–5 người hoạt động trước ván mới.
 - Luật sửa chỉ áp dụng từ cú tiếp theo, không tính lại lịch sử; mỗi cú tham chiếu version luật. Sửa thứ tự thủ công giữ nguyên người đang có cơ và người chịu đền; thứ tự mới quyết định người tiếp theo. Undo không vượt qua thay đổi người, luật hoặc thứ tự thủ công.
 - Trước khi bắt đầu ván đầu, thiết lập thứ tự bắn và người chịu đền để có người swap khi lỗi đề-pa. Không suy ra payer từ một ván trước chưa tồn tại.
+- Thứ tự ván đầu cố định: người đề-pa đứng đầu, người đền đầu đứng thứ hai; chỉ được đổi thứ tự từ người thứ ba trở đi.
 
 ## Chuỗi đề-pa
 

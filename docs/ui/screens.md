@@ -64,7 +64,7 @@ Màn hình hiển thị các trận đã tạo hoặc đã tham gia.
 Màn hình thiết lập trận trước khi bắt đầu.
 
 - Chọn số lượng người chơi và thêm người chơi theo tên hoặc hồ sơ.
-- Chọn người bắn trước, người chịu đền và thứ tự lượt ban đầu.
+- Chọn người bắn trước, người chịu đền và thứ tự lượt ban đầu. Người bắn trước đứng thứ nhất, người chịu đền đứng thứ hai; chỉ sửa được thứ tự từ người thứ ba trở đi.
 - Chọn loại trận theo luật 9 bi cơ bản.
 - Cấu hình các bi có điểm và số điểm tương ứng cho từng bi.
 - Hiển thị tóm tắt luật trước khi tạo phòng.
