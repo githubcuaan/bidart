@@ -35,8 +35,8 @@ class BallRulesEditor extends StatelessWidget {
 
   /// Horizontal inset used by the point box and the error line.
   static const _cellPadding = 8.0;
-  static const _dotSize = 50.0;
-  static const _dotBox = 56.0;
+  static const _dotSize = 54.0;
+  static const _dotBox = 60.0;
   static const _fieldHeight = 30.0;
   static const _errorHeight = 12.0;
   static const _spacing = 10.0;
@@ -59,6 +59,7 @@ class BallRulesEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SectionCard(
+    icon: Icons.tune_outlined,
     title: title,
     description: description,
     header: header,

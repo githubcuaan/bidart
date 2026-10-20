@@ -22,7 +22,8 @@ class EndConditionsFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SectionCard(
-    title: 'Kết thúc sớm',
+    icon: Icons.flag_outlined,
+    title: 'Điều kiện kết thúc',
     description: 'Để trống nếu không giới hạn thời gian hoặc điểm.',
     child: Column(
       children: [
@@ -32,6 +33,7 @@ class EndConditionsFields extends StatelessWidget {
           enabled: enabled,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
+            suffixIcon: Icon(Icons.timer_outlined),
             labelText: 'Thời lượng (giây, tùy chọn)',
             errorText: durationError,
           ),
@@ -43,6 +45,7 @@ class EndConditionsFields extends StatelessWidget {
           enabled: enabled,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
+            suffixIcon: Icon(Icons.emoji_events_outlined),
             labelText: 'Ngưỡng điểm (tùy chọn)',
             errorText: thresholdError,
           ),

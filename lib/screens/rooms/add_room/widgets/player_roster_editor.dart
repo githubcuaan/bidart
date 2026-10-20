@@ -27,6 +27,7 @@ class PlayerRosterEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SectionCard(
+    icon: Icons.group_outlined,
     title: 'Người chơi (${players.length}/5)',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,6 +75,7 @@ class PlayerRosterEditor extends StatelessWidget {
               ),
             ],
           ),
+        SizedBox(height: 10),
         TextButton.icon(
           key: const ValueKey('add-player'),
           onPressed: enabled && players.length < 5 ? onAdd : null,

@@ -265,8 +265,10 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 30),
+
           SectionCard(
+            icon: Icons.meeting_room_outlined,
             title: 'Thông tin phòng',
             description: 'Nhập tên phòng',
             child: TextField(
@@ -289,6 +291,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             ),
           ],
           const SizedBox(height: 16),
+
           PlayerRosterEditor(
             players: _players,
             names: _names,
@@ -304,6 +307,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             }),
           ),
           const SizedBox(height: 16),
+
           RoleSelectors(
             players: _players,
             starter: _starter,
@@ -321,6 +325,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             }),
           ),
           const SizedBox(height: 16),
+
           BallRulesEditor(
             enabled: _enabled,
             fields: _points,
@@ -329,7 +334,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             onToggle: (ball) =>
                 _changed(() => _enabled[ball] = !_enabled[ball]!),
             onEdit: _changed,
-            title: 'Điểm bi 1–9',
+            title: 'Cấu hình điểm số từng bi',
             description: 'Chạm ảnh bi để bật/tắt; bi tắt không tạo điểm.',
             header:
                 issues.any(
@@ -339,6 +344,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
                 : null,
           ),
           const SizedBox(height: 16),
+
           EndConditionsFields(
             duration: _duration,
             threshold: _threshold,
@@ -352,6 +358,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             onChanged: _changed,
           ),
           const SizedBox(height: 16),
+
           RoomDraftPreview(
             order: _players.map(_label).join(' → '),
             starter:
@@ -363,12 +370,13 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             payer:
                 _players.where((p) => p.id == _payer).map(_label).firstOrNull ??
                 'Chưa chọn',
-            rules: [
+            rules: {
               for (final ball in _balls)
-                'Bi $ball: ${_enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt'}',
-            ].join(' · '),
+                ball: _enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt',
+            },
           ),
           const SizedBox(height: 16),
+
           RuleTemplateSection(
             templateName: _templateName,
             enabled: !saving,

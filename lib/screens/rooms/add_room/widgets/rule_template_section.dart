@@ -27,6 +27,7 @@ class RuleTemplateSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final saveState = ref.watch(ruleTemplateSaveControllerProvider);
     return SectionCard(
+      icon: Icons.bookmark_outlined,
       title: 'Luật yêu thích',
       description:
           'Lưu bản hiện tại để tái dùng cho phòng mới; không sửa phòng cũ.',
@@ -52,6 +53,7 @@ class RuleTemplateSection extends ConsumerWidget {
             icon: const Icon(Icons.bookmark_add_outlined),
             label: Text(saveState.isLoading ? 'Đang lưu mẫu…' : 'Lưu mẫu luật'),
           ),
+          SizedBox(height: 4),
           AsyncContent<List<RuleTemplate>>(
             value: ref.watch(ruleTemplateListProvider),
             loadingBuilder: (_) => const SizedBox.shrink(),

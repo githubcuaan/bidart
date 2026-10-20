@@ -27,6 +27,7 @@ class RoleSelectors extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SectionCard(
+    icon: Icons.assignment_ind_outlined,
     title: 'Vai trò',
     child: Column(
       children: [
@@ -35,7 +36,7 @@ class RoleSelectors extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: InputDecorator(
               decoration: InputDecoration(
-                labelText: isStarter ? 'Người đề-pa' : 'Người trả đầu',
+                labelText: isStarter ? 'Người đề-pa' : 'Người đền đầu',
                 errorText: isStarter ? starterError : payerError,
               ),
               child: DropdownButtonHideUnderline(
