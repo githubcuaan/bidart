@@ -194,13 +194,13 @@ void main() {
   ) async {
     await pump(tester, const AddRoom());
     await fill(tester);
-    expect(tester.widget<IconButton>(key('move-up-draft-2')).onPressed, isNull);
-    expect(
-      tester.widget<IconButton>(key('move-down-draft-1')).onPressed,
-      isNull,
-    );
-    await tester.tap(key('move-up-draft-2'));
-    await tester.pump();
+    expect(key('role-badge-draft-1'), findsOneWidget);
+    expect(key('role-badge-draft-2'), findsOneWidget);
+    expect(key('locked-player-draft-1'), findsOneWidget);
+    expect(key('locked-player-draft-2'), findsOneWidget);
+    expect(key('move-up-draft-2'), findsNothing);
+    expect(key('move-down-draft-1'), findsNothing);
+    expect(find.text('Thứ tự lượt chơi tiếp theo'), findsNothing);
     var draft = container.read(createRoomControllerProvider).draft;
     expect(draft.playerOrder, ['draft-1', 'draft-2']);
     expect(draft.starterId, 'draft-1');
@@ -212,6 +212,7 @@ void main() {
     await tester.tap(key('add-player'));
     await tester.pump();
     await tester.enterText(key('player-name-draft-4'), 'Dũng');
+    expect(find.text('Thứ tự lượt chơi tiếp theo'), findsOneWidget);
     await tester.tap(key('move-up-draft-4'));
     await tester.pump();
     draft = container.read(createRoomControllerProvider).draft;
