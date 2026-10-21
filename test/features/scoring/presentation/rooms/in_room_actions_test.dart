@@ -12,6 +12,7 @@ import 'package:bidart/domain/services/room_commands.dart';
 import 'package:bidart/domain/services/score_engine.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/screens/rooms/in_room/in_room.dart';
+import 'package:bidart/widgets/room/ball_rules_editor/ball_toggle_dot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -154,7 +155,7 @@ void main() {
       expect(committed.scores['A'], 30);
       expect(key('pot-ball-1'), findsNothing);
       await visible(tester, 'pot-ball-2');
-      expect(tester.widget<FilterChip>(key('pot-ball-2')).selected, isFalse);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-2')).enabled, isFalse);
       await tap(tester, 'room-history');
       expect(find.textContaining('#1 A'), findsOneWidget);
     },
@@ -171,17 +172,17 @@ void main() {
       await tap(tester, 'record-turn');
       expect((await latest()).games.single.turns, isEmpty);
       await visible(tester, 'pot-ball-9');
-      expect(tester.widget<FilterChip>(key('pot-ball-9')).selected, isTrue);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isTrue);
       final id = repo.commands.last;
       await tap(tester, 'retry-action');
       expect(repo.commands.last, id);
       expect((await latest()).games.single.turns.length, 1);
       await visible(tester, 'pot-ball-9');
-      expect(tester.widget<FilterChip>(key('pot-ball-9')).selected, isFalse);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isFalse);
     },
   );
   testWidgets(
-    'in-flight save disables chips and confirm; double tap cannot duplicate',
+    'in-flight save disables ball picker and confirm; double tap cannot duplicate',
     (tester) async {
       await show(tester);
       await tap(tester, 'pot-ball-1');
@@ -190,7 +191,7 @@ void main() {
       await tester.tap(key('record-turn'));
       await tester.pump();
       expect(tester.widget<FilledButton>(key('record-turn')).onPressed, isNull);
-      expect(tester.widget<FilterChip>(key('pot-ball-1')).onSelected, isNull);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-1')).onToggle, isNull);
       await tester.tap(key('record-turn'));
       await tester.pump();
       expect((await latest()).revision, 0);
@@ -398,7 +399,7 @@ void main() {
       await tester.pumpAndSettle();
       expect((await latest()).pendingEndReasons, isNotEmpty);
       await visible(tester, 'pot-ball-9');
-      expect(tester.widget<FilterChip>(key('pot-ball-9')).selected, isTrue);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isTrue);
     },
   );
   testWidgets(

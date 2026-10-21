@@ -27,12 +27,20 @@ class TurnFoulToggle extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) => SwitchListTile(
-    key: const ValueKey('turn-foul'),
-    contentPadding: EdgeInsets.zero,
-    title: const Text('Có lỗi trong cú này'),
-    subtitle: Text('Phân loại: $foulLabel'),
-    value: foul,
-    onChanged: enabled ? onChanged : null,
-  );
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return SwitchListTile(
+      key: const ValueKey('turn-foul'),
+      contentPadding: EdgeInsets.zero,
+      title: const Text('Có lỗi trong cú này'),
+      secondary: Icon(
+        foul ? Icons.warning_amber_rounded : Icons.warning_amber_outlined,
+        color: foul ? scheme.error : scheme.onSurfaceVariant,
+      ),
+      subtitle: Text('Phân loại: $foulLabel'),
+      value: foul,
+      onChanged: enabled ? onChanged : null,
+    );
+  }
 }

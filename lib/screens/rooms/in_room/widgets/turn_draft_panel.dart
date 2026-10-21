@@ -2,7 +2,7 @@ import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/score_log.dart';
 import 'package:bidart/domain/services/score_engine.dart';
 import 'package:bidart/core/labels/room_labels.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/ball_selection_chips.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/ball_selection_grid.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/foul_toggle.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/turn_actions.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/turn_preview_panel.dart';
@@ -46,8 +46,8 @@ class TurnDraftPanel extends StatelessWidget {
     children: [
       const Divider(),
       ChainLabel(isBreakChain: preview?.game.chainState.isBreakChain ?? false),
-      const Text('Chọn bi đã ăn (bi tắt điểm vẫn ghi nhận):'),
-      BallSelectionChips(
+      SizedBox(height: 4),
+      BallSelectionGrid(
         remainingBalls: remainingBalls,
         selected: selectedBalls,
         enabled: !busy,
