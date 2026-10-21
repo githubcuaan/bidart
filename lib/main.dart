@@ -1,4 +1,5 @@
 import 'package:bidart/core/theme/app_theme.dart';
+import 'package:bidart/core/theme/theme_mode_controller.dart';
 import 'package:bidart/data/local/app_database.dart';
 import 'package:bidart/data/repositories/game_repository.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
@@ -22,17 +23,16 @@ Future<void> main() async {
   );
 }
 
-class BidartApp extends StatelessWidget {
+class BidartApp extends ConsumerWidget {
   const BidartApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Bidart',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      // The product design is dark-only (docs/ui/ui_description.md).
-      themeMode: ThemeMode.dark,
+      themeMode: ref.watch(themeModeProvider),
       home: const Mainscreen(),
     );
   }
