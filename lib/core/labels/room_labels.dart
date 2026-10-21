@@ -26,6 +26,13 @@ String gameStatusLabel(GameStatus status) => switch (status) {
   GameStatus.cancelled => 'Đã hủy',
 };
 
+String historyGameStatusLabel(GameStatus status) => switch (status) {
+  GameStatus.inProgress => 'Đang chơi',
+  GameStatus.finished => 'Đã xong',
+  GameStatus.incomplete => 'Chưa xong',
+  GameStatus.cancelled => 'Đã huỷ',
+};
+
 String validationMessage(ValidationCode code) => switch (code) {
   ValidationCode.rosterSize => 'Cần từ 2 đến 5 người chơi.',
   ValidationCode.emptyName => 'Nhập tên người chơi.',
