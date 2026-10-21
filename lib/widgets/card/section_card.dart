@@ -13,6 +13,7 @@ class SectionCard extends StatefulWidget {
     this.description,
     this.header,
     this.trailing,
+    this.surface,
     this.collapsible = true,
     this.initiallyExpanded = true,
   });
@@ -26,6 +27,10 @@ class SectionCard extends StatefulWidget {
 
   /// Optional widget on the right side of the header row (e.g. a badge or action).
   final Widget? trailing;
+
+  /// Overrides the card background. Defaults to `surfaceContainerLow`; pass a
+  /// darker tone for a nested card that should read as recessed.
+  final Color? surface;
 
   /// Rendered between the top header row and [child] (e.g. a validation error).
   final Widget? header;
@@ -104,19 +109,22 @@ class _SectionCardState extends State<SectionCard>
         widget.trailing != null;
     final canCollapse = widget.collapsible && hasTopRow;
 
-    return Container(
-      padding: const EdgeInsets.all(SectionCard.padding),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        border: Border.all(color: scheme.outlineVariant),
+    return Material(
+      color: widget.surface ?? scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (hasTopRow) _header(context, scheme, canCollapse),
-          if (canCollapse) _collapsibleBody(hasTopRow) else _body(hasTopRow),
-        ],
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(SectionCard.padding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (hasTopRow) _header(context, scheme, canCollapse),
+            if (canCollapse) _collapsibleBody(hasTopRow) else _body(hasTopRow),
+          ],
+        ),
       ),
     );
   }

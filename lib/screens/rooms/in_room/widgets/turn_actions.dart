@@ -19,17 +19,17 @@ class TurnActions extends StatelessWidget {
   final VoidCallback onRecord;
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) => Row(
     children: [
-      TextButton(
-        key: const ValueKey('clear-turn-draft'),
-        onPressed: clearEnabled ? onClear : null,
-        child: const Text('Xoá bản nháp'),
-      ),
       FilledButton(
         key: const ValueKey('record-turn'),
         onPressed: recordEnabled && !saving ? onRecord : null,
         child: Text(saving ? 'Đang lưu…' : 'Xác nhận cú đánh'),
+      ),
+      TextButton(
+        key: const ValueKey('clear-turn-draft'),
+        onPressed: clearEnabled ? onClear : null,
+        child: const Text('Xoá bản nháp'),
       ),
     ],
   );

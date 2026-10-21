@@ -13,14 +13,18 @@ import 'package:bidart/screens/rooms/dialogs/order_dialog.dart';
 import 'package:bidart/screens/rooms/dialogs/replacement_dialog.dart';
 import 'package:bidart/screens/rooms/dialogs/rules_dialog.dart';
 import 'package:bidart/screens/rooms/in_room/room_end_timer.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_error_panel.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_history_panel.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_lifecycle_actions.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/room_management_actions.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/turn_draft_panel.dart';
+import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/end_conditions_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/next_game_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_error_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_header_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_history_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_info_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_lifecycle_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_management_section.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/turn_section.dart';
 import 'package:bidart/widgets/async/async_content.dart';
 import 'package:bidart/widgets/dialog/confirm_dialog.dart';
-import 'package:bidart/widgets/room/room_details.dart';
 import 'package:bidart/widgets/room/room_load_error.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +104,9 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
       appBar: AppBar(title: const Text('Trong phòng')),
       body: AsyncContent<Room>(
         value: ref.watch(roomByIdProvider(widget.roomId)),
-        skipLoadingOnRefresh: false,
+        // Keep the live board mounted while a command refreshes the room, so
+        // turn cards can animate instead of being rebuilt from scratch.
+        skipLoadingOnRefresh: true,
         errorBuilder: (context, error, _) => RoomLoadError(
           error: error,
           onRetry: () => ref.invalidate(roomByIdProvider(widget.roomId)),
@@ -162,97 +168,120 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                 (e) => e.isUndoBarrier && e.revision > last.revision,
               );
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
+          return Column(
             children: [
-              if (active &&
-                  game.status == GameStatus.finished &&
-                  room.pendingEndReasons.isEmpty)
-                FilledButton(
-                  key: const ValueKey('next-game'),
-                  onPressed: busy ? null : () => _next(room),
-                  child: Text(
-                    next.isLoading ? 'Đang lưu…' : 'Bắt đầu ván tiếp',
-                  ),
-                ),
-
-              if (busy) const LinearProgressIndicator(),
-
-              if (active && error != null)
-                RoomErrorPanel(
-                  message: roomFailureMessage(error),
-                  enabled: !busy,
-                  fromNextGame: next.hasError,
-                  onRetry: _retry,
-                  onReload: () {
-                    _endTimer.invalidateSchedule();
-                    ref.invalidate(roomByIdProvider(room.id));
-                  },
-                ),
-
-              if (room.pendingEndReasons.isNotEmpty)
-                const Text(
-                  'Đã đạt điều kiện kết thúc — đánh hết ván rồi đóng phòng.',
-                ),
-
-              RoomDetails(room: room),
-
-              if (playing)
-                TurnDraftPanel(
-                  room: room,
-                  remainingBalls: game.remainingBalls.toList()..sort(),
-                  selectedBalls: _balls,
-                  foul: _foul,
-                  foulLabel: foul.name,
-                  busy: busy,
-                  preview: preview,
-                  previewError: previewError,
-                  onToggleBall: (ball) => setState(
-                    () => _balls.contains(ball)
-                        ? _balls.remove(ball)
-                        : _balls.add(ball),
-                  ),
-                  onToggleFoul: (value) => setState(() => _foul = value),
-                  onClear: _clearDraft,
-                  onRecord: () async {
-                    final result = await _act(
-                      room,
-                      RoomAction(
-                        RoomActionKind.record,
-                        gameId: game.id,
-                        actorId: game.currentPlayerId,
-                        balls: _balls.toList(),
-                        foul: foul,
+              SizedBox(
+                height: busy ? 4 : 0,
+                child: busy ? const LinearProgressIndicator() : null,
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    if (active &&
+                        game.status == GameStatus.finished &&
+                        room.pendingEndReasons.isEmpty) ...[
+                      NextGameSection(
+                        gameNumber: game.gameNumber,
+                        loading: next.isLoading,
+                        onStart: busy ? null : () => _next(room),
                       ),
-                    );
-                    if (result != null && mounted) _clearDraft();
-                  },
-                ),
+                      const SizedBox(height: 16),
+                    ],
 
-              if (active) ...[
-                RoomManagementActions(
-                  room: room,
-                  enabled: !busy,
-                  canUndo: canUndo,
-                  canAddPlayer: room.activePlayerIds.length < 5,
-                  canRemovePlayers:
-                      game.status == GameStatus.finished &&
-                      room.activePlayerIds.length > 2,
-                  onUndo: () => _undo(room),
-                  onAddPlayer: () => _edit(room, RoomActionKind.add),
-                  onEditRules: () => _edit(room, RoomActionKind.rules),
-                  onEditOrder: () => _edit(room, RoomActionKind.order),
-                  onRemovePlayer: (id) => _removePlayer(room, id),
-                ),
+                    if (active && error != null) ...[
+                      RoomErrorSection(
+                        message: roomFailureMessage(error),
+                        enabled: !busy,
+                        fromNextGame: next.hasError,
+                        onRetry: _retry,
+                        onReload: () {
+                          _endTimer.invalidateSchedule();
+                          ref.invalidate(roomByIdProvider(room.id));
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
 
-                RoomLifecycleActions(
-                  enabled: !busy,
-                  onFinish: () => _finish(room, cancel: false),
-                  onCancel: () => _finish(room, cancel: true),
-                ),
-              ],
+                    if (room.pendingEndReasons.isNotEmpty) ...[
+                      const EndConditionsSection(),
+                      const SizedBox(height: 16),
+                    ],
 
-              RoomHistoryPanel(room: room),
+                    RoomHeaderSection(
+                      room: room,
+                      now: () => ref.read(clockProvider)(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    RoomInfoSection(room: room),
+                    const SizedBox(height: 16),
+
+                    TurnScoresSection(room: room),
+
+                    if (playing) ...[
+                      const SizedBox(height: 16),
+                      TurnSection(
+                        room: room,
+                        remainingBalls: game.remainingBalls.toList()..sort(),
+                        selectedBalls: _balls,
+                        foul: _foul,
+                        foulLabel: foul.name,
+                        busy: busy,
+                        preview: preview,
+                        previewError: previewError,
+                        onToggleBall: (ball) => setState(
+                          () => _balls.contains(ball)
+                              ? _balls.remove(ball)
+                              : _balls.add(ball),
+                        ),
+                        onToggleFoul: (value) => setState(() => _foul = value),
+                        onClear: _clearDraft,
+                        onRecord: () async {
+                          final result = await _act(
+                            room,
+                            RoomAction(
+                              RoomActionKind.record,
+                              gameId: game.id,
+                              actorId: game.currentPlayerId,
+                              balls: _balls.toList(),
+                              foul: foul,
+                            ),
+                          );
+                          if (result != null && mounted) _clearDraft();
+                        },
+                      ),
+                    ],
+
+                    if (active) ...[
+                      const SizedBox(height: 16),
+                      RoomManagementSection(
+                        room: room,
+                        enabled: !busy,
+                        canUndo: canUndo,
+                        canAddPlayer: room.activePlayerIds.length < 5,
+                        canRemovePlayers:
+                            game.status == GameStatus.finished &&
+                            room.activePlayerIds.length > 2,
+                        onUndo: () => _undo(room),
+                        onAddPlayer: () => _edit(room, RoomActionKind.add),
+                        onEditRules: () => _edit(room, RoomActionKind.rules),
+                        onEditOrder: () => _edit(room, RoomActionKind.order),
+                        onRemovePlayer: (id) => _removePlayer(room, id),
+                      ),
+                      const SizedBox(height: 16),
+                      RoomLifecycleSection(
+                        enabled: !busy,
+                        onFinish: () => _finish(room, cancel: false),
+                        onCancel: () => _finish(room, cancel: true),
+                      ),
+                    ],
+
+                    const SizedBox(height: 16),
+                    RoomHistorySection(room: room),
+                  ],
+                ),
+              ),
             ],
           );
         },

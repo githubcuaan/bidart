@@ -1,5 +1,4 @@
 import 'package:bidart/domain/models/scoring/room.dart';
-import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/core/labels/room_labels.dart';
 import 'package:flutter/material.dart';
 
@@ -21,11 +20,6 @@ class RoomDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(room.name, style: Theme.of(context).textTheme.headlineSmall),
-        Text(roomStatusLabel(room.status)),
-        if (room.status != RoomStatus.active)
-          const Text('Phòng chỉ đọc — không thể thay đổi kết quả.'),
-        const SizedBox(height: 16),
         const Text('Điểm cộng dồn'),
         for (final player in room.participants)
           ListTile(
@@ -61,10 +55,6 @@ class RoomDetails extends StatelessWidget {
                 .join(' · '),
           ),
         ],
-        if (room.endConditions.durationSeconds case final int seconds)
-          Text('Thời lượng: $seconds giây'),
-        if (room.endConditions.scoreThreshold case final int threshold)
-          Text('Ngưỡng điểm: $threshold'),
         const SizedBox(height: 16),
         const Text(
           'Phòng tự lưu local; đóng/mở app vẫn giữ nguyên trạng thái.',
