@@ -147,8 +147,9 @@ void main() {
       await show(tester);
       await tap(tester, 'pot-ball-1');
       expect((await latest()).games.single.turns, isEmpty);
-      expect(find.text('A: +30'), findsOneWidget);
-      expect(find.text('B: -10'), findsOneWidget);
+      expect(find.text('A ăn Bi 1:'), findsOneWidget);
+      expect(find.text('+30 điểm'), findsOneWidget);
+      expect(find.text('-10 điểm'), findsNWidgets(3));
       await tap(tester, 'record-turn');
       final committed = await latest();
       expect(committed.games.single.turns.length, 1);
@@ -294,7 +295,8 @@ void main() {
       await tester.pumpAndSettle();
       expect((await latest()).currentRuleVersion, 2);
       await tap(tester, 'pot-ball-1');
-      expect(find.text('A: +75'), findsOneWidget);
+      expect(find.text('A ăn Bi 1:'), findsOneWidget);
+      expect(find.text('+75 điểm'), findsOneWidget);
     },
   );
   testWidgets(
