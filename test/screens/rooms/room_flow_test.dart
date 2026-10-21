@@ -129,6 +129,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> expandRoomInfo(WidgetTester tester) async {
+    await tester.tap(find.text('Thông tin phòng'));
+    await tester.pumpAndSettle();
+  }
+
   Future<Room> seed({
     String name = 'Phòng có sẵn',
     RoomStatus status = RoomStatus.active,
@@ -558,6 +563,7 @@ void main() {
     await tester.tap(key('open-room'));
     await tester.pumpAndSettle();
     expect(find.byType(InRoom), findsOneWidget);
+    await expandRoomInfo(tester);
     expect(find.text('An'), findsOneWidget);
     expect(find.text('ĐANG CÓ CƠ'), findsOneWidget);
     expect(find.text('Người trả: Bình'), findsOneWidget);
@@ -775,6 +781,7 @@ void main() {
     expect(updated.games, hasLength(2));
     expect(updated.scores, room.scores);
     expect(updated.ruleVersions, room.ruleVersions);
+    await expandRoomInfo(tester);
     expect(find.text('Ván 2 · Đang chơi'), findsOneWidget);
     expect(key('next-game'), findsNothing);
   });
