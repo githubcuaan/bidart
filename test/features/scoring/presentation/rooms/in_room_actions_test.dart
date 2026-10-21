@@ -119,8 +119,6 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Nhật ký'));
-    await tester.pumpAndSettle();
   }
 
   Future<void> tapExpanded(WidgetTester tester, String name) async {
@@ -176,8 +174,47 @@ void main() {
       await visible(tester, 'pot-ball-2');
       expect(tester.widget<BallToggleDot>(key('pot-ball-2')).enabled, isFalse);
       await expandHistory(tester);
-      await tapExpanded(tester, 'room-history');
-      expect(find.textContaining('#1 A'), findsOneWidget);
+      expect(key('history-game-1'), findsOneWidget);
+      await tapExpanded(tester, 'history-game-1');
+      final sheet = key('history-game-sheet');
+      expect(sheet, findsOneWidget);
+      expect(
+        find.descendant(of: sheet, matching: find.text('+30')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: sheet,
+          matching: find.textContaining('đền', findRichText: true),
+        ),
+        findsWidgets,
+      );
+      await tester.tap(key('close-history-game'));
+      await tester.pumpAndSettle();
+      expect(sheet, findsNothing);
+    },
+  );
+  testWidgets(
+    'finished history row shows stored winner and opens turn timeline',
+    (tester) async {
+      await win();
+      await show(tester);
+      await expandHistory(tester);
+      expect(find.text('Ván 1'), findsOneWidget);
+      expect(find.text('Đã xong'), findsOneWidget);
+      expect(find.textContaining('A thắng'), findsOneWidget);
+      expect(find.textContaining('(+240)'), findsOneWidget);
+      await tapExpanded(tester, 'history-game-1');
+      final sheet = key('history-game-sheet');
+      expect(sheet, findsOneWidget);
+      expect(
+        find.descendant(of: sheet, matching: find.text('+240')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: sheet, matching: find.text('9')),
+        findsOneWidget,
+      );
     },
   );
   testWidgets(
@@ -501,7 +538,7 @@ void main() {
     await tester.tap(find.text('Bỏ qua'));
     await tester.pumpAndSettle();
     await expandHistory(tester);
-    await tapExpanded(tester, 'room-history');
+    expect(key('room-history'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
