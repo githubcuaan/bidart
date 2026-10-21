@@ -564,9 +564,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(InRoom), findsOneWidget);
     await expandRoomInfo(tester);
-    expect(find.text('An'), findsOneWidget);
+    expect(tester.widget<Text>(key('room-info-current-player')).data, 'An');
     expect(find.text('ĐANG CÓ CƠ'), findsOneWidget);
-    expect(find.text('Người trả: Bình'), findsOneWidget);
+    expect(tester.widget<Text>(key('room-info-payer')).data, 'Bình');
     expect(key('next-game'), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();
@@ -782,7 +782,7 @@ void main() {
     expect(updated.scores, room.scores);
     expect(updated.ruleVersions, room.ruleVersions);
     await expandRoomInfo(tester);
-    expect(find.text('Ván 2 · Đang chơi'), findsOneWidget);
+    expect(tester.widget<Text>(key('room-info-game')).data, '2 · Đang chơi');
     expect(key('next-game'), findsNothing);
   });
 
