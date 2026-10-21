@@ -1,14 +1,22 @@
+import 'package:bidart/features/matchmaking/provider/matchmaking_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FilterModal extends StatefulWidget {
+class FilterModal extends ConsumerStatefulWidget {
   const FilterModal({super.key});
 
   @override
-  State<FilterModal> createState() => _FilterModalState();
+  ConsumerState<FilterModal> createState() => _FilterModalState();
 }
 
-class _FilterModalState extends State<FilterModal> {
-  double maxDistance = 10.0;
+class _FilterModalState extends ConsumerState<FilterModal> {
+  late double maxDistance;
+
+  @override
+  void initState() {
+    super.initState();
+    maxDistance = ref.read(matchmakingFilterProvider).maxDistanceKm;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,17 +54,6 @@ class _FilterModalState extends State<FilterModal> {
               setState(() => maxDistance = val);
             },
           ),
-          const SizedBox(height: 12),
-          const Text('Ưu tiên thể loại:', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              FilterChip(label: const Text('Bida Lỗ (Pool)'), selected: true, onSelected: (_) {}),
-              FilterChip(label: const Text('Carom 3C'), selected: false, onSelected: (_) {}),
-              FilterChip(label: const Text('Libre'), selected: false, onSelected: (_) {}),
-            ],
-          ),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -67,7 +64,10 @@ class _FilterModalState extends State<FilterModal> {
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                ref.read(matchmakingFilterProvider.notifier).updateDistance(maxDistance);
+                Navigator.pop(context);
+              },
               child: const Text('Áp dụng bộ lọc'),
             ),
           ),

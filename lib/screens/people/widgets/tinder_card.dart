@@ -1,4 +1,4 @@
-import 'package:bidart/models/user.dart';
+import 'package:bidart/domain/models/user/user.dart';
 import 'package:flutter/material.dart';
 
 class TinderCard extends StatelessWidget {
@@ -15,6 +15,8 @@ class TinderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final avatar = user.avatarUrl ?? '';
+
     return Dismissible(
       key: Key(user.id),
       onDismissed: (direction) {
@@ -68,21 +70,21 @@ class TinderCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              user.avatar,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.grey[300],
-                child: const Icon(Icons.person, size: 100),
-              ),
-            ),
+            if (avatar.isNotEmpty)
+              Image.network(
+                avatar,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _buildDefaultBackground(),
+              )
+            else
+              _buildDefaultBackground(),
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [Colors.transparent, Colors.black87],
-                  stops: [0.6, 1.0],
+                  stops: [0.55, 1.0],
                 ),
               ),
             ),
@@ -97,10 +99,10 @@ class TinderCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          user.name,
+                          '${user.name} • ${user.age}t',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 24,
+                            fontSize: 23,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -112,7 +114,7 @@ class TinderCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Hạng ${user.level.code}',
+                          'Hạng ${user.selfDeclaredLevel.code}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -121,12 +123,77 @@ class TinderCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Trình độ: ${user.level.displayName} • ${user.level.description}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        '${user.selfDeclaredLevel.displayName} • ${user.gender}',
+                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'Thắng ${user.winRate.toInt()}% (ELO ${user.eloRating})',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
                   ),
+                  if (user.address.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 14, color: Colors.white70),
+                        const SizedBox(width: 4),
+                        Text(
+                          user.address,
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultBackground() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF2E1A47), Color(0xFF6A0DAD)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 46,
+              backgroundColor: Colors.white12,
+              child: Text(
+                user.name.isNotEmpty
+                    ? user.name.trim().split(' ').last.substring(0, 1).toUpperCase()
+                    : 'P',
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '🎱 BIDART PLAYER',
+              style: TextStyle(
+                color: Colors.white54,
+                letterSpacing: 2,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
