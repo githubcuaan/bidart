@@ -311,10 +311,16 @@ void main() {
     expect(find.text('Bật tính điểm ít nhất một bi.'), findsOneWidget);
     expect(submit(tester).onPressed, isNull);
     await tester.tap(key('ball-enabled-1'));
-    await tester.enterText(key('duration-seconds'), '0');
+    await tester.tap(key('duration-3600'));
     await tester.pump();
-    expect(submit(tester).onPressed, isNull);
-    await tester.enterText(key('duration-seconds'), '600');
+    expect(
+      container
+          .read(createRoomControllerProvider)
+          .draft
+          .endConditions
+          .durationSeconds,
+      3600,
+    );
     await tester.enterText(key('score-threshold'), 'no');
     await tester.pump();
     expect(submit(tester).onPressed, isNull);
@@ -324,7 +330,7 @@ void main() {
     await tester.tap(key('submit-room'));
     await tester.pumpAndSettle();
     final room = (await repository.listRooms()).single;
-    expect(room.endConditions.durationSeconds, 600);
+    expect(room.endConditions.durationSeconds, 3600);
     expect(room.endConditions.scoreThreshold, 100);
     expect(room.ruleVersions.single.ballPoints[1]!.points, 10);
     expect(room.ruleVersions.single.ballPoints[2]!.enabled, false);
