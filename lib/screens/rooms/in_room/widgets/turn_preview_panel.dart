@@ -1,3 +1,4 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/widgets/card/section_card.dart';
 import 'package:flutter/material.dart';
 
@@ -38,12 +39,6 @@ class TurnPreviewPanel extends StatelessWidget {
 
   /// Optional rule note shown in an amber callout under the deltas.
   final String? note;
-
-  static const _positiveLight = Color(0xFF15803D);
-  static const _positiveDark = Color(0xFF4ADE80);
-  static const _negativeLight = Color(0xFFDC2626);
-  static const _negativeDark = Color(0xFFF87171);
-  static const _noteColor = Color(0xFFF59E0B);
 
   @override
   Widget build(BuildContext context) {
@@ -135,14 +130,9 @@ class _DeltaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = AppSemanticColors.of(context);
     final positive = delta.points >= 0;
-    final color = positive
-        ? (theme.brightness == Brightness.dark
-              ? TurnPreviewPanel._positiveDark
-              : TurnPreviewPanel._positiveLight)
-        : (theme.brightness == Brightness.dark
-              ? TurnPreviewPanel._negativeDark
-              : TurnPreviewPanel._negativeLight);
+    final color = positive ? colors.positive : colors.negative;
     final sign = positive ? '+' : '';
     final points = '$sign${delta.points}';
 
@@ -221,25 +211,20 @@ class _NoteBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteColor = AppSemanticColors.of(context).warning;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: TurnPreviewPanel._noteColor.withValues(alpha: 0.10),
-        border: Border.all(
-          color: TurnPreviewPanel._noteColor.withValues(alpha: 0.35),
-        ),
+        color: noteColor.withValues(alpha: 0.10),
+        border: Border.all(color: noteColor.withValues(alpha: 0.35)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 1),
-            child: Icon(
-              Icons.info_outline,
-              size: 18,
-              color: TurnPreviewPanel._noteColor,
-            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(Icons.info_outline, size: 18, color: noteColor),
           ),
           const SizedBox(width: 8),
           Expanded(

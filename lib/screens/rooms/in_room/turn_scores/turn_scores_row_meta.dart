@@ -1,5 +1,5 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_motion.dart';
-import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_palette.dart';
 import 'package:flutter/material.dart';
 
 /// Small uppercase badge used by a player row.
@@ -50,17 +50,18 @@ class TurnScoresSubtitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = AppSemanticColors.of(context);
     final color = current
-        ? TurnScoresPalette.currentSubtitle
+        ? colors.currentTurnSubtitle
         : theme.colorScheme.onSurfaceVariant;
 
     return Row(
       children: [
         if (showCue) ...[
-          const Icon(
+          Icon(
             Icons.sports_martial_arts,
             size: 13,
-            color: TurnScoresPalette.greenOnDark,
+            color: colors.currentTurnScore,
           ),
           const SizedBox(width: 4),
         ],
@@ -89,25 +90,28 @@ class TurnScoresRiskNote extends StatelessWidget {
   final String name;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      const Icon(
-        Icons.warning_amber_rounded,
-        size: 13,
-        color: TurnScoresPalette.riskOnDark,
-      ),
-      const SizedBox(width: 4),
-      Expanded(
-        child: Text(
-          'Nếu ăn: $name chịu đền',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: TurnScoresPalette.riskOnDark,
-            fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) {
+    final colors = AppSemanticColors.of(context);
+    return Row(
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          size: 13,
+          color: colors.currentTurnRisk,
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            'Nếu ăn: $name chịu đền',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colors.currentTurnRisk,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/room_duration_countdown.dart';
@@ -7,9 +8,6 @@ import 'package:flutter/material.dart';
 /// Room status, name and the limits that apply to the current room.
 class RoomHeaderSection extends StatelessWidget {
   const RoomHeaderSection({super.key, required this.room, required this.now});
-
-  static const _liveGreenLight = Color(0xFF15803D);
-  static const _liveGreenDark = Color(0xFF4ADE80);
 
   final Room room;
   final DateTime Function() now;
@@ -92,9 +90,7 @@ class _StatusLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = active
-        ? (theme.brightness == Brightness.dark
-              ? RoomHeaderSection._liveGreenDark
-              : RoomHeaderSection._liveGreenLight)
+        ? AppSemanticColors.of(context).live
         : theme.colorScheme.onSurfaceVariant;
 
     return Row(

@@ -1,3 +1,4 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/widgets/room/ball_rules_editor/ball_toggle_dot.dart';
 import 'package:flutter/material.dart';
 
@@ -84,16 +85,17 @@ class _BallChoiceCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = AppSemanticColors.of(context);
     // Ball 9 decides the game, so it keeps the gold accent from the rules grid.
     final special = ball == 9;
-    final accent = special ? Colors.amber.shade800 : scheme.primary;
+    final accent = special ? colors.ballNineAccent : scheme.primary;
 
     final Color background;
     final Color borderColor;
     final double borderWidth;
     if (selected && special) {
-      background = Colors.amber.withValues(alpha: 0.12);
-      borderColor = Colors.amber;
+      background = colors.ballNine.withValues(alpha: 0.12);
+      borderColor = colors.ballNine;
       borderWidth = 1.5;
     } else if (selected) {
       background = scheme.primaryContainer.withValues(alpha: 0.35);

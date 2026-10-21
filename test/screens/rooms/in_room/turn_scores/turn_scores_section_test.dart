@@ -1,3 +1,4 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/domain/models/scoring/chain_state.dart';
 import 'package:bidart/domain/models/scoring/end_conditions.dart';
 import 'package:bidart/domain/models/scoring/game_session.dart';
@@ -62,6 +63,7 @@ void main() {
   );
 
   Widget harness(Room room) => MaterialApp(
+    theme: AppTheme.light,
     home: Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -234,10 +236,11 @@ void main() {
         .style
         .color;
 
-    expect(colourOf('+45đ'), const Color(0xFF4ADE80));
-    expect(colourOf('+10đ'), const Color(0xFFF59E0B));
-    expect(colourOf('-15đ'), const Color(0xFFEF4444));
-    expect(colourOf('-40đ'), const Color(0xFFEF4444));
+    final colors = AppSemanticColors.light;
+    expect(colourOf('+45đ'), colors.currentTurnScore);
+    expect(colourOf('+10đ'), colors.positive);
+    expect(colourOf('-15đ'), colors.negative);
+    expect(colourOf('-40đ'), colors.negative);
     expect(tester.takeException(), isNull);
   });
 }
