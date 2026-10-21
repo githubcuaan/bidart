@@ -112,6 +112,24 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> expandHistory(WidgetTester tester) async {
+    await tester.scrollUntilVisible(
+      find.text('Nhật ký'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nhật ký'));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapExpanded(WidgetTester tester, String name) async {
+    await tester.ensureVisible(key(name));
+    await tester.pumpAndSettle();
+    await tester.tap(key(name));
+    await tester.pumpAndSettle();
+  }
+
   Future<Room> latest() => repo.getRoom(room.id);
   Future<void> win() async {
     room = await container
@@ -157,7 +175,8 @@ void main() {
       expect(key('pot-ball-1'), findsNothing);
       await visible(tester, 'pot-ball-2');
       expect(tester.widget<BallToggleDot>(key('pot-ball-2')).enabled, isFalse);
-      await tap(tester, 'room-history');
+      await expandHistory(tester);
+      await tapExpanded(tester, 'room-history');
       expect(find.textContaining('#1 A'), findsOneWidget);
     },
   );
@@ -481,7 +500,8 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.tap(find.text('Bỏ qua'));
     await tester.pumpAndSettle();
-    await tap(tester, 'room-history');
+    await expandHistory(tester);
+    await tapExpanded(tester, 'room-history');
     expect(tester.takeException(), isNull);
   });
 }
