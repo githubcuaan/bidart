@@ -4,6 +4,8 @@ Tài liệu mô tả các màn hình chính của ứng dụng dựa trên các 
 `docs/rule.md`. Một số thao tác phụ như xác nhận, chọn ngày đấu hoặc báo lỗi
 có thể được triển khai dưới dạng dialog/bottom sheet thay vì màn hình riêng.
 
+su dung generic class cho 1 man roi ap dung cho nhieu screens
+
 ## Auth
 
 ### 1. Màn hình đăng nhập
@@ -77,13 +79,13 @@ Màn hình chính để theo dõi và ghi nhận từng lượt bắn.
 
 - Hiển thị danh sách người chơi, điểm hiện tại và người đang có lượt.
 - Quy trình cộng điểm chính gồm ba bước:
-   1. Ghi nhận cho người đang có cơ; chỉ chủ phòng được ghi điểm.
+  1. Ghi nhận cho người đang có cơ; chỉ chủ phòng được ghi điểm.
   2. Chọn hình bi mà người đó đã ăn. Mỗi hình bi hiển thị rõ số bi và số điểm
      tương ứng theo luật của phòng.
   3. Hệ thống chạy logic game, tính điểm cộng/trừ và cập nhật bảng điểm ngay.
 - Sau khi cập nhật, hiển thị tóm tắt kết quả:
   - Người ăn bi được cộng điểm của bi đã chọn.
-   - Người vừa mất cơ chịu đền suốt chuỗi giữ cơ; trong chuỗi đề-pa mỗi người còn lại trả toàn bộ điểm.
+  - Người vừa mất cơ chịu đền suốt chuỗi giữ cơ; trong chuỗi đề-pa mỗi người còn lại trả toàn bộ điểm.
   - Điểm mới của tất cả người chơi và người nhận lượt tiếp theo.
 - Không cho chọn bi không tồn tại hoặc không còn trên bàn. Bi không điểm vẫn ghi nhận để cập nhật bàn/lượt, không sinh giao dịch. Bi đặt lại được chọn ở cú sau.
 - Việc chọn hình bi chỉ là dữ liệu đầu vào; người dùng không nhập trực tiếp số

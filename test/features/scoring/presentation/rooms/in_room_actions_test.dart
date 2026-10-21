@@ -11,7 +11,7 @@ import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/services/room_commands.dart';
 import 'package:bidart/domain/services/score_engine.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
-import 'package:bidart/screens/rooms/in_room.dart';
+import 'package:bidart/screens/rooms/in_room/in_room.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
