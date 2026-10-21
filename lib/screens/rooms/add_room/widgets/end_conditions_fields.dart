@@ -1,3 +1,4 @@
+import 'package:bidart/widgets/card/section_card.dart';
 import 'package:flutter/material.dart';
 
 /// Optional time/score limits; empty means "no limit".
@@ -20,30 +21,37 @@ class EndConditionsFields extends StatelessWidget {
   final VoidCallback onChanged;
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      TextField(
-        key: const ValueKey('duration-seconds'),
-        controller: duration,
-        enabled: enabled,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: 'Thời lượng (giây, tùy chọn)',
-          errorText: durationError,
+  Widget build(BuildContext context) => SectionCard(
+    icon: Icons.flag_outlined,
+    title: 'Điều kiện kết thúc',
+    description: 'Để trống nếu không giới hạn thời gian hoặc điểm.',
+    child: Column(
+      children: [
+        TextField(
+          key: const ValueKey('duration-seconds'),
+          controller: duration,
+          enabled: enabled,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            suffixIcon: Icon(Icons.timer_outlined),
+            labelText: 'Thời lượng (giây, tùy chọn)',
+            errorText: durationError,
+          ),
+          onChanged: (_) => onChanged(),
         ),
-        onChanged: (_) => onChanged(),
-      ),
-      TextField(
-        key: const ValueKey('score-threshold'),
-        controller: threshold,
-        enabled: enabled,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: 'Ngưỡng điểm (tùy chọn)',
-          errorText: thresholdError,
+        TextField(
+          key: const ValueKey('score-threshold'),
+          controller: threshold,
+          enabled: enabled,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            suffixIcon: Icon(Icons.emoji_events_outlined),
+            labelText: 'Ngưỡng điểm (tùy chọn)',
+            errorText: thresholdError,
+          ),
+          onChanged: (_) => onChanged(),
         ),
-        onChanged: (_) => onChanged(),
-      ),
-    ],
+      ],
+    ),
   );
 }

@@ -41,6 +41,8 @@ String validationMessage(ValidationCode code) => switch (code) {
   ValidationCode.invalidScoreThreshold =>
     'Ngưỡng điểm phải là số nguyên dương.',
   ValidationCode.invalidOrder => 'Thứ tự phải chứa đủ người chơi, không trùng.',
+  ValidationCode.invalidOpeningOrder =>
+    'Người đề-pa phải đứng đầu, người đền đầu đứng thứ hai.',
   _ => 'Cấu hình phòng không hợp lệ (${code.name}).',
 };
 

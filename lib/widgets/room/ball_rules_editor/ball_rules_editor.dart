@@ -1,3 +1,4 @@
+import 'package:bidart/widgets/card/section_card.dart';
 import 'package:flutter/material.dart';
 
 import 'ball_point_field.dart';
@@ -34,12 +35,11 @@ class BallRulesEditor extends StatelessWidget {
 
   /// Horizontal inset used by the point box and the error line.
   static const _cellPadding = 8.0;
-  static const _dotSize = 50.0;
-  static const _dotBox = 56.0;
+  static const _dotSize = 54.0;
+  static const _dotBox = 60.0;
   static const _fieldHeight = 30.0;
   static const _errorHeight = 12.0;
   static const _spacing = 10.0;
-  static const _framePadding = 12.0;
   static const _minCellWidth = 88.0;
   static const _maxColumns = 3;
 
@@ -58,72 +58,41 @@ class BallRulesEditor extends StatelessWidget {
   final Widget? header;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(_framePadding),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        border: Border.all(color: scheme.outlineVariant),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (title != null)
-            Text(
-              title!,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) => SectionCard(
+    icon: Icons.tune_outlined,
+    title: title,
+    description: description,
+    header: header,
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final columns =
+            ((constraints.maxWidth + _spacing) ~/ (_minCellWidth + _spacing))
+                .clamp(1, _maxColumns);
+        final cellWidth =
+            (constraints.maxWidth - _spacing * (columns - 1)) / columns;
+        return Wrap(
+          spacing: _spacing,
+          runSpacing: _spacing,
+          children: [
+            for (var ball = minBall; ball <= maxBall; ball++)
+              SizedBox(
+                width: cellWidth,
+                child: BallRuleCell(
+                  ball: ball,
+                  enabled: enabled[ball] ?? true,
+                  controller: fields[ball]!,
+                  editable: editable,
+                  errorText: errors[ball],
+                  keyPrefix: keyPrefix,
+                  onToggle: editable ? onToggle : null,
+                  onEdit: onEdit ?? () {},
+                ),
               ),
-            ),
-          if (description != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              description!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
           ],
-          if (header != null) ...[const SizedBox(height: 6), header!],
-          if (title != null || description != null || header != null)
-            const SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              var columns =
-                  ((constraints.maxWidth + _spacing) ~/
-                          (_minCellWidth + _spacing))
-                      .clamp(1, _maxColumns);
-              final cellWidth =
-                  (constraints.maxWidth - _spacing * (columns - 1)) / columns;
-              return Wrap(
-                spacing: _spacing,
-                runSpacing: _spacing,
-                children: [
-                  for (var ball = minBall; ball <= maxBall; ball++)
-                    SizedBox(
-                      width: cellWidth,
-                      child: BallRuleCell(
-                        ball: ball,
-                        enabled: enabled[ball] ?? true,
-                        controller: fields[ball]!,
-                        editable: editable,
-                        errorText: errors[ball],
-                        keyPrefix: keyPrefix,
-                        onToggle: editable ? onToggle : null,
-                        onEdit: onEdit ?? () {},
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+        );
+      },
+    ),
+  );
 }
 
 /// One ball mini-card: the ball is centred, the point box sits at the bottom,

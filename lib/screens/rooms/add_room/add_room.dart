@@ -14,6 +14,7 @@ import 'package:bidart/screens/rooms/add_room/widgets/role_selectors.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/room_draft_preview.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/rule_template_section.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
+import 'package:bidart/widgets/card/section_card.dart';
 import 'package:bidart/widgets/room/ball_rules_editor/ball_rules_editor.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
@@ -79,7 +80,8 @@ class _AddRoomState extends ConsumerState<AddRoom> {
       _names[player.id] = TextEditingController(text: player.displayName);
     }
     _starter = saved.participants.isEmpty ? _players.first.id : saved.starterId;
-    _payer = saved.participants.isEmpty ? _players.last.id : saved.payerId;
+    _payer = saved.participants.isEmpty ? _players[1].id : saved.payerId;
+    _fixRoleOrder();
     for (final ball in _balls) {
       final config = saved.ballPoints[ball];
       _enabled[ball] = config?.enabled ?? true;
@@ -140,13 +142,43 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   }
 
   void _changed([VoidCallback? update]) {
-    setState(() => update?.call());
+    setState(() {
+      update?.call();
+      _fixRoleOrder();
+    });
     ref.read(createRoomControllerProvider.notifier).setDraft(_draft);
   }
 
+  /// The opening order is always starter, initial payer, then the rest. The
+  /// starter and payer rows stay fixed; only later rows can be reordered.
+  void _fixRoleOrder() {
+    if (_starter.isEmpty ||
+        _payer.isEmpty ||
+        _starter == _payer ||
+        !_players.any((player) => player.id == _starter) ||
+        !_players.any((player) => player.id == _payer)) {
+      return;
+    }
+    final starter = _players.firstWhere((player) => player.id == _starter);
+    final payer = _players.firstWhere((player) => player.id == _payer);
+    _players = [
+      starter,
+      payer,
+      ..._players.where(
+        (player) => player.id != _starter && player.id != _payer,
+      ),
+    ];
+  }
+
   void _move(int index, int offset) => _changed(() {
+    final target = index + offset;
+    if (index < PlayerRosterEditor.lockedCount ||
+        target < PlayerRosterEditor.lockedCount ||
+        target >= _players.length) {
+      return;
+    }
     final player = _players.removeAt(index);
-    _players.insert(index + offset, player);
+    _players.insert(target, player);
   });
 
   void _remove(String id) => _changed(() {
@@ -251,27 +283,46 @@ class _AddRoomState extends ConsumerState<AddRoom> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Phòng local · 2–5 người · điểm cộng dồn qua các ván'),
-          const Text(
-            'Tự lưu sau mỗi thao tác; mở lại app để tiếp tục đúng trạng thái.',
+          Text(
+            'Cài đặt & Tạo phòng bắn đền',
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
-          if (error != null)
+          const SizedBox(height: 4),
+          Text(
+            'Phòng local · 2–5 người · điểm cộng dồn qua các ván. '
+            'Tự lưu sau mỗi thao tác; mở lại app để tiếp tục đúng trạng thái.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 30),
+
+          SectionCard(
+            icon: Icons.meeting_room_outlined,
+            title: 'Thông tin phòng',
+            description: 'Nhập tên phòng',
+            child: TextField(
+              key: const ValueKey('room-name'),
+              controller: _name,
+              enabled: !saving,
+              decoration: InputDecoration(
+                labelText: 'Tên phòng',
+                errorText: _name.text.trim().isEmpty ? 'Nhận tên phòng.' : null,
+              ),
+              onChanged: (_) => _changed(),
+            ),
+          ),
+          if (error != null) ...[
+            const SizedBox(height: 16),
             CreateRoomErrorPanel(
               error: error,
               enabled: !saving,
               onOpenExisting: _openExisting,
             ),
-          TextField(
-            key: const ValueKey('room-name'),
-            controller: _name,
-            enabled: !saving,
-            decoration: InputDecoration(
-              labelText: 'Tên phòng',
-              errorText: _name.text.trim().isEmpty ? 'Nhận tên phòng.' : null,
-            ),
-            onChanged: (_) => _changed(),
-          ),
+          ],
           const SizedBox(height: 16),
+
           PlayerRosterEditor(
             players: _players,
             names: _names,
@@ -286,6 +337,8 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               _names[player.id] = TextEditingController();
             }),
           ),
+          const SizedBox(height: 16),
+
           RoleSelectors(
             players: _players,
             starter: _starter,
@@ -303,6 +356,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             }),
           ),
           const SizedBox(height: 16),
+
           BallRulesEditor(
             enabled: _enabled,
             fields: _points,
@@ -311,7 +365,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             onToggle: (ball) =>
                 _changed(() => _enabled[ball] = !_enabled[ball]!),
             onEdit: _changed,
-            title: 'Điểm bi 1–9',
+            title: 'Cấu hình điểm số từng bi',
             description: 'Chạm ảnh bi để bật/tắt; bi tắt không tạo điểm.',
             header:
                 issues.any(
@@ -321,6 +375,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
                 : null,
           ),
           const SizedBox(height: 16),
+
           EndConditionsFields(
             duration: _duration,
             threshold: _threshold,
@@ -334,6 +389,7 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             onChanged: _changed,
           ),
           const SizedBox(height: 16),
+
           RoomDraftPreview(
             order: _players.map(_label).join(' → '),
             starter:
@@ -345,12 +401,13 @@ class _AddRoomState extends ConsumerState<AddRoom> {
             payer:
                 _players.where((p) => p.id == _payer).map(_label).firstOrNull ??
                 'Chưa chọn',
-            rules: [
+            rules: {
               for (final ball in _balls)
-                'Bi $ball: ${_enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt'}',
-            ].join(' · '),
+                ball: _enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt',
+            },
           ),
           const SizedBox(height: 16),
+
           RuleTemplateSection(
             templateName: _templateName,
             enabled: !saving,
