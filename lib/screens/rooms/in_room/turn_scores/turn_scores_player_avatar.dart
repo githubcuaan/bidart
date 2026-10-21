@@ -1,5 +1,5 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_motion.dart';
-import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_palette.dart';
 import 'package:flutter/material.dart';
 
 /// Circular initials avatar with a status badge.
@@ -19,6 +19,7 @@ class TurnScoresPlayerAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = AppSemanticColors.of(context);
     final size = current ? 46.0 : 38.0;
 
     return AnimatedContainer(
@@ -38,11 +39,11 @@ class TurnScoresPlayerAvatar extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: current
-                  ? TurnScoresPalette.currentAvatar
+                  ? colors.currentTurnAvatar
                   : scheme.primaryContainer,
               border: Border.all(
                 color: current
-                    ? TurnScoresPalette.greenOnDark
+                    ? colors.currentTurnScore
                     : scheme.outlineVariant,
                 width: current ? 2 : 1,
               ),
@@ -50,7 +51,9 @@ class TurnScoresPlayerAvatar extends StatelessWidget {
             child: Text(
               _initials(name),
               style: theme.textTheme.labelLarge?.copyWith(
-                color: current ? Colors.white : scheme.onPrimaryContainer,
+                color: current
+                    ? colors.onCurrentTurn
+                    : scheme.onPrimaryContainer,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.4,
               ),
@@ -68,12 +71,10 @@ class TurnScoresPlayerAvatar extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: current
-                      ? TurnScoresPalette.greenBright
-                      : TurnScoresPalette.negative,
+                  color: current ? colors.currentTurnAccent : colors.negative,
                   border: Border.all(
                     color: current
-                        ? TurnScoresPalette.currentSurface
+                        ? colors.currentTurnSurface
                         : scheme.surfaceContainerLowest,
                     width: 1.5,
                   ),
@@ -81,7 +82,7 @@ class TurnScoresPlayerAvatar extends StatelessWidget {
                 child: Icon(
                   current ? Icons.sports_esports : Icons.priority_high,
                   size: current ? 12 : 11,
-                  color: current ? TurnScoresPalette.onGamepad : Colors.white,
+                  color: current ? colors.onCurrentTurnGamepad : scheme.onError,
                 ),
               ),
             ),

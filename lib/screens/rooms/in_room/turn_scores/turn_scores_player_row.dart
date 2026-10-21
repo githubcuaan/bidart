@@ -1,6 +1,6 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_data.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_motion.dart';
-import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_palette.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_player_avatar.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_row_meta.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +22,7 @@ class TurnScoresPlayerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = AppSemanticColors.of(context);
     final name = entry.player.displayName;
     final score = data.scoreOf(entry);
 
@@ -34,29 +35,29 @@ class TurnScoresPlayerRow extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: _current
-            ? TurnScoresPalette.currentSurface
+            ? colors.currentTurnSurface
             : scheme.surfaceContainerLowest,
         gradient: _current
-            ? const LinearGradient(
+            ? LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  TurnScoresPalette.currentSurface,
-                  TurnScoresPalette.currentSurfaceDeep,
+                  colors.currentTurnSurface,
+                  colors.currentTurnSurfaceDeep,
                 ],
               )
             : null,
         borderRadius: BorderRadius.circular(_current ? 18 : 14),
         border: Border.all(
           color: _current
-              ? TurnScoresPalette.currentBorder
+              ? colors.currentTurnBorder
               : scheme.outlineVariant.withValues(alpha: 0.6),
           width: _current ? 1.5 : 1,
         ),
         boxShadow: _current
             ? [
                 BoxShadow(
-                  color: TurnScoresPalette.greenBright.withValues(alpha: 0.2),
+                  color: colors.currentTurnAccent.withValues(alpha: 0.2),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),
@@ -90,7 +91,7 @@ class TurnScoresPlayerRow extends StatelessWidget {
                                   : theme.textTheme.bodyMedium)
                               ?.copyWith(
                                 color: _current
-                                    ? Colors.white
+                                    ? colors.onCurrentTurn
                                     : scheme.onSurface,
                                 fontWeight: _current
                                     ? FontWeight.w700
@@ -117,7 +118,7 @@ class TurnScoresPlayerRow extends StatelessWidget {
                           child: ScaleTransition(scale: scale, child: child),
                         );
                       },
-                      child: _roleBadge(scheme),
+                      child: _roleBadge(scheme, colors),
                     ),
                   ],
                 ),
@@ -160,7 +161,7 @@ class TurnScoresPlayerRow extends StatelessWidget {
                             ? theme.textTheme.headlineSmall
                             : theme.textTheme.titleMedium)
                         ?.copyWith(
-                          color: _scoreColor(scheme, score),
+                          color: _scoreColor(scheme, colors, score),
                           fontWeight: FontWeight.w800,
                           height: 1,
                         ) ??
@@ -183,21 +184,22 @@ class TurnScoresPlayerRow extends StatelessWidget {
     );
   }
 
-  Widget _roleBadge(ColorScheme scheme) => switch (entry.role) {
-    TurnScoreRole.current => const TurnScoresBadge(
-      key: ValueKey('current-turn-badge'),
-      label: 'ĐANG CÓ CƠ',
-      background: TurnScoresPalette.currentBadge,
-      foreground: TurnScoresPalette.currentBadgeText,
-    ),
-    TurnScoreRole.payer => TurnScoresBadge(
-      key: const ValueKey('payer-turn-badge'),
-      label: 'Bắn trước đó',
-      background: scheme.errorContainer.withValues(alpha: 0.45),
-      foreground: scheme.error,
-    ),
-    _ => const SizedBox.shrink(key: ValueKey('no-turn-badge')),
-  };
+  Widget _roleBadge(ColorScheme scheme, AppSemanticColors colors) =>
+      switch (entry.role) {
+        TurnScoreRole.current => TurnScoresBadge(
+          key: const ValueKey('current-turn-badge'),
+          label: 'ĐANG CÓ CƠ',
+          background: colors.currentTurnBadge,
+          foreground: colors.currentTurnBadgeText,
+        ),
+        TurnScoreRole.payer => TurnScoresBadge(
+          key: const ValueKey('payer-turn-badge'),
+          label: 'Bắn trước đó',
+          background: scheme.errorContainer.withValues(alpha: 0.45),
+          foreground: scheme.error,
+        ),
+        _ => const SizedBox.shrink(key: ValueKey('no-turn-badge')),
+      };
 
   String get _subtitle => switch (entry.role) {
     TurnScoreRole.current =>
@@ -220,15 +222,13 @@ class TurnScoresPlayerRow extends StatelessWidget {
           'đ',
   };
 
-  Color _scoreColor(ColorScheme scheme, int score) {
-    if (score < 0) return TurnScoresPalette.negative;
-    if (_current) return TurnScoresPalette.greenOnDark;
-    if (data.isLeader(entry)) {
-      return scheme.brightness == Brightness.dark
-          ? TurnScoresPalette.greenOnDark
-          : TurnScoresPalette.greenLight;
+  Color _scoreColor(ColorScheme scheme, AppSemanticColors colors, int score) {
+    if (score < 0) {
+      return _current ? colors.currentTurnNegative : colors.negative;
     }
-    if (score > 0) return TurnScoresPalette.positive;
+    if (_current) return colors.currentTurnScore;
+    if (data.isLeader(entry)) return colors.live;
+    if (score > 0) return colors.positive;
     return scheme.onSurfaceVariant;
   }
 }

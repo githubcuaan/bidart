@@ -1,6 +1,6 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_data.dart';
-import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_palette.dart';
 import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_reorder_column.dart';
 import 'package:bidart/widgets/card/section_card.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +18,8 @@ class TurnScoresSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final green = theme.brightness == Brightness.dark
-        ? TurnScoresPalette.greenOnDark
-        : TurnScoresPalette.greenLight;
+    final colors = AppSemanticColors.of(context);
+    final green = colors.live;
     final data = TurnScoreboardData.fromRoom(room);
 
     return SectionCard(

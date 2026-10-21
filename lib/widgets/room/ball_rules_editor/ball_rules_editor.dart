@@ -1,3 +1,4 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/widgets/card/section_card.dart';
 import 'package:flutter/material.dart';
 
@@ -126,8 +127,9 @@ class BallRuleCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = AppSemanticColors.of(context);
     final hasError = errorText != null;
-    final accent = _special ? Colors.amber.shade800 : scheme.primary;
+    final accent = _special ? colors.ballNineAccent : scheme.primary;
 
     final Color background;
     final Color borderColor;
@@ -141,8 +143,8 @@ class BallRuleCell extends StatelessWidget {
       borderColor = Colors.transparent;
       borderWidth = 1;
     } else if (_special) {
-      background = Colors.amber.withValues(alpha: 0.08);
-      borderColor = Colors.amber;
+      background = colors.ballNine.withValues(alpha: 0.08);
+      borderColor = colors.ballNine;
       borderWidth = 1.5;
     } else {
       background = scheme.surface;

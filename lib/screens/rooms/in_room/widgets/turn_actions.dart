@@ -19,7 +19,10 @@ class TurnActions extends StatelessWidget {
   final VoidCallback onRecord;
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) => Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    crossAxisAlignment: WrapCrossAlignment.center,
     children: [
       FilledButton(
         key: const ValueKey('record-turn'),

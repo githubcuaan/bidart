@@ -1,3 +1,4 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/data/local/app_database.dart';
 import 'package:bidart/data/repositories/game_repository.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
@@ -26,6 +27,13 @@ class BidartApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(title: 'Bidart', home: Mainscreen());
+    return MaterialApp(
+      title: 'Bidart',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      // The product design is dark-only (docs/ui/ui_description.md).
+      themeMode: ThemeMode.dark,
+      home: const Mainscreen(),
+    );
   }
 }
