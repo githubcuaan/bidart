@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for map tiles and other network access in release builds.
+         Debug/profile builds already get this from their own manifest. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="bidart"
         android:name="${applicationName}"

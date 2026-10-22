@@ -1,3 +1,4 @@
+import 'package:bidart/widgets/maps/map_view.dart';
 import 'package:flutter/material.dart';
 
 class Maps extends StatelessWidget {
@@ -5,6 +6,6 @@ class Maps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: const Text('he'));
+    return const MapView();
   }
 }
