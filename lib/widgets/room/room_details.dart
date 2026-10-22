@@ -16,7 +16,7 @@ class RoomDetails extends StatelessWidget {
         SectionCard(
           collapsible: false,
           icon: Icons.leaderboard_outlined,
-          title: 'Điểm cộng dồn',
+          title: 'Điểm trong phòng',
           child: Column(
             children: [
               for (final player in room.participants)
