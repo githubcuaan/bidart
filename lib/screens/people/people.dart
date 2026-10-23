@@ -1,6 +1,8 @@
 import 'package:bidart/domain/models/matchmaking/swipe_type.dart';
 import 'package:bidart/domain/models/user/user.dart';
+import 'package:bidart/features/chat/provider/chat_providers.dart';
 import 'package:bidart/features/matchmaking/provider/matchmaking_providers.dart';
+import 'package:bidart/screens/people/chat/chat_screen.dart';
 import 'package:bidart/screens/people/widgets/action_buttons.dart';
 import 'package:bidart/screens/people/widgets/empty_state.dart';
 import 'package:bidart/screens/people/widgets/people_top_bar.dart';
@@ -13,11 +15,12 @@ class People extends ConsumerWidget {
 
   void _onChallenge(BuildContext context, WidgetRef ref, User player) {
     ref.read(matchmakingFeedProvider.notifier).swipe(player, SwipeType.like);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đã gửi lời mời thách đấu tới ${player.name}!'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 1),
+    ref
+        .read(chatControllerProvider.notifier)
+        .sendChallengeInvitation(opponentId: player.id);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ChatScreen(opponent: player),
       ),
     );
   }

@@ -36,6 +36,11 @@ class Navibar extends StatelessWidget {
           selectedIcon: Icon(Icons.people),
           label: 'People',
         ),
+        NavigationDestination(
+          icon: Icon(Icons.chat_bubble_outline),
+          selectedIcon: Icon(Icons.chat_bubble),
+          label: 'Chat',
+        ),
       ],
     );
   }
