@@ -38,4 +38,19 @@ class RuleTemplateSaveController extends Notifier<AsyncValue<RuleTemplate?>> {
       return null;
     }
   }
+
+  Future<bool> delete(String templateId) async {
+    state = const AsyncLoading();
+    try {
+      await ref
+          .read(ruleTemplateRepositoryProvider)
+          .deleteRuleTemplate(templateId);
+      ref.invalidate(ruleTemplateListProvider);
+      state = const AsyncData(null);
+      return true;
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+      return false;
+    }
+  }
 }

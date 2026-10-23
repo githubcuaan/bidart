@@ -1,4 +1,5 @@
 import 'package:bidart/screens/profile/history/match_history_screen.dart';
+import 'package:bidart/screens/profile/rules/favorite_rules_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileShortcutsCard extends StatelessWidget {
@@ -25,7 +26,13 @@ class ProfileShortcutsCard extends StatelessWidget {
             leading: const Icon(Icons.bookmark_outline),
             title: const Text('Bộ luật yêu thích'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const FavoriteRulesScreen(),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.location_on_outlined),
