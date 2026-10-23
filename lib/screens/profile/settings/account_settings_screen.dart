@@ -41,7 +41,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.12),
+                      color: Colors.red.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(

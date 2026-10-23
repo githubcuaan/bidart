@@ -30,7 +30,7 @@ class TinderCard extends StatelessWidget {
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 30),
         decoration: BoxDecoration(
-          color: Colors.green.withOpacity(0.85),
+          color: Colors.green.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(
@@ -48,7 +48,7 @@ class TinderCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 30),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.85),
+          color: Colors.red.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(
@@ -74,7 +74,7 @@ class TinderCard extends StatelessWidget {
               Image.network(
                 avatar,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildDefaultBackground(),
+                errorBuilder: (_, _, _) => _buildDefaultBackground(),
               )
             else
               _buildDefaultBackground(),

@@ -1,6 +1,6 @@
 import 'package:bidart/domain/models/user/user.dart';
 import 'package:bidart/features/chat/provider/chat_providers.dart';
-import 'package:bidart/models/mockUser.dart';
+import 'package:bidart/models/mock_user.dart';
 import 'package:bidart/screens/people/chat/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,7 +44,7 @@ class ChatListScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -67,7 +67,7 @@ class ChatListScreen extends ConsumerWidget {
                     'Thách đấu các cơ thủ trong mục People để bắt đầu kết nối trò chuyện và hẹn kèo!',
                     style: TextStyle(
                       fontSize: 14,
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                       height: 1.4,
                     ),
                     textAlign: TextAlign.center,
@@ -88,7 +88,7 @@ class ChatListScreen extends ConsumerWidget {
         return ListView.separated(
           padding: const EdgeInsets.symmetric(vertical: 8),
           itemCount: conversations.length,
-          separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
+          separatorBuilder: (_, _) => const Divider(height: 1, indent: 72),
           itemBuilder: (context, index) {
             final item = conversations[index];
             final partner = _resolveUser(item.otherUserId);
@@ -164,7 +164,7 @@ class ChatListScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13.5,
-                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
                         ),
                       ),
                     ),
