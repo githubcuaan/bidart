@@ -185,6 +185,7 @@ Nguồn nghiệp vụ: [rule.md](./rule.md). Domain, lifecycle, commands, invari
 - **Repository:** workspace Bidart hiện tại; URL remote chưa xác nhận, không tự điền.
 - **Luật nghiệp vụ:** [rule.md](./rule.md).
 - **Luồng tạo phòng/trong phòng:** [screens.md](./screens.md), mục Game §6–8.
+- **Kế hoạch trang Home:** [plans/home.md](./plans/home.md).
 - **Thiết kế domain:** [class_design.md](./class_design.md), Module 2; [class_checklist.md](./class_checklist.md).
 - **Kiến trúc mục tiêu:** [folder_structure.md](./folder_structure.md).
 - **UI tham khảo:** [ui_description.md](./ui_description.md), [createRoom.html](../scratch/createRoom.html), [inGame.html](../scratch/inGame.html). Nội dung mẫu không tự động trở thành luật.
