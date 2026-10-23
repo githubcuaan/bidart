@@ -4,8 +4,8 @@ import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
+import 'package:bidart/widgets/bidart_app_bar.dart';
 import 'package:bidart/widgets/navi_bar.dart';
-import 'package:bidart/widgets/theme_button.dart';
 import 'package:flutter/material.dart';
 
 class Mainscreen extends StatefulWidget {
@@ -22,50 +22,7 @@ class _MainscreenState extends State<Mainscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_indexSelected]),
-        actions: [
-          const ThemeButton(),
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none, size: 28),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lịch sử ghép kèo & Thông báo'),
-                    ),
-                  );
-                },
-              ),
-              Positioned(
-                right: 12,
-                top: 12,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Builder(
-              builder: (ctx) => GestureDetector(
-                onTap: () => Scaffold.of(ctx).openEndDrawer(),
-                child: const Tooltip(
-                  message: 'Mở hồ sơ',
-                  child: CircleAvatar(radius: 18, child: Text('TA')),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: BidartAppBar(titles: _titles, indexSelected: _indexSelected),
       endDrawer: Drawer(
         width: MediaQuery.of(context).size.width * 0.85,
         child: const Profile(),
