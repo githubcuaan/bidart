@@ -6,6 +6,7 @@ import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bidart/screens/auth/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,7 @@ class BidartApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ref.watch(themeModeProvider),
-      home: const Mainscreen(),
+      home: const AuthGate(),
     );
   }
 }
