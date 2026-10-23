@@ -2,7 +2,7 @@ import 'package:bidart/domain/models/matchmaking/matchmaking_filter.dart';
 import 'package:bidart/domain/models/matchmaking/swipe_type.dart';
 import 'package:bidart/domain/models/user/user.dart';
 import 'package:bidart/domain/repositories/matchmaking_repository.dart';
-import 'package:bidart/models/mockUser.dart';
+import 'package:bidart/models/mock_user.dart';
 
 class InMemoryMatchmakingRepository implements MatchmakingRepository {
   final Map<String, Set<String>> _swipedUserIds = {};

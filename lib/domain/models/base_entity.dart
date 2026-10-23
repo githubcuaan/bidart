@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 abstract class BaseEntity<T> {
   T get id;
   T get name;
@@ -12,6 +14,6 @@ extension BaseEntityCommonMethods<T> on BaseEntity<T> {
            description.toString().toLowerCase().contains(query);
   }
   void printInfo() {
-    print('[$runtimeType] ID: $id | Tên: $name | Miêu tả: $description');
+    debugPrint('[$runtimeType] ID: $id | Tên: $name | Miêu tả: $description');
   }
 }

@@ -14,8 +14,6 @@ class ChallengeInvitationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Align(
       alignment: isFromMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -34,14 +32,14 @@ class ChallengeInvitationCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
           ],
           border: Border.all(
             color: isFromMe
-                ? Colors.purpleAccent.withOpacity(0.4)
+                ? Colors.purpleAccent.withValues(alpha: 0.4)
                 : Colors.white24,
             width: 1.2,
           ),
@@ -57,7 +55,7 @@ class ChallengeInvitationCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.2),
+                      color: Colors.amber.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -119,7 +117,7 @@ class ChallengeInvitationCard extends StatelessWidget {
                 child: Text(
                   '${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 11,
                   ),
                 ),

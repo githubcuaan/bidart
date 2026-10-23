@@ -126,7 +126,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _gender,
+                    initialValue: _gender,
                     decoration: const InputDecoration(labelText: 'Giới tính'),
                     items: const ['Nam', 'Nữ', 'Khác']
                         .map((g) => DropdownMenuItem(value: g, child: Text(g)))
@@ -155,7 +155,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<SkillLevel>(
-              value: _level,
+              initialValue: _level,
               decoration: const InputDecoration(
                 labelText: 'Trình độ (tự khai báo)',
               ),
