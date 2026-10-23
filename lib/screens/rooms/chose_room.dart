@@ -1,6 +1,7 @@
 import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/screens/rooms/in_room/in_room.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/sections/room_header_section.dart';
 import 'package:bidart/widgets/room/room_details.dart';
 import 'package:bidart/widgets/room/room_load_error.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
@@ -27,6 +28,8 @@ class ChoseRoom extends ConsumerWidget {
       dataBuilder: (context, room) => ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          RoomHeaderSection(room: room, now: () => ref.read(clockProvider)()),
+          const SizedBox(height: 16),
           FilledButton(
             key: const ValueKey('open-room'),
             onPressed: () => Navigator.of(context).push(

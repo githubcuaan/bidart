@@ -83,7 +83,7 @@ lib/
           turn_draft_panel.dart
           turn_actions.dart
           turn_preview_panel.dart
-          ball_selection_chips.dart
+          ball_selection_grid.dart
           foul_toggle.dart
           room_error_panel.dart
           room_management_actions.dart
@@ -156,8 +156,8 @@ Không test nào import trực tiếp các file trên → chỉ sửa import, te
 ### Phase 4 — Tách `in_room.dart`
 
 9. Tạo `in_room/widgets/`:
-   - `ball_selection_chips.dart` — Wrap `pot-ball-$b` + dòng "bi tắt điểm vẫn
-     ghi nhận" + text "Chuỗi đề-pa".
+   - `ball_selection_grid.dart` — lưới bi có khung (`pot-ball-$b`) dùng lại
+     `BallToggleDot` + dòng "bi tắt điểm vẫn ghi nhận" + text "Chuỗi đề-pa".
    - `foul_toggle.dart` — `SwitchListTile` `turn-foul` + phân loại lỗi.
    - `turn_preview_panel.dart` — `score-preview` + danh sách log + đặt lại bi.
    - `turn_actions.dart` — `clear-turn-draft` + `record-turn`.

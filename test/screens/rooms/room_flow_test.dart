@@ -11,10 +11,12 @@ import 'package:bidart/domain/repositories/game_repository_interface.dart';
 import 'package:bidart/domain/services/room_service.dart';
 import 'package:bidart/widgets/room/ball_rules_editor/ball_toggle_dot.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
+import 'package:bidart/features/scoring/provider/room_action_controller.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/screens/rooms/add_room/add_room.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
 import 'package:bidart/screens/rooms/in_room/in_room.dart';
+import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_section.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:bidart/widgets/async/async_content.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
@@ -24,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 class ScreenRepository extends InMemoryGameRepository {
   Completer<void>? saveGate;
+  Completer<void>? updateGate;
   Completer<void>? readGate;
   bool failList = false;
   bool failGet = false;
@@ -37,6 +40,22 @@ class ScreenRepository extends InMemoryGameRepository {
     creates++;
     await saveGate?.future;
     return super.createRoom(commandId: commandId, room: room);
+  }
+
+  @override
+  Future<CommandReceipt> updateRoom({
+    required String commandId,
+    required int expectedRevision,
+    required Room room,
+    RoomCommandType type = RoomCommandType.update,
+  }) async {
+    await updateGate?.future;
+    return super.updateRoom(
+      commandId: commandId,
+      expectedRevision: expectedRevision,
+      room: room,
+      type: type,
+    );
   }
 
   @override
@@ -107,6 +126,11 @@ void main() {
     await tester.tap(key(selector));
     await tester.pumpAndSettle();
     await tester.tap(find.text(name).last);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> expandRoomInfo(WidgetTester tester) async {
+    await tester.tap(find.text('Thông tin phòng'));
     await tester.pumpAndSettle();
   }
 
@@ -189,32 +213,52 @@ void main() {
     expect(await repository.listRooms(), isEmpty);
   });
 
-  testWidgets(
-    'rename/reorder preserves IDs; removing selected player clears selection',
-    (tester) async {
-      await pump(tester, const AddRoom());
-      await fill(tester);
-      await tester.tap(key('move-up-draft-2'));
-      await tester.pump();
-      var draft = container.read(createRoomControllerProvider).draft;
-      expect(draft.playerOrder, ['draft-2', 'draft-1']);
-      expect(draft.starterId, 'draft-1');
-      expect(draft.payerId, 'draft-2');
-      await tester.enterText(key('player-name-draft-1'), 'An mới');
-      await tester.tap(key('add-player'));
-      await tester.pump();
-      await tester.enterText(key('player-name-draft-3'), 'Chi');
-      await tester.tap(key('remove-player-draft-1'));
-      await tester.pump();
-      draft = container.read(createRoomControllerProvider).draft;
-      expect(draft.playerOrder, ['draft-2', 'draft-3']);
-      expect(draft.starterId, isEmpty);
-      expect(draft.payerId, 'draft-2');
-      expect(find.text('Chọn người đề-pa.'), findsOneWidget);
-      expect(submit(tester).onPressed, isNull);
-      expect(tester.takeException(), isNull);
-    },
-  );
+  testWidgets('fixed roles stay first two; only later players can reorder', (
+    tester,
+  ) async {
+    await pump(tester, const AddRoom());
+    await fill(tester);
+    expect(key('role-badge-draft-1'), findsOneWidget);
+    expect(key('role-badge-draft-2'), findsOneWidget);
+    expect(key('locked-player-draft-1'), findsOneWidget);
+    expect(key('locked-player-draft-2'), findsOneWidget);
+    expect(key('move-up-draft-2'), findsNothing);
+    expect(key('move-down-draft-1'), findsNothing);
+    expect(find.text('Thứ tự lượt chơi tiếp theo'), findsNothing);
+    var draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.playerOrder, ['draft-1', 'draft-2']);
+    expect(draft.starterId, 'draft-1');
+    expect(draft.payerId, 'draft-2');
+
+    await tester.tap(key('add-player'));
+    await tester.pump();
+    await tester.enterText(key('player-name-draft-3'), 'Chi');
+    await tester.tap(key('add-player'));
+    await tester.pump();
+    await tester.enterText(key('player-name-draft-4'), 'Dũng');
+    expect(find.text('Thứ tự lượt chơi tiếp theo'), findsOneWidget);
+    await tester.tap(key('move-up-draft-4'));
+    await tester.pump();
+    draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.playerOrder, ['draft-1', 'draft-2', 'draft-4', 'draft-3']);
+    expect(draft.starterId, 'draft-1');
+    expect(draft.payerId, 'draft-2');
+
+    await choose(tester, 'payer-selector', 'Chi');
+    draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.playerOrder, ['draft-1', 'draft-3', 'draft-2', 'draft-4']);
+    expect(draft.payerId, 'draft-3');
+
+    await tester.enterText(key('player-name-draft-1'), 'An mới');
+    await tester.tap(key('remove-player-draft-1'));
+    await tester.pump();
+    draft = container.read(createRoomControllerProvider).draft;
+    expect(draft.starterId, isEmpty);
+    expect(draft.payerId, 'draft-3');
+    expect(find.text('Chọn người đề-pa.'), findsOneWidget);
+    expect(submit(tester).onPressed, isNull);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('starter/payer conflict is inline and disables submit', (
     tester,
@@ -254,7 +298,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester.widget<Text>(key('order-preview')).data,
-      'Thứ tự: An → Bình → Khách 3 → Khách 5 → Khách 4',
+      'An → Bình → Khách 3 → Khách 5 → Khách 4',
     );
     await tester.tap(key('submit-room'));
     await tester.pumpAndSettle();
@@ -291,10 +335,16 @@ void main() {
     expect(find.text('Bật tính điểm ít nhất một bi.'), findsOneWidget);
     expect(submit(tester).onPressed, isNull);
     await tester.tap(key('ball-enabled-1'));
-    await tester.enterText(key('duration-seconds'), '0');
+    await tester.tap(key('duration-3600'));
     await tester.pump();
-    expect(submit(tester).onPressed, isNull);
-    await tester.enterText(key('duration-seconds'), '600');
+    expect(
+      container
+          .read(createRoomControllerProvider)
+          .draft
+          .endConditions
+          .durationSeconds,
+      3600,
+    );
     await tester.enterText(key('score-threshold'), 'no');
     await tester.pump();
     expect(submit(tester).onPressed, isNull);
@@ -304,7 +354,7 @@ void main() {
     await tester.tap(key('submit-room'));
     await tester.pumpAndSettle();
     final room = (await repository.listRooms()).single;
-    expect(room.endConditions.durationSeconds, 600);
+    expect(room.endConditions.durationSeconds, 3600);
     expect(room.endConditions.scoreThreshold, 100);
     expect(room.ruleVersions.single.ballPoints[1]!.points, 10);
     expect(room.ruleVersions.single.ballPoints[2]!.enabled, false);
@@ -513,8 +563,10 @@ void main() {
     await tester.tap(key('open-room'));
     await tester.pumpAndSettle();
     expect(find.byType(InRoom), findsOneWidget);
-    expect(find.text('Người đánh: An'), findsOneWidget);
-    expect(find.text('Người trả: Bình'), findsOneWidget);
+    await expandRoomInfo(tester);
+    expect(tester.widget<Text>(key('room-info-current-player')).data, 'An');
+    expect(find.text('ĐANG CÓ CƠ'), findsOneWidget);
+    expect(tester.widget<Text>(key('room-info-payer')).data, 'Bình');
     expect(key('next-game'), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();
@@ -598,12 +650,21 @@ void main() {
         repository.readGate!.complete();
         await tester.pumpAndSettle();
         expect(find.text(room.name), findsOneWidget);
+        final scores = gateway
+            ? null
+            : tester.element(find.byType(TurnScoresSection));
 
         repository.readGate = Completer<void>();
         container.invalidate(roomByIdProvider(room.id));
         await tester.pump();
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
-        expect(find.text(room.name), findsNothing);
+        if (gateway) {
+          expect(find.byType(CircularProgressIndicator), findsOneWidget);
+          expect(find.text(room.name), findsNothing);
+        } else {
+          expect(find.byType(CircularProgressIndicator), findsNothing);
+          expect(find.text(room.name), findsOneWidget);
+          expect(tester.element(find.byType(TurnScoresSection)), same(scores));
+        }
         repository.readGate!.complete();
         await tester.pumpAndSettle();
         expect(find.text(room.name), findsOneWidget);
@@ -638,6 +699,49 @@ void main() {
     );
   }
 
+  testWidgets('in-room keeps turn cards mounted while saving', (tester) async {
+    final room = await seed();
+    await pump(tester, InRoom(roomId: room.id));
+
+    final scores = tester.element(find.byType(TurnScoresSection));
+    final playerRow = tester.element(
+      find.byKey(const ValueKey('turn-score-row-a')),
+    );
+
+    repository.updateGate = Completer<void>();
+    final pending = container
+        .read(roomActionControllerProvider(room.id).notifier)
+        .submit(
+          RoomAction(
+            RoomActionKind.record,
+            gameId: room.games.single.id,
+            actorId: 'a',
+            balls: const [1],
+          ),
+          expectedRevision: room.revision,
+        );
+    await tester.pump();
+
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(tester.element(find.byType(TurnScoresSection)), same(scores));
+    expect(
+      tester.element(find.byKey(const ValueKey('turn-score-row-a'))),
+      same(playerRow),
+    );
+
+    repository.updateGate!.complete();
+    await pending;
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(tester.element(find.byType(TurnScoresSection)), same(scores));
+    expect(
+      tester.element(find.byKey(const ValueKey('turn-score-row-a'))),
+      same(playerRow),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   for (final status in [RoomStatus.finished, RoomStatus.cancelled]) {
     testWidgets('${status.name} room is read-only in gateway and destination', (
       tester,
@@ -654,8 +758,8 @@ void main() {
       expect(key('next-game'), findsNothing);
       expect(find.byType(TextField), findsNothing);
       expect(find.byType(FilledButton), findsNothing);
-      expect(find.text('10'), findsOneWidget);
-      expect(find.text('-10'), findsOneWidget);
+      expect(find.text('+10đ'), findsOneWidget);
+      expect(find.text('-10đ'), findsOneWidget);
       expect(await repository.getRoom(room.id), room);
     });
   }
@@ -677,7 +781,8 @@ void main() {
     expect(updated.games, hasLength(2));
     expect(updated.scores, room.scores);
     expect(updated.ruleVersions, room.ruleVersions);
-    expect(find.text('Ván 2 · Đang chơi'), findsOneWidget);
+    await expandRoomInfo(tester);
+    expect(tester.widget<Text>(key('room-info-game')).data, '2 · Đang chơi');
     expect(key('next-game'), findsNothing);
   });
 

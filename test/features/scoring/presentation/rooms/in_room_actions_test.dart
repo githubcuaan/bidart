@@ -12,6 +12,7 @@ import 'package:bidart/domain/services/room_commands.dart';
 import 'package:bidart/domain/services/score_engine.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/screens/rooms/in_room/in_room.dart';
+import 'package:bidart/widgets/room/ball_rules_editor/ball_toggle_dot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -111,6 +112,22 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> expandHistory(WidgetTester tester) async {
+    await tester.scrollUntilVisible(
+      find.text('Nhật ký'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapExpanded(WidgetTester tester, String name) async {
+    await tester.ensureVisible(key(name));
+    await tester.pumpAndSettle();
+    await tester.tap(key(name));
+    await tester.pumpAndSettle();
+  }
+
   Future<Room> latest() => repo.getRoom(room.id);
   Future<void> win() async {
     room = await container
@@ -146,17 +163,58 @@ void main() {
       await show(tester);
       await tap(tester, 'pot-ball-1');
       expect((await latest()).games.single.turns, isEmpty);
-      expect(find.text('A: +30'), findsOneWidget);
-      expect(find.text('B: -10'), findsOneWidget);
+      expect(find.text('A ăn Bi 1:'), findsOneWidget);
+      expect(find.text('+30 điểm'), findsOneWidget);
+      expect(find.text('-10 điểm'), findsNWidgets(3));
       await tap(tester, 'record-turn');
       final committed = await latest();
       expect(committed.games.single.turns.length, 1);
       expect(committed.scores['A'], 30);
       expect(key('pot-ball-1'), findsNothing);
       await visible(tester, 'pot-ball-2');
-      expect(tester.widget<FilterChip>(key('pot-ball-2')).selected, isFalse);
-      await tap(tester, 'room-history');
-      expect(find.textContaining('#1 A'), findsOneWidget);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-2')).enabled, isFalse);
+      await expandHistory(tester);
+      expect(key('history-game-1'), findsOneWidget);
+      await tapExpanded(tester, 'history-game-1');
+      final sheet = key('history-game-sheet');
+      expect(sheet, findsOneWidget);
+      expect(
+        find.descendant(of: sheet, matching: find.text('+30')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: sheet,
+          matching: find.textContaining('đền', findRichText: true),
+        ),
+        findsWidgets,
+      );
+      await tester.tap(key('close-history-game'));
+      await tester.pumpAndSettle();
+      expect(sheet, findsNothing);
+    },
+  );
+  testWidgets(
+    'finished history row shows stored winner and opens turn timeline',
+    (tester) async {
+      await win();
+      await show(tester);
+      await expandHistory(tester);
+      expect(find.text('Ván 1'), findsOneWidget);
+      expect(find.text('Đã xong'), findsOneWidget);
+      expect(find.textContaining('A thắng'), findsOneWidget);
+      expect(find.textContaining('(+240)'), findsOneWidget);
+      await tapExpanded(tester, 'history-game-1');
+      final sheet = key('history-game-sheet');
+      expect(sheet, findsOneWidget);
+      expect(
+        find.descendant(of: sheet, matching: find.text('+240')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: sheet, matching: find.text('9')),
+        findsOneWidget,
+      );
     },
   );
   testWidgets(
@@ -171,17 +229,17 @@ void main() {
       await tap(tester, 'record-turn');
       expect((await latest()).games.single.turns, isEmpty);
       await visible(tester, 'pot-ball-9');
-      expect(tester.widget<FilterChip>(key('pot-ball-9')).selected, isTrue);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isTrue);
       final id = repo.commands.last;
       await tap(tester, 'retry-action');
       expect(repo.commands.last, id);
       expect((await latest()).games.single.turns.length, 1);
       await visible(tester, 'pot-ball-9');
-      expect(tester.widget<FilterChip>(key('pot-ball-9')).selected, isFalse);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isFalse);
     },
   );
   testWidgets(
-    'in-flight save disables chips and confirm; double tap cannot duplicate',
+    'in-flight save disables ball picker and confirm; double tap cannot duplicate',
     (tester) async {
       await show(tester);
       await tap(tester, 'pot-ball-1');
@@ -190,7 +248,7 @@ void main() {
       await tester.tap(key('record-turn'));
       await tester.pump();
       expect(tester.widget<FilledButton>(key('record-turn')).onPressed, isNull);
-      expect(tester.widget<FilterChip>(key('pot-ball-1')).onSelected, isNull);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-1')).onToggle, isNull);
       await tester.tap(key('record-turn'));
       await tester.pump();
       expect((await latest()).revision, 0);
@@ -293,7 +351,8 @@ void main() {
       await tester.pumpAndSettle();
       expect((await latest()).currentRuleVersion, 2);
       await tap(tester, 'pot-ball-1');
-      expect(find.text('A: +75'), findsOneWidget);
+      expect(find.text('A ăn Bi 1:'), findsOneWidget);
+      expect(find.text('+75 điểm'), findsOneWidget);
     },
   );
   testWidgets(
@@ -398,7 +457,7 @@ void main() {
       await tester.pumpAndSettle();
       expect((await latest()).pendingEndReasons, isNotEmpty);
       await visible(tester, 'pot-ball-9');
-      expect(tester.widget<FilterChip>(key('pot-ball-9')).selected, isTrue);
+      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isTrue);
     },
   );
   testWidgets(
@@ -478,7 +537,8 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.tap(find.text('Bỏ qua'));
     await tester.pumpAndSettle();
-    await tap(tester, 'room-history');
+    await expandHistory(tester);
+    expect(key('room-history'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

@@ -45,6 +45,11 @@ class RoomValidator {
         starterId: starterId,
         payerId: payerId,
       ),
+      ...validateOpeningOrder(
+        playerOrder: playerOrder,
+        starterId: starterId,
+        payerId: payerId,
+      ),
       ...RuleConfigValidator.validate(ruleConfig),
       ...validateEndConditions(endConditions),
     ];
@@ -182,6 +187,25 @@ class RoomValidator {
       );
     }
     return issues;
+  }
+
+  /// At setup the break player shoots first and the initial payer shoots second.
+  /// Later players may be reordered; these two positions may not.
+  static List<ValidationIssue> validateOpeningOrder({
+    required List<String> playerOrder,
+    required String starterId,
+    required String payerId,
+  }) {
+    if (playerOrder.length < 2) return const [];
+    if (playerOrder[0] == starterId && playerOrder[1] == payerId) {
+      return const [];
+    }
+    return const [
+      ValidationIssue(
+        fieldPath: 'playerOrder',
+        code: ValidationCode.invalidOpeningOrder,
+      ),
+    ];
   }
 
   static List<ValidationIssue> validateEndConditions(EndConditions conditions) {

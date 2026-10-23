@@ -26,6 +26,13 @@ String gameStatusLabel(GameStatus status) => switch (status) {
   GameStatus.cancelled => 'Đã hủy',
 };
 
+String historyGameStatusLabel(GameStatus status) => switch (status) {
+  GameStatus.inProgress => 'Đang chơi',
+  GameStatus.finished => 'Đã xong',
+  GameStatus.incomplete => 'Chưa xong',
+  GameStatus.cancelled => 'Đã huỷ',
+};
+
 String validationMessage(ValidationCode code) => switch (code) {
   ValidationCode.rosterSize => 'Cần từ 2 đến 5 người chơi.',
   ValidationCode.emptyName => 'Nhập tên người chơi.',
@@ -41,6 +48,8 @@ String validationMessage(ValidationCode code) => switch (code) {
   ValidationCode.invalidScoreThreshold =>
     'Ngưỡng điểm phải là số nguyên dương.',
   ValidationCode.invalidOrder => 'Thứ tự phải chứa đủ người chơi, không trùng.',
+  ValidationCode.invalidOpeningOrder =>
+    'Người đề-pa phải đứng đầu, người đền đầu đứng thứ hai.',
   _ => 'Cấu hình phòng không hợp lệ (${code.name}).',
 };
 

@@ -1,8 +1,7 @@
 import 'package:bidart/domain/models/scoring/room.dart';
-import 'package:bidart/domain/models/scoring/score_log.dart';
 import 'package:bidart/domain/services/score_engine.dart';
 import 'package:bidart/core/labels/room_labels.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/ball_selection_chips.dart';
+import 'package:bidart/screens/rooms/in_room/widgets/ball_selection_grid.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/foul_toggle.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/turn_actions.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/turn_preview_panel.dart';
@@ -46,8 +45,8 @@ class TurnDraftPanel extends StatelessWidget {
     children: [
       const Divider(),
       ChainLabel(isBreakChain: preview?.game.chainState.isBreakChain ?? false),
-      const Text('Chọn bi đã ăn (bi tắt điểm vẫn ghi nhận):'),
-      BallSelectionChips(
+      SizedBox(height: 4),
+      BallSelectionGrid(
         remainingBalls: remainingBalls,
         selected: selectedBalls,
         enabled: !busy,
@@ -62,13 +61,14 @@ class TurnDraftPanel extends StatelessWidget {
       if (previewError != null) Text(roomFailureMessage(previewError!)),
       if (preview != null)
         TurnPreviewPanel(
-          logs: _previewLogs(room, preview!),
+          deltas: _previewDeltas(room, preview!),
           respotted: [
             for (final ball in preview!.balls)
               if (ball.isRespotted) ball.ballNumber,
           ],
           nextPlayerName: playerName(room, preview!.game.currentPlayerId),
         ),
+      SizedBox(height: 4),
       TurnActions(
         clearEnabled: !busy,
         recordEnabled: preview != null,
@@ -79,10 +79,31 @@ class TurnDraftPanel extends StatelessWidget {
     ],
   );
 
-  List<String> _previewLogs(Room room, ScoreEngineResult result) => [
-    for (final ScoreLog log in result.logs)
-      '${playerName(room, log.participantId)}: '
-          '${log.newScore - log.previousScore >= 0 ? '+' : ''}'
-          '${log.newScore - log.previousScore}',
-  ];
+  List<TurnPreviewDelta> _previewDeltas(Room room, ScoreEngineResult result) {
+    final actorId = result.game.previousPlayerId;
+    final potted = result.balls.map((ball) => ball.ballNumber).join(', ');
+    return [
+      for (final log in result.logs)
+        TurnPreviewDelta(
+          name: playerName(room, log.participantId),
+          action: _previewAction(
+            isActor: log.participantId == actorId,
+            gainsPoints: log.newScore >= log.previousScore,
+            pottedBalls: potted,
+          ),
+          points: log.newScore - log.previousScore,
+        ),
+    ];
+  }
+
+  String _previewAction({
+    required bool isActor,
+    required bool gainsPoints,
+    required String pottedBalls,
+  }) {
+    if (gainsPoints) {
+      return isActor ? 'ăn Bi $pottedBalls:' : 'nhận đền:';
+    }
+    return isActor ? 'chịu phạt:' : 'chịu đền:';
+  }
 }

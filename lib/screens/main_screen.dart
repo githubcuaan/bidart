@@ -4,6 +4,7 @@ import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:bidart/widgets/navi_bar.dart';
+import 'package:bidart/widgets/theme_button.dart';
 import 'package:flutter/material.dart';
 
 class Mainscreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _MainscreenState extends State<Mainscreen> {
           : AppBar(
         title: Text(_titles[_indexSelected]),
         actions: [
+          const ThemeButton(),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: Builder(
