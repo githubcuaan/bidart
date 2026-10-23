@@ -1,16 +1,10 @@
-import 'package:bidart/data/repositories/in_memory_auth_repository.dart';
+import 'package:bidart/data/repositories/firebase_auth_repository.dart';
 import 'package:bidart/domain/models/auth/auth_user.dart';
 import 'package:bidart/domain/repositories/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final repo = InMemoryAuthRepository(
-    initialUser: const AuthUser(
-      id: 'usr_tuananh',
-      email: 'tuananh@example.com',
-      displayName: 'Tuấn Anh',
-    ),
-  );
+  final repo = FirebaseAuthRepository();
   ref.onDispose(repo.dispose);
   return repo;
 });
