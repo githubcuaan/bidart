@@ -3,7 +3,6 @@ import 'package:bidart/core/theme/theme_mode_controller.dart';
 import 'package:bidart/data/local/app_database.dart';
 import 'package:bidart/data/repositories/game_repository.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
-import 'package:bidart/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bidart/screens/auth/auth_gate.dart';
