@@ -15,7 +15,7 @@ class People extends ConsumerWidget {
     ref.read(matchmakingFeedProvider.notifier).swipe(player, SwipeType.like);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('🎯 Đã gửi lời mời thách đấu tới ${player.name}!'),
+        content: Text('Đã gửi lời mời thách đấu tới ${player.name}!'),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 1),
       ),
@@ -36,50 +36,48 @@ class People extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final feedAsync = ref.watch(matchmakingFeedProvider);
 
-    return Scaffold(
-      body: Column(
-        children: [
-          const PeopleTopBar(),
-          Expanded(
-            child: feedAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Lỗi tải danh sách: $err')),
-              data: (candidates) {
-                if (candidates.isEmpty) {
-                  return EmptyState(
-                    onReload: () =>
-                        ref.read(matchmakingFeedProvider.notifier).reload(),
-                  );
-                }
+    return Column(
+      children: [
+        const PeopleTopBar(),
+        Expanded(
+          child: feedAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(child: Text('Lỗi tải danh sách: $err')),
+            data: (candidates) {
+              if (candidates.isEmpty) {
+                return EmptyState(
+                  onReload: () =>
+                      ref.read(matchmakingFeedProvider.notifier).reload(),
+                );
+              }
 
-                final currentTarget = candidates.first;
+              final currentTarget = candidates.first;
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: TinderCard(
-                          user: currentTarget,
-                          onChallenge: () =>
-                              _onChallenge(context, ref, currentTarget),
-                          onPass: () => _onPass(context, ref, currentTarget),
-                        ),
+              return Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: TinderCard(
+                        user: currentTarget,
+                        onChallenge: () =>
+                            _onChallenge(context, ref, currentTarget),
+                        onPass: () => _onPass(context, ref, currentTarget),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ActionButtons(
-                      onPass: () => _onPass(context, ref, currentTarget),
-                      onChallenge: () =>
-                          _onChallenge(context, ref, currentTarget),
-                    ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                  const SizedBox(height: 12),
+                  ActionButtons(
+                    onPass: () => _onPass(context, ref, currentTarget),
+                    onChallenge: () =>
+                        _onChallenge(context, ref, currentTarget),
+                  ),
+                ],
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

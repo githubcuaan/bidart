@@ -45,25 +45,40 @@ class PeopleTopBar extends StatelessWidget {
                 ),
               ],
             ),
-            Stack(
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_none, size: 28),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Lịch sử ghép kèo & Thông báo')),
-                    );
-                  },
+                Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_none, size: 28),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Lịch sử ghép kèo & Thông báo')),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      right: 12,
+                      top: 12,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  right: 12,
-                  top: 12,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
+                const SizedBox(width: 4),
+                Builder(
+                  builder: (ctx) => GestureDetector(
+                    onTap: () => Scaffold.of(ctx).openEndDrawer(),
+                    child: const Tooltip(
+                      message: 'Mở hồ sơ',
+                      child: CircleAvatar(radius: 18, child: Text('TA')),
                     ),
                   ),
                 ),
