@@ -1,5 +1,6 @@
 import 'package:bidart/screens/profile/history/match_history_screen.dart';
 import 'package:bidart/screens/profile/rules/favorite_rules_screen.dart';
+import 'package:bidart/screens/profile/settings/account_settings_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileShortcutsCard extends StatelessWidget {
@@ -44,7 +45,13 @@ class ProfileShortcutsCard extends StatelessWidget {
             leading: const Icon(Icons.settings_outlined),
             title: const Text('Cài đặt tài khoản'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const AccountSettingsScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
