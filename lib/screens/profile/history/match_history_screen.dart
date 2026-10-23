@@ -123,7 +123,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                             'Các phòng đấu bida đã kết thúc của bạn sẽ được lưu trữ tự động tại đây.',
                             style: TextStyle(
                               fontSize: 14,
-                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -186,7 +186,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                       vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _statusColor(room.status).withOpacity(0.15),
+                                      color: _statusColor(room.status).withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(

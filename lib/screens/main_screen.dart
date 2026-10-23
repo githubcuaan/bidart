@@ -17,17 +17,41 @@ class Mainscreen extends StatefulWidget {
 
 class _MainscreenState extends State<Mainscreen> {
   int _indexSelected = 0;
-  static const _titles = ["Bidart", "Rooms", "Map", "People", "Trò chuyện"];
+  static const _titles = ["Bidart", "Rooms", "Map", "People", "Chats"];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: (_indexSelected == 3)
-          ? null
-          : AppBar(
+      appBar: AppBar(
         title: Text(_titles[_indexSelected]),
         actions: [
           const ThemeButton(),
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none, size: 28),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Lịch sử ghép kèo & Thông báo'),
+                    ),
+                  );
+                },
+              ),
+              Positioned(
+                right: 12,
+                top: 12,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: Builder(

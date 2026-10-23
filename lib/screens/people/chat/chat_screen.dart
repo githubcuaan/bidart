@@ -113,7 +113,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           vertical: 1.5,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.2),
+                          color: Colors.amber.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -127,7 +127,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '${widget.opponent.address.isNotEmpty ? widget.opponent.address : "Gần bạn"}',
+                        widget.opponent.address.isNotEmpty ? widget.opponent.address : "Gần bạn",
                         style: TextStyle(
                           fontSize: 11,
                           color: theme.textTheme.bodySmall?.color,
