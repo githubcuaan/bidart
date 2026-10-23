@@ -10,6 +10,8 @@ class ThemeModeController extends Notifier<ThemeMode> {
   @override
   ThemeMode build() => ThemeMode.system;
 
+  void setMode(ThemeMode mode) => state = mode;
+
   /// Switches to the opposite explicit mode from the currently rendered theme.
   void toggle(Brightness currentBrightness) {
     state = currentBrightness == Brightness.dark

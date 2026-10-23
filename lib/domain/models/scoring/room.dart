@@ -8,6 +8,7 @@ import 'room_mode.dart';
 import 'room_status.dart';
 import 'room_event.dart';
 import 'rule_config.dart';
+import '../base_entity.dart';
 
 part 'room.freezed.dart';
 part 'room.g.dart';
@@ -16,12 +17,13 @@ part 'room.g.dart';
 /// players and must sum to zero. Rule versions immutable; turns reference
 /// the version used at confirmation. Templates stay independent.
 @freezed
-abstract class Room with _$Room {
+abstract class Room with _$Room implements BaseEntity<String>{
   // ignore: invalid_annotation_target
   @JsonSerializable(explicitToJson: true)
   const factory Room({
     required String id,
     required String name,
+    @Default('') String description,
     required String ownerId,
     required RoomMode mode,
     required RoomStatus status,

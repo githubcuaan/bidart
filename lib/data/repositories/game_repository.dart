@@ -276,4 +276,11 @@ class DriftGameRepository
     if (row == null) throw RuleTemplateNotFoundFailure(templateId);
     return _decodeTemplate(row.payload);
   }
+
+  @override
+  Future<void> deleteRuleTemplate(String templateId) async {
+    await (_db.delete(_db.templateRows)
+          ..where((t) => t.id.equals(templateId)))
+        .go();
+  }
 }

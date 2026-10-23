@@ -3,7 +3,7 @@ import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/screens/home.dart';
 import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/main_screen.dart';
-import 'package:bidart/screens/people.dart';
+import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';

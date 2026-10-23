@@ -27,8 +27,10 @@ class BidartApp extends ConsumerWidget {
   const BidartApp({super.key});
 
   @override
+
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Bidart',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

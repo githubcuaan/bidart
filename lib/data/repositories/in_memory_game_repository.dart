@@ -180,4 +180,9 @@ class InMemoryGameRepository
     if (template == null) throw RuleTemplateNotFoundFailure(templateId);
     return _copyTemplate(template);
   }
+
+  @override
+  Future<void> deleteRuleTemplate(String templateId) async {
+    _templates.remove(templateId);
+  }
 }

@@ -1,6 +1,7 @@
+import 'package:bidart/screens/chat/chat_list_screen.dart';
 import 'package:bidart/screens/home.dart';
 import 'package:bidart/screens/maps.dart';
-import 'package:bidart/screens/people.dart';
+import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
 import 'package:bidart/widgets/navi_bar.dart';
@@ -16,12 +17,14 @@ class Mainscreen extends StatefulWidget {
 
 class _MainscreenState extends State<Mainscreen> {
   int _indexSelected = 0;
-  static const _titles = ["Bidart", "Rooms", "Map", "People"];
+  static const _titles = ["Bidart", "Rooms", "Map", "People", "Trò chuyện"];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: (_indexSelected == 3)
+          ? null
+          : AppBar(
         title: Text(_titles[_indexSelected]),
         actions: [
           const ThemeButton(),
@@ -45,7 +48,19 @@ class _MainscreenState extends State<Mainscreen> {
       ),
       body: IndexedStack(
         index: _indexSelected,
-        children: [Home(), Rooms(), Maps(), People()],
+        children: [
+          const Home(),
+          const Rooms(),
+          const Maps(),
+          const People(),
+          ChatListScreen(
+            onExplorePeople: () {
+              setState(() {
+                _indexSelected = 3;
+              });
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: Navibar(
         selectedIndex: _indexSelected,

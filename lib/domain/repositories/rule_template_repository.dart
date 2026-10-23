@@ -16,6 +16,8 @@ abstract interface class RuleTemplateRepository {
   Future<List<RuleTemplate>> listRuleTemplates();
 
   Future<RuleTemplate> getRuleTemplate(String templateId);
+
+  Future<void> deleteRuleTemplate(String templateId);
 }
 
 /// Shared validation so RAM and Drift backends reject the same inputs.
