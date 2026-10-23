@@ -16,9 +16,6 @@ class People extends ConsumerWidget {
   void _openFilter(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) => const FilterModal(),
     );
   }

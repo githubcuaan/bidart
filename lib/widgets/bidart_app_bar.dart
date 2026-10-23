@@ -9,6 +9,8 @@ class BidartAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return AppBar(
       titleSpacing: 16,
       title: const BidartLogo(),
@@ -30,8 +32,8 @@ class BidartAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
+                decoration: BoxDecoration(
+                  color: scheme.error,
                   shape: BoxShape.circle,
                 ),
               ),

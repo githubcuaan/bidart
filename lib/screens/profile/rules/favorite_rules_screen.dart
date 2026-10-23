@@ -24,7 +24,10 @@ class FavoriteRulesScreen extends ConsumerWidget {
             child: const Text('Hủy'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
             onPressed: () async {
               Navigator.of(ctx).pop();
               final success = await ref
@@ -218,15 +221,22 @@ class FavoriteRulesScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'delete',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.delete_outline,
-                                        size: 18, color: Colors.red),
-                                    SizedBox(width: 8),
-                                    Text('Xóa',
-                                        style: TextStyle(color: Colors.red)),
+                                    Icon(
+                                      Icons.delete_outline,
+                                      size: 18,
+                                      color: theme.colorScheme.error,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Xóa',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.error,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),

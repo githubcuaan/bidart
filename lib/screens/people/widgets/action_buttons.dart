@@ -12,6 +12,8 @@ class ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
@@ -19,18 +21,24 @@ class ActionButtons extends StatelessWidget {
         children: [
           FloatingActionButton(
             heroTag: 'pass_btn',
-            backgroundColor: Colors.white,
+            tooltip: 'Bỏ qua',
+            backgroundColor: scheme.surfaceContainerHigh,
+            foregroundColor: scheme.error,
+            elevation: 0,
             onPressed: onPass,
-            child: const Icon(Icons.close, color: Colors.red, size: 30),
+            child: const Icon(Icons.close, size: 30),
           ),
           FloatingActionButton.extended(
             heroTag: 'challenge_btn',
-            backgroundColor: Colors.green,
+            tooltip: 'Thách đấu',
+            backgroundColor: scheme.primary,
+            foregroundColor: scheme.onPrimary,
+            elevation: 0,
             onPressed: onChallenge,
-            icon: const Icon(Icons.flash_on, color: Colors.white),
+            icon: const Icon(Icons.flash_on),
             label: const Text(
               'Thách đấu',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ],

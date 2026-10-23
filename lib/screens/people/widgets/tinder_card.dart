@@ -1,3 +1,4 @@
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/domain/models/user/user.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ class TinderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatar = user.avatarUrl ?? '';
+    final scheme = Theme.of(context).colorScheme;
 
     return Dismissible(
       key: Key(user.id),
@@ -30,16 +32,21 @@ class TinderCard extends StatelessWidget {
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 30),
         decoration: BoxDecoration(
-          color: Colors.green.withValues(alpha: 0.85),
+          color: scheme.primary,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.flash_on, color: Colors.white, size: 40),
-            SizedBox(width: 8),
+            Icon(Icons.flash_on, color: scheme.onPrimary, size: 40),
+            const SizedBox(width: 8),
             Text(
               'THÁCH ĐẤU',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: scheme.onPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
             ),
           ],
         ),
@@ -48,23 +55,29 @@ class TinderCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 30),
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.85),
+          color: scheme.error,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
               'BỎ QUA',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: scheme.onError,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
             ),
-            SizedBox(width: 8),
-            Icon(Icons.close, color: Colors.white, size: 40),
+            const SizedBox(width: 8),
+            Icon(Icons.close, color: scheme.onError, size: 40),
           ],
         ),
       ),
       child: Card(
-        elevation: 6,
+        elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -74,10 +87,10 @@ class TinderCard extends StatelessWidget {
               Image.network(
                 avatar,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => _buildDefaultBackground(),
+                errorBuilder: (_, _, _) => _buildDefaultBackground(context),
               )
             else
-              _buildDefaultBackground(),
+              _buildDefaultBackground(context),
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -103,21 +116,25 @@ class TinderCard extends StatelessWidget {
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 23,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
                           ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.amber[700],
-                          borderRadius: BorderRadius.circular(12),
+                          color: scheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           'Hạng ${user.selfDeclaredLevel.code}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          style: TextStyle(
+                            color: scheme.onSecondaryContainer,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -128,12 +145,18 @@ class TinderCard extends StatelessWidget {
                     children: [
                       Text(
                         '${user.selfDeclaredLevel.displayName} • ${user.gender}',
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: 13,
+                        ),
                       ),
                       const Spacer(),
                       Text(
                         'Thắng ${user.winRate.toInt()}% (ELO ${user.eloRating})',
-                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -141,11 +164,18 @@ class TinderCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Colors.white70),
+                        Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.white.withValues(alpha: 0.78),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           user.address,
-                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.78),
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -159,11 +189,16 @@ class TinderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDefaultBackground() {
+  Widget _buildDefaultBackground(BuildContext context) {
+    final colors = AppSemanticColors.of(context);
+
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF2E1A47), Color(0xFF6A0DAD)],
+          colors: [
+            colors.currentTurnSurfaceDeep,
+            colors.currentTurnSurface,
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -174,27 +209,38 @@ class TinderCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 46,
-              backgroundColor: Colors.white12,
+              backgroundColor: colors.currentTurnAvatar,
               child: Text(
                 user.name.isNotEmpty
                     ? user.name.trim().split(' ').last.substring(0, 1).toUpperCase()
                     : 'P',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  color: colors.onCurrentTurn,
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            const Text(
-              '🎱 BIDART PLAYER',
-              style: TextStyle(
-                color: Colors.white54,
-                letterSpacing: 2,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.sports_esports_rounded,
+                  size: 16,
+                  color: colors.currentTurnSubtitle,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'BIDART PLAYER',
+                  style: TextStyle(
+                    color: colors.currentTurnSubtitle,
+                    letterSpacing: 2,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

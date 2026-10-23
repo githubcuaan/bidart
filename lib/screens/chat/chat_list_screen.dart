@@ -142,17 +142,17 @@ class ChatListScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     if (lastMsg.isInvitation) ...[
-                      const Icon(
+                      Icon(
                         Icons.flash_on,
                         size: 15,
-                        color: Colors.amber,
+                        color: theme.colorScheme.secondary,
                       ),
                       const SizedBox(width: 4),
-                      const Text(
+                      Text(
                         '[Lời mời thách đấu] ',
                         style: TextStyle(
-                          color: Colors.amber,
-                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.secondary,
+                          fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
                       ),

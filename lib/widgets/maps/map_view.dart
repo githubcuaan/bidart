@@ -12,6 +12,8 @@ class MapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final markerColor = Theme.of(context).colorScheme.secondary;
+
     return FlutterMap(
       options: const MapOptions(
         initialCenter: _initialPosition,
@@ -24,13 +26,17 @@ class MapView extends StatelessWidget {
           userAgentPackageName: 'com.example.bidart',
         ),
         // Lớp hiển thị Marker (điểm đánh dấu)
-        const MarkerLayer(
+        MarkerLayer(
           markers: [
             Marker(
               point: _initialPosition,
               width: 40,
               height: 40,
-              child: Icon(Icons.location_on, size: 40, color: Colors.red),
+              child: Icon(
+                Icons.location_on,
+                size: 40,
+                color: markerColor,
+              ),
             ),
           ],
         ),
