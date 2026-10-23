@@ -1,4 +1,5 @@
 import 'package:bidart/core/theme/app_colors.dart';
+import 'package:bidart/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 /// Semantic colours that are not covered by [ColorScheme].
@@ -291,21 +292,216 @@ abstract final class AppTheme {
     required ColorScheme scheme,
     required AppSemanticColors semanticColors,
   }) {
+    final textTheme = AppTypography.textTheme(scheme);
+    final hairline = scheme.outlineVariant;
+    final cardShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: hairline),
+    );
+
+    OutlineInputBorder inputBorder(Color color, {double width = 1}) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
+      fontFamily: AppTypography.fontFamily,
+      textTheme: textTheme,
       scaffoldBackgroundColor: scheme.surface,
       extensions: [semanticColors],
+      iconTheme: IconThemeData(color: scheme.onSurfaceVariant, size: 24),
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
         surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 16,
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+        shape: Border(bottom: BorderSide(color: hairline)),
       ),
       navigationBarTheme: NavigationBarThemeData(
+        height: 72,
+        elevation: 0,
         backgroundColor: scheme.surfaceContainerLow,
-        indicatorColor: scheme.primaryContainer.withValues(alpha: 0.35),
         surfaceTintColor: Colors.transparent,
+        indicatorColor: scheme.primary.withValues(alpha: 0.16),
+        indicatorShape: const StadiumBorder(),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            size: 24,
+            color: states.contains(WidgetState.selected)
+                ? scheme.primary
+                : scheme.onSurfaceVariant,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => textTheme.labelSmall!.copyWith(
+            color: states.contains(WidgetState.selected)
+                ? scheme.primary
+                : scheme.onSurfaceVariant,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w500,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: scheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        shape: cardShape,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          side: BorderSide(color: hairline),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: scheme.surfaceContainerHigh,
+        selectedColor: scheme.primary.withValues(alpha: 0.18),
+        disabledColor: scheme.surfaceContainer,
+        side: BorderSide.none,
+        shape: const StadiumBorder(),
+        labelStyle: textTheme.labelMedium!,
+        secondaryLabelStyle: textTheme.labelMedium!.copyWith(
+          color: scheme.primary,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: scheme.surfaceContainer,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+        ),
+        labelStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurfaceVariant,
+        ),
+        floatingLabelStyle: textTheme.labelMedium?.copyWith(
+          color: scheme.primary,
+        ),
+        border: inputBorder(hairline),
+        enabledBorder: inputBorder(hairline),
+        focusedBorder: inputBorder(scheme.primary, width: 1.5),
+        errorBorder: inputBorder(scheme.error),
+        focusedErrorBorder: inputBorder(scheme.error, width: 1.5),
+      ),
+      dividerTheme: DividerThemeData(color: hairline, thickness: 1),
+      dialogTheme: DialogThemeData(
+        backgroundColor: scheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        titleTextStyle: textTheme.titleLarge,
+        contentTextStyle: textTheme.bodyMedium,
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        modalBackgroundColor: scheme.surfaceContainerLow,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        showDragHandle: true,
+        dragHandleColor: scheme.outlineVariant,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onInverseSurface,
+        ),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: scheme.surfaceContainerHigh,
+        surfaceTintColor: Colors.transparent,
+        textStyle: textTheme.bodyMedium,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: scheme.primary,
+        inactiveTrackColor: scheme.outlineVariant,
+        thumbColor: scheme.primary,
+        overlayColor: scheme.primary.withValues(alpha: 0.12),
+        trackHeight: 4,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: scheme.primary,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: scheme.primary,
+        selectionColor: scheme.primary.withValues(alpha: 0.3),
+        selectionHandleColor: scheme.primary,
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: scheme.inverseSurface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        textStyle: textTheme.bodySmall?.copyWith(
+          color: scheme.onInverseSurface,
+        ),
       ),
     );
   }
