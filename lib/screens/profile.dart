@@ -1,4 +1,5 @@
 import 'package:bidart/core/enum/skill_level.dart';
+import 'package:bidart/screens/profile/history/match_history_screen.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -108,7 +109,13 @@ class Profile extends StatelessWidget {
                 leading: const Icon(Icons.history_outlined),
                 title: const Text('Lịch sử đấu'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MatchHistoryScreen(),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.bookmark_outline),
