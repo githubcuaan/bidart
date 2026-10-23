@@ -6,6 +6,23 @@ có thể được triển khai dưới dạng dialog/bottom sheet thay vì màn
 
 su dung generic class cho 1 man roi ap dung cho nhieu screens
 
+## Onboarding
+
+### 0. Màn hình giới thiệu lần đầu
+
+Màn hình chào mừng, chỉ tự hiện ở lần mở ứng dụng đầu tiên (hoặc khi tăng
+phiên bản nội dung giới thiệu). Cờ đã xem lưu cục bộ, không cần tài khoản/mạng.
+
+- Gồm 5 trang: Welcome; chia điểm tự động; ghi cú trong 3 chạm và hoàn tác;
+  tìm kèo/quán (`SẮP CÓ`); sẵn sàng vào bàn.
+- Nền dark theo splash native, minh họa vẽ bằng code, có chuyển động nhẹ và
+  parallax; giảm chuyển động hệ thống thì tắt hiệu ứng lặp.
+- Cho phép `Bỏ qua`, vuốt ngang, bấm dots hoặc nút back để điều hướng.
+- Trang cuối có `Tạo phòng đầu tiên` (mở màn hình tạo phòng) và
+  `Khám phá ứng dụng` (vào màn hình chính).
+- Có thể mở lại từ `Cài đặt tài khoản` -> `Xem lại giới thiệu`; ở chế độ này
+  nút cuối là `Đã hiểu` và chỉ đóng màn hình, không thay đổi cờ đã xem.
+
 ## Auth
 
 ### 1. Màn hình đăng nhập
@@ -47,6 +64,7 @@ Màn hình hiển thị và chỉnh sửa thông tin người chơi.
 - Cho phép cập nhật ảnh đại diện và thông tin cá nhân.
 - Cho phép người dùng chọn hoặc cập nhật trình độ chơi.
 - Có lối tắt tới lịch sử đấu và các thiết lập tài khoản.
+- Trong Cài đặt tài khoản có mục `Xem lại giới thiệu` để mở lại onboarding.
 
 ### 5. Màn hình lịch sử đấu
 
