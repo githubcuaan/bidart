@@ -27,63 +27,6 @@ class PeopleTopBar extends StatelessWidget {
               icon: const Icon(Icons.tune, size: 26),
               onPressed: () => _openFilter(context),
             ),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  child: const Text('Logo', style: TextStyle(fontSize: 16)),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'BIDART',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                    color: Colors.deepPurple,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_none, size: 28),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Lịch sử ghép kèo & Thông báo')),
-                        );
-                      },
-                    ),
-                    Positioned(
-                      right: 12,
-                      top: 12,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 4),
-                Builder(
-                  builder: (ctx) => GestureDetector(
-                    onTap: () => Scaffold.of(ctx).openEndDrawer(),
-                    child: const Tooltip(
-                      message: 'Mở hồ sơ',
-                      child: CircleAvatar(radius: 18, child: Text('TA')),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
