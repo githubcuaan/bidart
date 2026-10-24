@@ -22,6 +22,26 @@ Nguồn scratch: `scratch/createRoom.html`, `scratch/inGame.html`, `scratch/tind
   Icon outlined khi chưa chọn, filled khi active. Không còn tab `Profile`.
 - Layout mobile-first, `main` chừa `pt-16 pb-28` để khỏi bị header/nav che, bo góc chủ đạo `rounded-xl/2xl`.
 
+### 0.1. Giới thiệu lần đầu (Onboarding)
+
+Hiển thị một lần ở lần mở app đầu tiên, trước `Mainscreen`. Cờ đã xem lưu bằng
+`shared_preferences` (`onboarding.seen_version`); tăng `onboardingVersion` sẽ
+phát lại giới thiệu sau một bản cập nhật nội dung lớn.
+
+- Khóa dark theo splash native (`#0F131D`), dùng palette mint/amber của brand.
+- 5 trang: Welcome; chia điểm tự động; ghi cú trong 3 chạm + hoàn tác; tìm kèo
+  và quán (`SẮP CÓ`); sẵn sàng vào bàn.
+- Hình minh họa vẽ bằng code (`CustomPaint`/widget), không dùng ảnh raster.
+  Có parallax nhẹ, entrance stagger và idle loop; tôn trọng
+  `MediaQuery.disableAnimations` (giảm chuyển động thì tắt loop/entrance).
+- Top bar: logo + `Bỏ qua` (trừ trang cuối). Bottom: dots bấm được + CTA chính.
+  Vuốt ngang hoặc nút back để về trang trước; back ở trang đầu thoát app.
+- Trang cuối: CTA `Tạo phòng đầu tiên` mở `AddRoom`; CTA phụ
+  `Khám phá ứng dụng` vào `Mainscreen` bình thường.
+- Replay từ `Cài đặt tài khoản` -> `Xem lại giới thiệu`: mở lại dạng push,
+  có nút đóng, CTA cuối là `Đã hiểu` và chỉ pop, không đổi cờ đã xem.
+- Có semantics label cho trang/dots/CTA và announcement khi đổi trang.
+
 ---
 
 ## 1. Tab Phòng — trang chính + 2 trang con
@@ -221,7 +241,8 @@ Bố cục từ trên xuống:
    - `Lịch sử đấu` (`history`) -> `docs/screens.md` §5 (list theo thời gian, lọc thắng/thua, bấm vào xem chi tiết lượt/bi/lỗi).
    - `Bộ luật yêu thích` (`bookmark`) -> mẫu đã lưu ở trang con Tạo phòng 1.1.
    - `Quán đã lưu` (`location_on`) -> quán bookmark ở tab CLB Quán.
-   - `Cài đặt tài khoản` (`settings`): đổi mật khẩu, OTP, đăng xuất, xóa tài khoản.
+   - `Cài đặt tài khoản` (`settings`): đổi mật khẩu, OTP, đăng xuất, xóa tài khoản,
+     xem lại giới thiệu lần đầu.
 
 ### 5.2. Chỉnh sửa thông tin cá nhân
 
