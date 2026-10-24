@@ -20,12 +20,11 @@ class Mainscreen extends StatefulWidget {
 
 class _MainscreenState extends State<Mainscreen> {
   int _indexSelected = 0;
-  static const _titles = ["Bidart", "Rooms", "Map", "People", "Chats"];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: BidartAppBar(titles: _titles, indexSelected: _indexSelected),
+      appBar: const BidartAppBar(),
       endDrawer: Drawer(
         width: MediaQuery.of(context).size.width * 0.85,
         child: const Profile(),

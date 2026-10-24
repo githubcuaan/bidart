@@ -6,6 +6,7 @@ import 'package:bidart/screens/main_screen.dart';
 import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
+import 'package:bidart/widgets/branding/bidart_logo.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,8 +36,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Finder appBarTitle(String value) =>
-      find.descendant(of: find.byType(AppBar), matching: find.text(value));
+  Finder appBarBrand() => find.descendant(
+    of: find.byType(AppBar),
+    matching: find.byType(BidartLogo),
+  );
 
   Future<void> openTab(WidgetTester tester, String label) async {
     await tester.tap(find.widgetWithText(NavigationDestination, label));
@@ -48,18 +51,14 @@ void main() {
 
     expect(find.byType(Scaffold), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
-    expect(appBarTitle('Bidart'), findsOneWidget);
+    expect(appBarBrand(), findsOneWidget);
+    expect(find.text('BiDART'), findsOneWidget);
 
-    for (final entry in {
-      'Room': 'Rooms',
-      'Map': 'Map',
-      'People': 'People',
-      'Home': 'Bidart',
-    }.entries) {
-      await openTab(tester, entry.key);
+    for (final tab in ['Room', 'Map', 'People', 'Home']) {
+      await openTab(tester, tab);
       expect(find.byType(Scaffold), findsOneWidget);
       expect(find.byType(AppBar), findsOneWidget);
-      expect(appBarTitle(entry.value), findsOneWidget);
+      expect(appBarBrand(), findsOneWidget);
     }
   });
 
@@ -90,7 +89,7 @@ void main() {
 
     await openTab(tester, 'Home');
     expect(find.byType(Home), findsOneWidget);
-    expect(find.text('Bidart'), findsOneWidget);
+    expect(appBarBrand(), findsOneWidget);
 
     await openTab(tester, 'Room');
     expect(
@@ -108,7 +107,7 @@ void main() {
     await pumpApp(tester);
     await openTab(tester, 'Map');
 
-    expect(appBarTitle('Map'), findsOneWidget);
+    expect(appBarBrand(), findsOneWidget);
     await tester.tap(find.byTooltip('Mở hồ sơ'));
     await tester.pumpAndSettle();
     expect(find.byType(Profile), findsOneWidget);
@@ -118,7 +117,7 @@ void main() {
     await tester.tapAt(const Offset(10, 400));
     await tester.pumpAndSettle();
     expect(find.byType(Profile), findsNothing);
-    expect(appBarTitle('Map'), findsOneWidget);
+    expect(appBarBrand(), findsOneWidget);
   });
 
   testWidgets('Placeholder tabs render without extra shells', (tester) async {

@@ -12,7 +12,8 @@ Nguồn scratch: `scratch/createRoom.html`, `scratch/inGame.html`, `scratch/tind
 - Màu nhấn: `primary #4edea3` (xanh lá bàn bida), `primary-container #10b981` (nút CTA),
   `secondary #ffb95f` (vàng/cam điểm số, rating), `error #ffb4ab` / `error-container #93000a` (phạt, bỏ qua).
 - Font `Plus Jakarta Sans` (400/600/700/800). Icon `Material Symbols Outlined`.
-- Header (AppBar): trái là title theo tab, phải là avatar tròn (`CircleAvatar`).
+- Header (AppBar): trái là brand lockup `BiDART` (`BidartLogo`: icon 9 bi + wordmark,
+  `Bi` màu `primary`, `DART` màu chữ chính), phải là các action (đổi theme, thông báo) và avatar tròn (`CircleAvatar`).
   Bấm avatar -> mở drawer phải (`endDrawer`) chứa Profile. Không dùng nút back; vuốt/bấm ngoài để đóng.
 - Bottom nav (`lib/widgets/naviBar.dart:18`): 4 tab Material `NavigationBar`
   `Home (home)` | `Room (create)` | `Map (map)` | `People (people)`.

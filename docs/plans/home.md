@@ -214,7 +214,7 @@ Không đổi: domain, repository, provider, schema, `pubspec.yaml`.
 - [ ] Tạo `Home` là `ConsumerWidget` nhận `VoidCallback? onOpenRooms`.
 - [ ] `Mainscreen`: truyền `onOpenRooms: () => setState(() => _indexSelected = 1)`.
 - [ ] `Home` watch `roomListProvider(null)`.
-- [ ] AppBar title giữ `Bidart`.
+- [ ] AppBar dùng brand lockup `BiDART` (`BidartLogo`) thay cho title tab.
 - [ ] Xóa `lib/screens/home.dart` cũ, sửa import.
 - Verify: `flutter analyze`; app chạy, tab Home không còn "he".
 

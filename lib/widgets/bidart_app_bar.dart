@@ -1,20 +1,17 @@
+import 'package:bidart/widgets/branding/bidart_logo.dart';
 import 'package:bidart/widgets/theme_button.dart';
 import 'package:flutter/material.dart';
 
+/// Branded app bar shared by every tab: logo lockup on the left, theme,
+/// notifications and the profile avatar on the right.
 class BidartAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const BidartAppBar({
-    super.key,
-    required this._titles,
-    required this._indexSelected,
-  });
-
-  final List _titles;
-  final int _indexSelected;
+  const BidartAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(_titles[_indexSelected]),
+      titleSpacing: 16,
+      title: const BidartLogo(),
       actions: [
         const ThemeButton(),
         Stack(
