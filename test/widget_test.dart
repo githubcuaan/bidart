@@ -28,7 +28,7 @@ void main() {
     expect(app.title, 'Bidart');
     expect(app.theme?.brightness, Brightness.light);
     expect(app.darkTheme?.brightness, Brightness.dark);
-    expect(app.themeMode, ThemeMode.system);
+    expect(app.themeMode, ThemeMode.dark);
     expect(tester.takeException(), isNull);
   });
 
@@ -39,15 +39,6 @@ void main() {
     MaterialApp materialApp() =>
         tester.widget<MaterialApp>(find.byType(MaterialApp));
 
-    expect(materialApp().themeMode, ThemeMode.system);
-    expect(
-      Theme.of(tester.element(find.byKey(const ValueKey('theme-mode-toggle'))))
-          .brightness,
-      Brightness.light,
-    );
-
-    await tester.tap(find.byKey(const ValueKey('theme-mode-toggle')));
-    await tester.pumpAndSettle();
     expect(materialApp().themeMode, ThemeMode.dark);
     expect(
       Theme.of(tester.element(find.byKey(const ValueKey('theme-mode-toggle'))))
@@ -58,6 +49,15 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('theme-mode-toggle')));
     await tester.pumpAndSettle();
     expect(materialApp().themeMode, ThemeMode.light);
+    expect(
+      Theme.of(tester.element(find.byKey(const ValueKey('theme-mode-toggle'))))
+          .brightness,
+      Brightness.light,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('theme-mode-toggle')));
+    await tester.pumpAndSettle();
+    expect(materialApp().themeMode, ThemeMode.dark);
     expect(tester.takeException(), isNull);
   });
 }
