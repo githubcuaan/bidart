@@ -2,6 +2,7 @@ import 'package:bidart/core/theme/theme_mode_controller.dart';
 import 'package:bidart/domain/models/user/user.dart';
 import 'package:bidart/features/profile/provider/account_security_provider.dart';
 import 'package:bidart/features/profile/provider/profile_providers.dart';
+import 'package:bidart/screens/onboarding/onboarding_screen.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
@@ -463,6 +464,33 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                     ref.read(themeModeProvider.notifier).setMode(mode);
                   }
                 },
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Text(
+              'GIỚI THIỆU',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.1,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              key: const ValueKey('onboarding-replay-tile'),
+              leading: const Icon(Icons.slideshow_outlined),
+              title: const Text('Xem lại giới thiệu'),
+              subtitle: const Text('Ôn lại cách BiDART hoạt động'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const OnboardingScreen(replay: true),
+                ),
               ),
             ),
           ),
