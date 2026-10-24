@@ -44,19 +44,22 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.12),
+                      color: Theme.of(ctx).colorScheme.errorContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline,
-                            size: 18, color: Colors.red),
+                        Icon(
+                          Icons.error_outline,
+                          size: 18,
+                          color: Theme.of(ctx).colorScheme.onErrorContainer,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             errorText!,
-                            style: const TextStyle(
-                              color: Colors.red,
+                            style: TextStyle(
+                              color: Theme.of(ctx).colorScheme.onErrorContainer,
                               fontSize: 12.5,
                             ),
                           ),
@@ -80,7 +83,8 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                         size: 20,
                       ),
                       onPressed: () => setDialogState(
-                          () => obscureCurrent = !obscureCurrent),
+                        () => obscureCurrent = !obscureCurrent,
+                      ),
                     ),
                   ),
                 ),
@@ -93,9 +97,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                     hintText: 'Ít nhất 6 ký tự',
                     suffixIcon: IconButton(
                       icon: Icon(
-                        obscureNew
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        obscureNew ? Icons.visibility_off : Icons.visibility,
                         size: 20,
                       ),
                       onPressed: () =>
@@ -117,7 +119,8 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                         size: 20,
                       ),
                       onPressed: () => setDialogState(
-                          () => obscureConfirm = !obscureConfirm),
+                        () => obscureConfirm = !obscureConfirm,
+                      ),
                     ),
                   ),
                 ),
@@ -136,17 +139,21 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                 final cnf = confirmPassController.text;
 
                 if (cur.isEmpty || nxt.isEmpty || cnf.isEmpty) {
-                  setDialogState(() => errorText = 'Vui lòng điền đầy đủ thông tin');
+                  setDialogState(
+                    () => errorText = 'Vui lòng điền đầy đủ thông tin',
+                  );
                   return;
                 }
                 if (nxt.length < 6) {
                   setDialogState(
-                      () => errorText = 'Mật khẩu mới phải có ít nhất 6 ký tự');
+                    () => errorText = 'Mật khẩu mới phải có ít nhất 6 ký tự',
+                  );
                   return;
                 }
                 if (nxt != cnf) {
                   setDialogState(
-                      () => errorText = 'Mật khẩu xác nhận không trùng khớp');
+                    () => errorText = 'Mật khẩu xác nhận không trùng khớp',
+                  );
                   return;
                 }
 
@@ -156,16 +163,14 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
 
                 if (!success) {
                   setDialogState(
-                      () => errorText = 'Mật khẩu hiện tại không chính xác');
+                    () => errorText = 'Mật khẩu hiện tại không chính xác',
+                  );
                   return;
                 }
 
                 Navigator.of(ctx).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Đổi mật khẩu thành công!'),
-                    backgroundColor: Colors.green,
-                  ),
+                  const SnackBar(content: Text('Đổi mật khẩu thành công!')),
                 );
               },
               child: const Text('Cập nhật'),
@@ -181,14 +186,19 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Xác nhận đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Hủy'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.orange.shade800),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.secondary,
+              foregroundColor: Theme.of(ctx).colorScheme.onSecondary,
+            ),
             onPressed: () async {
               Navigator.of(ctx).pop();
               Navigator.of(context).pop();
@@ -210,9 +220,12 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text(
+          title: Text(
             'Xóa tài khoản vĩnh viễn',
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -232,7 +245,10 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                 if (errorText != null) ...[
                   Text(
                     errorText!,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(height: 6),
                 ],
@@ -247,8 +263,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                         obscure ? Icons.visibility_off : Icons.visibility,
                         size: 20,
                       ),
-                      onPressed: () =>
-                          setDialogState(() => obscure = !obscure),
+                      onPressed: () => setDialogState(() => obscure = !obscure),
                     ),
                   ),
                 ),
@@ -261,12 +276,16 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
               child: const Text('Hủy'),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Theme.of(context).colorScheme.onError,
+              ),
               onPressed: () async {
                 final password = passwordController.text;
                 if (password.isEmpty) {
                   setDialogState(
-                      () => errorText = 'Vui lòng nhập mật khẩu để tiếp tục');
+                    () => errorText = 'Vui lòng nhập mật khẩu để tiếp tục',
+                  );
                   return;
                 }
 
@@ -276,7 +295,9 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
 
                 if (!success) {
                   setDialogState(
-                      () => errorText = 'Mật khẩu không chính xác. Vui lòng thử lại.');
+                    () => errorText =
+                        'Mật khẩu không chính xác. Vui lòng thử lại.',
+                  );
                   return;
                 }
 
@@ -288,7 +309,9 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                   winRate: 0.0,
                   eloRating: 1000,
                 );
-                await ref.read(userRepositoryProvider).updateProfile(defaultUser);
+                await ref
+                    .read(userRepositoryProvider)
+                    .updateProfile(defaultUser);
 
                 if (!context.mounted) return;
                 Navigator.of(ctx).pop();
@@ -297,7 +320,6 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Tài khoản của bạn đã được xóa thành công!'),
-                    backgroundColor: Colors.red,
                   ),
                 );
               },
@@ -314,6 +336,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
     final userAsync = ref.watch(userProfileStreamProvider);
     final themeMode = ref.watch(themeModeProvider);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     final user = userAsync.asData?.value;
     final userName = user?.name ?? 'Tuấn Anh';
@@ -322,9 +345,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
         : (user?.phone ?? '0901 234 567');
 
     return AppScreen(
-      appBar: AppBar(
-        title: const Text('Cài đặt tài khoản'),
-      ),
+      appBar: AppBar(title: const Text('Cài đặt tài khoản')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -371,7 +392,8 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                       if (user != null) {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) => ProfileEditScreen(currentUser: user),
+                            builder: (_) =>
+                                ProfileEditScreen(currentUser: user),
                           ),
                         );
                       }
@@ -383,18 +405,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            child: Text(
-              'BẢO MẬT & ĐĂNG NHẬP',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-                color: Colors.grey,
-              ),
-            ),
-          ),
+          const _SectionHeader('BẢO MẬT & ĐĂNG NHẬP'),
           Card(
             child: Column(
               children: [
@@ -419,18 +430,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            child: Text(
-              'GIAO DIỆN',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-                color: Colors.grey,
-              ),
-            ),
-          ),
+          const _SectionHeader('GIAO DIỆN'),
           Card(
             child: ListTile(
               leading: const Icon(Icons.palette_outlined),
@@ -439,8 +439,8 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                 themeMode == ThemeMode.dark
                     ? 'Chế độ tối (Dark)'
                     : themeMode == ThemeMode.light
-                        ? 'Chế độ sáng (Light)'
-                        : 'Theo hệ thống',
+                    ? 'Chế độ sáng (Light)'
+                    : 'Theo hệ thống',
               ),
               trailing: DropdownButton<ThemeMode>(
                 value: themeMode,
@@ -450,14 +450,8 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                     value: ThemeMode.system,
                     child: Text('Hệ thống'),
                   ),
-                  DropdownMenuItem(
-                    value: ThemeMode.light,
-                    child: Text('Sáng'),
-                  ),
-                  DropdownMenuItem(
-                    value: ThemeMode.dark,
-                    child: Text('Tối'),
-                  ),
+                  DropdownMenuItem(value: ThemeMode.light, child: Text('Sáng')),
+                  DropdownMenuItem(value: ThemeMode.dark, child: Text('Tối')),
                 ],
                 onChanged: (mode) {
                   if (mode != null) {
@@ -468,18 +462,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            child: Text(
-              'GIỚI THIỆU',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-                color: Colors.grey,
-              ),
-            ),
-          ),
+          const _SectionHeader('GIỚI THIỆU'),
           Card(
             child: ListTile(
               key: const ValueKey('onboarding-replay-tile'),
@@ -495,43 +478,64 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            child: Text(
-              'QUẢN LÝ TÀI KHOẢN',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-                color: Colors.red,
-              ),
-            ),
-          ),
+          const _SectionHeader('QUẢN LÝ TÀI KHOẢN', danger: true),
           Card(
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.orange),
-                  title: const Text(
+                  leading: Icon(Icons.logout, color: scheme.secondary),
+                  title: Text(
                     'Đăng xuất',
-                    style: TextStyle(color: Colors.orange),
+                    style: TextStyle(
+                      color: scheme.secondary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   onTap: () => _showLogoutDialog(context),
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.delete_forever, color: Colors.red),
-                  title: const Text(
+                  leading: Icon(Icons.delete_forever, color: scheme.error),
+                  title: Text(
                     'Xóa tài khoản',
-                    style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: scheme.error,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  subtitle: const Text('Yêu cầu xác minh mật khẩu để xóa vĩnh viễn'),
+                  subtitle: const Text(
+                    'Yêu cầu xác minh mật khẩu để xóa vĩnh viễn',
+                  ),
                   onTap: () => _showDeleteAccountDialog(context),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader(this.label, {this.danger = false});
+
+  final String label;
+  final bool danger;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.1,
+          color: danger ? scheme.error : scheme.onSurfaceVariant,
+        ),
       ),
     );
   }

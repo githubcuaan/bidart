@@ -53,8 +53,11 @@ void main() {
     expect(find.byType(AppBar), findsOneWidget);
     expect(appBarBrand(), findsOneWidget);
     expect(find.text('BiDART'), findsOneWidget);
+    expect(find.byType(NavigationDestination), findsNWidgets(4));
+    expect(find.text('Phòng'), findsOneWidget);
+    expect(find.text('Tin nhắn'), findsOneWidget);
 
-    for (final tab in ['Room', 'Map', 'People', 'Home']) {
+    for (final tab in ['Phòng', 'Bản đồ', 'Đối thủ', 'Tin nhắn']) {
       await openTab(tester, tab);
       expect(find.byType(Scaffold), findsOneWidget);
       expect(find.byType(AppBar), findsOneWidget);
@@ -67,11 +70,9 @@ void main() {
   ) async {
     await pumpApp(tester);
 
-    expect(find.byType(Home), findsOneWidget);
-    expect(find.byType(Rooms), findsNothing);
-
-    await openTab(tester, 'Room');
     expect(find.byType(Rooms), findsOneWidget);
+    expect(find.byType(Home), findsNothing);
+
     expect(find.text('Chưa có phòng trong danh sách này.'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('room-status-filter')));
@@ -87,11 +88,11 @@ void main() {
       isNotNull,
     );
 
-    await openTab(tester, 'Home');
-    expect(find.byType(Home), findsOneWidget);
+    await openTab(tester, 'Bản đồ');
+    expect(find.byType(Maps), findsOneWidget);
     expect(appBarBrand(), findsOneWidget);
 
-    await openTab(tester, 'Room');
+    await openTab(tester, 'Phòng');
     expect(
       tester
           .widget<DropdownButton<Object?>>(
@@ -105,7 +106,7 @@ void main() {
 
   testWidgets('Drawer opens profile above the active tab', (tester) async {
     await pumpApp(tester);
-    await openTab(tester, 'Map');
+    await openTab(tester, 'Bản đồ');
 
     expect(appBarBrand(), findsOneWidget);
     await tester.tap(find.byTooltip('Mở hồ sơ'));

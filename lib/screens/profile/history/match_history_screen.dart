@@ -1,4 +1,5 @@
 import 'package:bidart/core/labels/room_labels.dart';
+import 'package:bidart/core/theme/app_theme.dart';
 import 'package:bidart/domain/models/scoring/room_status.dart';
 import 'package:bidart/domain/models/scoring/room_summary.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
@@ -20,15 +21,13 @@ class MatchHistoryScreen extends ConsumerStatefulWidget {
 class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
   RoomStatus? _filterStatus = RoomStatus.finished;
 
-  Color _statusColor(RoomStatus status) {
-    switch (status) {
-      case RoomStatus.finished:
-        return Colors.green;
-      case RoomStatus.active:
-        return Colors.blue;
-      case RoomStatus.cancelled:
-        return Colors.red;
-    }
+  Color _statusColor(BuildContext context, RoomStatus status) {
+    final scheme = Theme.of(context).colorScheme;
+    return switch (status) {
+      RoomStatus.finished => scheme.primary,
+      RoomStatus.active => AppSemanticColors.of(context).live,
+      RoomStatus.cancelled => scheme.error,
+    };
   }
 
   @override
@@ -105,17 +104,26 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.history_outlined,
-                            size: 64,
-                            color: theme.disabledColor,
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.1,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.history_outlined,
+                              size: 56,
+                              color: theme.colorScheme.primary,
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 18),
                           const Text(
                             'Chưa có lịch sử trận đấu',
                             style: TextStyle(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -123,7 +131,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                             'Các phòng đấu bida đã kết thúc của bạn sẽ được lưu trữ tự động tại đây.',
                             style: TextStyle(
                               fontSize: 14,
-                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -186,15 +194,19 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                       vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _statusColor(room.status).withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(6),
+                                      color: _statusColor(context, room.status)
+                                          .withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
                                       roomStatusLabel(room.status),
                                       style: TextStyle(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: _statusColor(room.status),
+                                        fontWeight: FontWeight.w700,
+                                        color: _statusColor(
+                                          context,
+                                          room.status,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -235,7 +247,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                   Icon(
                                     Icons.sports_esports_outlined,
                                     size: 15,
-                                    color: Colors.amber.shade700,
+                                    color: theme.colorScheme.secondary,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -243,10 +255,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const Spacer(),
-                                  const Icon(
+                                  Icon(
                                     Icons.arrow_forward_ios,
                                     size: 13,
-                                    color: Colors.grey,
+                                    color: theme.colorScheme.onSurfaceVariant,
                                   ),
                                 ],
                               ),

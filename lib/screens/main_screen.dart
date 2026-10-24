@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-// 1. Import đúng file Home đầy đủ trong thư mục lib/screens/home/
-import 'package:bidart/screens/home/home.dart';
-
 import 'package:bidart/screens/chat/chat_list_screen.dart';
 import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/people/people.dart';
@@ -48,21 +45,13 @@ class _MainscreenState extends State<Mainscreen> {
       body: IndexedStack(
         index: _indexSelected,
         children: [
-          // 2. Tích hợp Home đầy đủ kèm callback chuyển sang Tab Rooms (Index 1)
-          Home(
-            onOpenRooms: () {
-              setState(() {
-                _indexSelected = 1;
-              });
-            },
-          ),
           const Rooms(),
           const Maps(),
           const People(),
           ChatListScreen(
             onExplorePeople: () {
               setState(() {
-                _indexSelected = 3;
+                _indexSelected = 2;
               });
             },
           ),

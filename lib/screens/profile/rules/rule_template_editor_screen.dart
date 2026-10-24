@@ -132,14 +132,12 @@ class _RuleTemplateEditorScreenState
                 ? 'Đã tạo bộ luật “$name”'
                 : 'Đã cập nhật bộ luật “$name”',
           ),
-          backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Không thể lưu bộ luật. Vui lòng kiểm tra lại.'),
-          backgroundColor: Colors.red,
         ),
       );
     }

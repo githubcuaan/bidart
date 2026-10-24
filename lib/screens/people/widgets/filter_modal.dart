@@ -49,7 +49,6 @@ class _FilterModalState extends ConsumerState<FilterModal> {
             min: 1,
             max: 50,
             divisions: 49,
-            activeColor: Colors.deepPurple,
             onChanged: (val) {
               setState(() => maxDistance = val);
             },
@@ -57,13 +56,7 @@ class _FilterModalState extends ConsumerState<FilterModal> {
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+            child: FilledButton(
               onPressed: () {
                 ref.read(matchmakingFilterProvider.notifier).updateDistance(maxDistance);
                 Navigator.pop(context);

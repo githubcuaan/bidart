@@ -70,6 +70,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ref.watch(chatMessagesStreamProvider(widget.opponent.id));
     final currentUserId = ref.watch(currentUserIdProvider);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -113,15 +114,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           vertical: 1.5,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.amber.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
+                          color: scheme.secondary.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           widget.opponent.selfDeclaredLevel.name.toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber,
+                            fontWeight: FontWeight.w700,
+                            color: scheme.secondary,
                           ),
                         ),
                       ),

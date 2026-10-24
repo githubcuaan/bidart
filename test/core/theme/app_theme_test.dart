@@ -1,5 +1,6 @@
 import 'package:bidart/core/theme/app_colors.dart';
 import 'package:bidart/core/theme/app_theme.dart';
+import 'package:bidart/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,6 +32,45 @@ void main() {
 
     expect(_contrast(colors.positive, Colors.white), greaterThanOrEqualTo(4.5));
     expect(_contrast(colors.negative, Colors.white), greaterThanOrEqualTo(4.5));
+  });
+
+  test('brand type scale is bundled with tabular figures', () {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      final textTheme = theme.textTheme;
+
+      expect(theme.textTheme.bodyMedium?.fontFamily, AppTypography.fontFamily);
+      expect(textTheme.headlineSmall?.fontFamily, AppTypography.fontFamily);
+      expect(
+        textTheme.headlineSmall?.fontFeatures?.first.feature,
+        'tnum',
+      );
+      expect(
+        textTheme.bodyMedium?.fontFeatures?.first.feature,
+        'tnum',
+      );
+    }
+  });
+
+  test('shared component themes keep the chrome flat and bordered', () {
+    final theme = AppTheme.dark;
+    final scheme = theme.colorScheme;
+
+    expect(theme.appBarTheme.elevation, 0);
+    expect(theme.appBarTheme.scrolledUnderElevation, 0);
+    expect(theme.appBarTheme.shape, isA<Border>());
+
+    expect(theme.navigationBarTheme.height, 72);
+    expect(theme.navigationBarTheme.elevation, 0);
+    expect(theme.navigationBarTheme.indicatorShape, isA<StadiumBorder>());
+
+    expect(theme.cardTheme.elevation, 0);
+    expect(theme.cardTheme.color, scheme.surfaceContainerLow);
+    expect(
+      (theme.cardTheme.shape as RoundedRectangleBorder).side.color,
+      isNot(Colors.transparent),
+    );
+
+    expect(theme.dialogTheme.shape, isA<RoundedRectangleBorder>());
   });
 }
 

@@ -14,6 +14,15 @@ class ChallengeInvitationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final background = isFromMe
+        ? scheme.primaryContainer
+        : scheme.surfaceContainerHigh;
+    final foreground = isFromMe
+        ? scheme.onPrimaryContainer
+        : scheme.onSurface;
+    final accent = isFromMe ? scheme.onPrimaryContainer : scheme.primary;
+
     return Align(
       alignment: isFromMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -22,26 +31,12 @@ class ChallengeInvitationCard extends StatelessWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isFromMe
-                ? [Colors.deepPurple.shade700, Colors.deepPurple.shade900]
-                : [Colors.grey.shade800, Colors.grey.shade900],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: background,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
           border: Border.all(
             color: isFromMe
-                ? Colors.purpleAccent.withValues(alpha: 0.4)
-                : Colors.white24,
-            width: 1.2,
+                ? scheme.primary.withValues(alpha: 0.4)
+                : scheme.outlineVariant,
           ),
         ),
         child: Padding(
@@ -55,22 +50,18 @@ class ChallengeInvitationCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.2),
+                      color: accent.withValues(alpha: 0.14),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.flash_on,
-                      color: Colors.amber,
-                      size: 18,
-                    ),
+                    child: Icon(Icons.flash_on, color: accent, size: 18),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'KÈO THÁCH ĐẤU',
                     style: TextStyle(
-                      color: Colors.amber,
+                      color: accent,
                       fontSize: 13,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       letterSpacing: 1.1,
                     ),
                   ),
@@ -79,8 +70,8 @@ class ChallengeInvitationCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 message.text,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: foreground,
                   fontSize: 14.5,
                   height: 1.35,
                 ),
@@ -90,17 +81,17 @@ class ChallengeInvitationCard extends StatelessWidget {
                 width: double.infinity,
                 child: FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.amber.shade700,
-                    foregroundColor: Colors.black,
+                    backgroundColor: foreground,
+                    foregroundColor: background,
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
                   ),
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text(
                     'Tạo phòng đấu ngay',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
                   ),
                   onPressed: () {
                     Navigator.of(context).push(
@@ -117,7 +108,7 @@ class ChallengeInvitationCard extends StatelessWidget {
                 child: Text(
                   '${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: foreground.withValues(alpha: 0.6),
                     fontSize: 11,
                   ),
                 ),
