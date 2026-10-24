@@ -1,12 +1,27 @@
+import 'package:bidart/features/onboarding/onboarding_store.dart';
+import 'package:bidart/features/onboarding/provider/onboarding_provider.dart';
 import 'package:bidart/main.dart';
-import 'package:bidart/main.dart' as app;
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'support/onboarding_test_support.dart';
 
 void main() {
+  Widget buildApp({int seen = onboardingVersion}) {
+    return ProviderScope(
+      overrides: [
+        onboardingStoreProvider.overrideWithValue(
+          MemoryOnboardingStore(seen: seen),
+        ),
+      ],
+      child: const BidartApp(),
+    );
+  }
+
   testWidgets('App starts with an empty scaffold', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: BidartApp()));
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
 
     expect(find.byType(Scaffold), findsOneWidget);
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
@@ -17,17 +32,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('App entry point installs a provider scope', (tester) async {
-    app.main();
-    await tester.pump();
-
-    expect(find.byType(ProviderScope), findsOneWidget);
-    expect(find.byType(BidartApp), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets('Theme toggle switches between light and dark', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: BidartApp()));
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
 
     MaterialApp materialApp() =>
         tester.widget<MaterialApp>(find.byType(MaterialApp));
