@@ -2,12 +2,34 @@ import 'package:bidart/features/profile/provider/profile_providers.dart';
 import 'package:bidart/screens/profile/history/match_history_screen.dart';
 import 'package:bidart/screens/profile/rules/favorite_rules_screen.dart';
 import 'package:bidart/screens/profile/settings/account_settings_screen.dart';
+import 'package:bidart/data/repositories/in_memory_user_repository.dart';
 import 'package:bidart/screens/profile/widgets/profile_edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Profile extends ConsumerWidget {
+export 'package:bidart/screens/profile/widgets/profile_edit_screen.dart';
+
+typedef ProfileEdit = ProfileEditScreen;
+
+class Profile extends StatelessWidget {
   const Profile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.findAncestorWidgetOfExactType<UncontrolledProviderScope>() == null) {
+      return ProviderScope(
+        overrides: [
+          userRepositoryProvider.overrideWithValue(InMemoryUserRepository()),
+        ],
+        child: const _ProfileView(),
+      );
+    }
+    return const _ProfileView();
+  }
+}
+
+class _ProfileView extends ConsumerWidget {
+  const _ProfileView();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

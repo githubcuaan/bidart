@@ -1,6 +1,7 @@
 import 'package:bidart/features/auth/provider/auth_providers.dart';
 import 'package:bidart/screens/auth/forgot_password_screen.dart';
 import 'package:bidart/screens/auth/register_screen.dart';
+import 'package:bidart/widgets/branding/bidart_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,18 +44,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _handleGuestLogin() async {
-    final success = await ref.read(authControllerProvider.notifier).signInAnonymously();
-    if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không thể đăng nhập với tư cách khách'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
@@ -71,37 +60,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade800,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.orange.withValues(alpha: 0.3),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.sports_basketball,
-                        size: 44,
-                        color: Colors.white,
-                      ),
-                    ),
+                  const Center(
+                    child: BidartLogoMark(size: 84),
                   ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Bidart',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
+                  const SizedBox(height: 14),
+                  const Center(
+                    child: BidartWordmark(fontSize: 30),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -185,19 +149,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     height: 50,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.orange.shade800,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: isLoading ? null : _handleLogin,
                       child: isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 22,
                               height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             )
                           : const Text(
@@ -206,38 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.grey.shade700)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          'HOẶC',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                        ),
-                      ),
-                      Expanded(child: Divider(color: Colors.grey.shade700)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey.shade600),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: const Icon(Icons.person_outline),
-                      label: const Text(
-                        'Trải nghiệm với tư cách Khách',
-                        style: TextStyle(fontSize: 15),
-                      ),
-                      onPressed: isLoading ? null : _handleGuestLogin,
-                    ),
-                  ),
+
                   const SizedBox(height: 28),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -259,7 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Text(
                           'Đăng ký ngay',
                           style: TextStyle(
-                            color: Colors.orange.shade400,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

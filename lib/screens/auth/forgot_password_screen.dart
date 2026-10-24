@@ -1,4 +1,5 @@
 import 'package:bidart/features/auth/provider/auth_providers.dart';
+import 'package:bidart/widgets/branding/bidart_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,7 +64,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     Icon(
                       Icons.mark_email_read_outlined,
                       size: 80,
-                      color: Colors.orange.shade400,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(height: 20),
                     const Text(
@@ -86,7 +87,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     const SizedBox(height: 32),
                     FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.orange.shade800,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -101,22 +103,32 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Đặt lại mật khẩu',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Nhập email đã đăng ký của bạn. Chúng tôi sẽ gửi liên kết để bạn tạo mật khẩu mới.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade400,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
+                  const Center(
+                    child: BidartLogoMark(size: 72),
+                  ),
+                  const SizedBox(height: 12),
+                  const Center(
+                    child: BidartWordmark(fontSize: 26),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Đặt lại mật khẩu',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Nhập email đã đăng ký của bạn. Chúng tôi sẽ gửi liên kết để bạn tạo mật khẩu mới.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -144,19 +156,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         height: 50,
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            backgroundColor: Colors.orange.shade800,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: isLoading ? null : _handleResetPassword,
                           child: isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 22,
                                   height: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.5,
-                                    color: Colors.white,
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 )
                               : const Text(

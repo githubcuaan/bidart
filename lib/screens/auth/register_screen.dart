@@ -1,4 +1,5 @@
 import 'package:bidart/features/auth/provider/auth_providers.dart';
+import 'package:bidart/widgets/branding/bidart_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,16 +74,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const Center(
+                    child: BidartLogoMark(size: 72),
+                  ),
+                  const SizedBox(height: 12),
+                  const Center(
+                    child: BidartWordmark(fontSize: 26),
+                  ),
+                  const SizedBox(height: 20),
                   const Text(
                     'Tạo tài khoản Bidart',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Tham gia cộng đồng cơ thủ và lưu lại lịch sử đấu của bạn',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade400,
@@ -195,19 +206,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     height: 50,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.orange.shade800,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: isLoading ? null : _handleRegister,
                       child: isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 22,
                               height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             )
                           : const Text(
@@ -229,7 +241,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         child: Text(
                           'Đăng nhập ngay',
                           style: TextStyle(
-                            color: Colors.orange.shade400,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

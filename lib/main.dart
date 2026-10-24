@@ -6,6 +6,7 @@ import 'package:bidart/features/onboarding/onboarding_store.dart';
 import 'package:bidart/features/onboarding/provider/onboarding_provider.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
 import 'package:bidart/screens/auth/auth_gate.dart';
+import 'package:bidart/screens/main_screen.dart';
 import 'package:bidart/screens/onboarding/onboarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:bidart/firebase_options.dart';
@@ -24,9 +25,16 @@ Future<OnboardingStore> _openOnboardingStore() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+  if (!isTest) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (e) {
+      debugPrint('Firebase init: $e');
+    }
+  }
   final onboardingStore = await _openOnboardingStore();
   final database = AppDatabase();
   runApp(
@@ -51,7 +59,10 @@ class BidartApp extends ConsumerStatefulWidget {
 }
 
 class _BidartAppState extends ConsumerState<BidartApp> {
+  bool _openCreateRoom = false;
+
   Future<void> _finishOnboarding(OnboardingExit exit) async {
+    setState(() => _openCreateRoom = exit == OnboardingExit.createRoom);
     await ref.read(showOnboardingProvider.notifier).complete();
   }
 
@@ -67,7 +78,9 @@ class _BidartAppState extends ConsumerState<BidartApp> {
       themeMode: ref.watch(themeModeProvider),
       home: showOnboarding
           ? OnboardingScreen(onFinish: _finishOnboarding)
-          : const AuthGate(),
+          : AuthGate(
+              child: Mainscreen(openCreateRoomOnStart: _openCreateRoom),
+            ),
     );
   }
 }

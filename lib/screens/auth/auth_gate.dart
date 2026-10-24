@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthGate extends ConsumerWidget {
-  const AuthGate({super.key});
+  final Widget? child;
+
+  const AuthGate({super.key, this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,7 +16,7 @@ class AuthGate extends ConsumerWidget {
     return authState.when(
       data: (user) {
         if (user != null) {
-          return const Mainscreen();
+          return child ?? const Mainscreen();
         }
         return const LoginScreen();
       },

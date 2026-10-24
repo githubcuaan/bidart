@@ -3,7 +3,6 @@ import 'package:bidart/domain/models/user/user.dart';
 import 'package:bidart/features/profile/provider/account_security_provider.dart';
 import 'package:bidart/features/profile/provider/profile_providers.dart';
 import 'package:bidart/screens/onboarding/onboarding_screen.dart';
-import 'package:bidart/screens/profile.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
