@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="ballBase" cx="34%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#EDE8DC"/>
+    </radialGradient>
+    <radialGradient id="shade" cx="35%" cy="28%" r="92%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.18"/>
+    </radialGradient>
+    <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD953"/>
+      <stop offset="100%" stop-color="#F1A63A"/>
+    </linearGradient>
+    <clipPath id="ballClip"><circle r="33"/></clipPath>
+  </defs>
+
+  <!-- Maskable: nền full-bleed góc vuông, nội dung nằm trong safe zone 80% -->
+  <rect width="512" height="512" fill="#0F131D"/>
+
+  <path d="M 320.6 131.8 A 140 140 0 1 0 380.2 191.4"
+        fill="none" stroke="#4EDEA3" stroke-width="44" stroke-linecap="round"/>
+  <path d="M 380.2 191.4 A 140 140 0 0 0 366.3 169.8"
+        fill="none" stroke="#4EDEA3" stroke-width="44" stroke-linecap="round" opacity="0.45"/>
+
+  <g transform="translate(346,149) scale(1.2)">
+    <circle r="33" fill="url(#ballBase)"/>
+    <g clip-path="url(#ballClip)">
+      <rect x="-33" y="-13.2" width="66" height="26.4" fill="url(#band)"/>
+      <circle r="33" fill="url(#shade)"/>
+    </g>
+    <circle r="12.5" fill="#FAF8F2" stroke="#E4DECC" stroke-width="1.2"/>
+    <ellipse cx="-6" cy="-8" rx="4" ry="2.6" fill="#FFFFFF" opacity="0.85"/>
+    <text y="3" text-anchor="middle" dominant-baseline="central"
+          font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif"
+          font-size="26" font-weight="800" fill="#10141E">9</text>
+    <circle r="33" fill="none" stroke="#10141E" stroke-width="5"/>
+  </g>
+</svg>
