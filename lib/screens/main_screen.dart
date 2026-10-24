@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:bidart/screens/chat/chat_list_screen.dart';
+import 'package:bidart/screens/home/home.dart';
 import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
@@ -45,6 +46,7 @@ class _MainscreenState extends State<Mainscreen> {
       body: IndexedStack(
         index: _indexSelected,
         children: [
+          Home(onOpenRooms: () => setState(() => _indexSelected = 1)),
           const Rooms(),
           const Maps(),
           const People(),

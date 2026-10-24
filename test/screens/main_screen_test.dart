@@ -1,6 +1,6 @@
 import 'package:bidart/data/repositories/in_memory_game_repository.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
-import 'package:bidart/screens/home.dart';
+import 'package:bidart/screens/home/home.dart';
 import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/main_screen.dart';
 import 'package:bidart/screens/people/people.dart';
