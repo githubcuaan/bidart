@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthGate extends ConsumerWidget {
-  const AuthGate({super.key});
+  const AuthGate({super.key, this.child});
+
+  final Widget? child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,20 +16,14 @@ class AuthGate extends ConsumerWidget {
     return authState.when(
       data: (user) {
         if (user != null) {
-          return const Mainscreen();
+          return child ?? const Mainscreen();
         }
         return const LoginScreen();
       },
       loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.orange),
-        ),
+        body: Center(child: CircularProgressIndicator(color: Colors.orange)),
       ),
-      error: (e, _) => Scaffold(
-        body: Center(
-          child: Text('Lỗi xác thực: $e'),
-        ),
-      ),
+      error: (e, _) => Scaffold(body: Center(child: Text('Lỗi xác thực: $e'))),
     );
   }
 }

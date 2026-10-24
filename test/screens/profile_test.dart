@@ -1,4 +1,5 @@
 import 'package:bidart/screens/profile.dart';
+import 'package:bidart/screens/profile/widgets/profile_edit_screen.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,7 +24,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Chỉnh sửa hồ sơ'));
     await tester.pumpAndSettle();
-    expect(find.byType(ProfileEdit), findsOneWidget);
+    expect(find.byType(ProfileEditScreen), findsOneWidget);
     expect(find.byType(AppScreen), findsOneWidget);
     expect(
       find.descendant(
@@ -48,7 +49,7 @@ void main() {
 
     expect(find.text('Nhập tên'), findsOneWidget);
     expect(find.text('SĐT chưa đúng'), findsOneWidget);
-    expect(find.byType(ProfileEdit), findsOneWidget);
+    expect(find.byType(ProfileEditScreen), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(
       tester.widget<TextFormField>(field('Số điện thoại')).controller!.text,
@@ -76,7 +77,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pumpAndSettle();
-    expect(find.byType(ProfileEdit), findsNothing);
+    expect(find.byType(ProfileEditScreen), findsNothing);
     expect(find.text('Đã lưu thay đổi'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -88,7 +89,7 @@ void main() {
     await tester.enterText(field('Tên hiển thị *'), 'Bản nháp');
     await tester.tap(find.text('Hủy'));
     await tester.pumpAndSettle();
-    expect(find.byType(ProfileEdit), findsNothing);
+    expect(find.byType(ProfileEditScreen), findsNothing);
 
     await tester.tap(find.byTooltip('Chỉnh sửa hồ sơ'));
     await tester.pumpAndSettle();
@@ -114,7 +115,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ProfileEdit), findsNothing);
+    expect(find.byType(ProfileEditScreen), findsNothing);
     expect(find.text('Other page'), findsOneWidget);
     expect(find.byType(AppScreen), findsNothing);
     expect(find.text('Đã lưu thay đổi'), findsNothing);
