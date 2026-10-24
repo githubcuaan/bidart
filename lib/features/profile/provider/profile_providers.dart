@@ -2,9 +2,26 @@ import 'package:bidart/data/repositories/in_memory_user_repository.dart';
 import 'package:bidart/domain/models/user/user.dart';
 import 'package:bidart/domain/repositories/user_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bidart/features/auth/provider/auth_providers.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  final repo = InMemoryUserRepository();
+  final authUser = ref.watch(authRepositoryProvider).currentUser;
+
+  final initialUser = User(
+    id: authUser?.id ?? 'guest_user',
+    name: authUser?.displayName ?? (authUser?.email?.split('@').first ?? 'Cơ thủ'),
+    email: authUser?.email ?? '',
+    phone: '',
+    address: '',
+    age: 22,
+    gender: 'Nam',
+    totalMatches: 0,
+    winRate: 0.0,
+    eloRating: 1500,
+    createdAt: DateTime.now(),
+  );
+
+  final repo = InMemoryUserRepository(initialUser: initialUser);
   ref.onDispose(repo.dispose);
   return repo;
 });

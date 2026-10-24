@@ -7,6 +7,8 @@ import 'package:bidart/screens/profile.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bidart/features/auth/provider/auth_providers.dart';
+import 'package:bidart/screens/profile/widgets/profile_edit_screen.dart';
 
 class AccountSettingsScreen extends ConsumerStatefulWidget {
   const AccountSettingsScreen({super.key});
@@ -187,14 +189,10 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.orange.shade800),
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Đã đăng xuất khỏi tài khoản'),
-                ),
-              );
+              await ref.read(authControllerProvider.notifier).signOut();
             },
             child: const Text('Đăng xuất'),
           ),
@@ -370,11 +368,13 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                   ),
                   OutlinedButton(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const ProfileEdit(),
-                        ),
-                      );
+                      if (user != null) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => ProfileEditScreen(currentUser: user),
+                          ),
+                        );
+                      }
                     },
                     child: const Text('Chỉnh sửa'),
                   ),

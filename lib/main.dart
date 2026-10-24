@@ -5,6 +5,17 @@ import 'package:bidart/data/repositories/game_repository.dart';
 import 'package:bidart/features/onboarding/onboarding_store.dart';
 import 'package:bidart/features/onboarding/provider/onboarding_provider.dart';
 import 'package:bidart/features/scoring/provider/room_providers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bidart/screens/auth/auth_gate.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:bidart/firebase_options.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 import 'package:bidart/screens/main_screen.dart';
 import 'package:bidart/screens/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +74,7 @@ class _BidartAppState extends ConsumerState<BidartApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ref.watch(themeModeProvider),
+      home: const AuthGate(),
       home: showOnboarding
           ? OnboardingScreen(onFinish: _finishOnboarding)
           : Mainscreen(openCreateRoomOnStart: _openCreateRoom),
