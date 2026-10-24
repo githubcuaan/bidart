@@ -1,12 +1,15 @@
+import 'package:flutter/material.dart';
+
+// 1. Import đúng file Home đầy đủ trong thư mục lib/screens/home/
+import 'package:bidart/screens/home/home.dart';
+
 import 'package:bidart/screens/chat/chat_list_screen.dart';
-import 'package:bidart/screens/home.dart';
 import 'package:bidart/screens/maps.dart';
 import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
+import 'package:bidart/widgets/bidart_app_bar.dart';
 import 'package:bidart/widgets/navi_bar.dart';
-import 'package:bidart/widgets/theme_button.dart';
-import 'package:flutter/material.dart';
 
 class Mainscreen extends StatefulWidget {
   const Mainscreen({super.key});
@@ -22,50 +25,7 @@ class _MainscreenState extends State<Mainscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_indexSelected]),
-        actions: [
-          const ThemeButton(),
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none, size: 28),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lịch sử ghép kèo & Thông báo'),
-                    ),
-                  );
-                },
-              ),
-              Positioned(
-                right: 12,
-                top: 12,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Builder(
-              builder: (ctx) => GestureDetector(
-                onTap: () => Scaffold.of(ctx).openEndDrawer(),
-                child: const Tooltip(
-                  message: 'Mở hồ sơ',
-                  child: CircleAvatar(radius: 18, child: Text('TA')),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: BidartAppBar(titles: _titles, indexSelected: _indexSelected),
       endDrawer: Drawer(
         width: MediaQuery.of(context).size.width * 0.85,
         child: const Profile(),
@@ -73,7 +33,14 @@ class _MainscreenState extends State<Mainscreen> {
       body: IndexedStack(
         index: _indexSelected,
         children: [
-          const Home(),
+          // 2. Tích hợp Home đầy đủ kèm callback chuyển sang Tab Rooms (Index 1)
+          Home(
+            onOpenRooms: () {
+              setState(() {
+                _indexSelected = 1;
+              });
+            },
+          ),
           const Rooms(),
           const Maps(),
           const People(),
