@@ -53,11 +53,12 @@ void main() {
     expect(find.byType(AppBar), findsOneWidget);
     expect(appBarBrand(), findsOneWidget);
     expect(find.text('BiDART'), findsOneWidget);
-    expect(find.byType(NavigationDestination), findsNWidgets(4));
+    expect(find.byType(NavigationDestination), findsNWidgets(5));
+    expect(find.text('Home'), findsOneWidget);
     expect(find.text('Phòng'), findsOneWidget);
     expect(find.text('Tin nhắn'), findsOneWidget);
 
-    for (final tab in ['Phòng', 'Bản đồ', 'Đối thủ', 'Tin nhắn']) {
+    for (final tab in ['Home', 'Phòng', 'Bản đồ', 'Đối thủ', 'Tin nhắn']) {
       await openTab(tester, tab);
       expect(find.byType(Scaffold), findsOneWidget);
       expect(find.byType(AppBar), findsOneWidget);
@@ -70,6 +71,10 @@ void main() {
   ) async {
     await pumpApp(tester);
 
+    expect(find.byType(Home), findsOneWidget);
+    expect(find.byType(Rooms), findsNothing);
+
+    await openTab(tester, 'Phòng');
     expect(find.byType(Rooms), findsOneWidget);
     expect(find.byType(Home), findsNothing);
 

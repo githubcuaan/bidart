@@ -25,7 +25,6 @@ Future<OnboardingStore> _openOnboardingStore() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // Widget tests invoke the app entry point without a Firebase platform host.
   final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
     'Test',
@@ -35,7 +34,6 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
-
   final onboardingStore = await _openOnboardingStore();
   final database = AppDatabase();
   runApp(
@@ -79,7 +77,9 @@ class _BidartAppState extends ConsumerState<BidartApp> {
       themeMode: ref.watch(themeModeProvider),
       home: showOnboarding
           ? OnboardingScreen(onFinish: _finishOnboarding)
-          : AuthGate(child: Mainscreen(openCreateRoomOnStart: _openCreateRoom)),
+          : AuthGate(
+              child: Mainscreen(openCreateRoomOnStart: _openCreateRoom),
+            ),
     );
   }
 }
