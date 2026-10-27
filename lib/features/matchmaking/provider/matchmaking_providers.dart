@@ -9,8 +9,8 @@ import 'package:bidart/features/auth/provider/auth_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currentUserIdProvider = Provider<String>((ref) {
-  final authUser = ref.watch(authRepositoryProvider).currentUser;
-  return authUser?.id ?? 'usr_001';
+  final authUser = ref.watch(authStateStreamProvider).value;
+  return authUser?.id ?? ref.watch(authRepositoryProvider).currentUser?.id ?? 'usr_001';
 });
 
 final matchmakingRepositoryProvider = Provider<MatchmakingRepository>((ref) {

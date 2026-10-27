@@ -7,11 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bidart/features/auth/provider/auth_providers.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  final authUser = ref.watch(authRepositoryProvider).currentUser;
+  final authUser = ref.watch(authStateStreamProvider).value ?? ref.watch(authRepositoryProvider).currentUser;
 
   if (Firebase.apps.isNotEmpty && authUser != null) {
     return FirestoreUserRepository(
-      getCurrentAuthUser: () => ref.watch(authRepositoryProvider).currentUser ?? authUser,
+      getCurrentAuthUser: () =>
+          ref.watch(authStateStreamProvider).value ??
+          ref.watch(authRepositoryProvider).currentUser ??
+          authUser,
     );
   }
 

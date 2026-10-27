@@ -91,7 +91,8 @@ class ChatListScreen extends ConsumerWidget {
           separatorBuilder: (_, _) => const Divider(height: 1, indent: 72),
           itemBuilder: (context, index) {
             final item = conversations[index];
-            final partner = _resolveUser(item.otherUserId);
+            final partnerAsync = ref.watch(otherUserFutureProvider(item.otherUserId));
+            final partner = partnerAsync.value ?? _resolveUser(item.otherUserId);
             final lastMsg = item.lastMessage;
             final timeStr =
                 '${lastMsg.createdAt.hour.toString().padLeft(2, '0')}:${lastMsg.createdAt.minute.toString().padLeft(2, '0')}';
