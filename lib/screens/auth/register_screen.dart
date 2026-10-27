@@ -1,4 +1,5 @@
 import 'package:bidart/features/auth/provider/auth_providers.dart';
+import 'package:bidart/features/profile/provider/profile_providers.dart';
 import 'package:bidart/widgets/branding/bidart_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,7 +40,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     if (mounted) {
       if (success) {
-        Navigator.of(context).pop();
+        try {
+          await ref.read(userRepositoryProvider).getCurrentUser();
+        } catch (_) {}
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       } else {
         final error = ref.read(authControllerProvider).error;
         ScaffoldMessenger.of(context).showSnackBar(

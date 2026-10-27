@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:bidart/data/repositories/firestore_user_repository.dart';
 import 'package:bidart/data/repositories/in_memory_user_repository.dart';
 import 'package:bidart/domain/models/user/user.dart';
 import 'package:bidart/domain/repositories/user_repository.dart';
@@ -6,6 +8,12 @@ import 'package:bidart/features/auth/provider/auth_providers.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final authUser = ref.watch(authRepositoryProvider).currentUser;
+
+  if (Firebase.apps.isNotEmpty && authUser != null) {
+    return FirestoreUserRepository(
+      getCurrentAuthUser: () => ref.watch(authRepositoryProvider).currentUser ?? authUser,
+    );
+  }
 
   final initialUser = User(
     id: authUser?.id ?? 'guest_user',

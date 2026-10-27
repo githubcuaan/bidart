@@ -1,5 +1,4 @@
 import 'package:bidart/screens/profile.dart';
-import 'package:bidart/screens/profile/widgets/profile_edit_screen.dart';
 import 'package:bidart/widgets/screen/app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

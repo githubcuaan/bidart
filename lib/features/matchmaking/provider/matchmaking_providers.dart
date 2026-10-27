@@ -1,13 +1,22 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:bidart/data/repositories/firestore_matchmaking_repository.dart';
 import 'package:bidart/data/repositories/in_memory_matchmaking_repository.dart';
 import 'package:bidart/domain/models/matchmaking/matchmaking_filter.dart';
 import 'package:bidart/domain/models/matchmaking/swipe_type.dart';
 import 'package:bidart/domain/models/user/user.dart';
 import 'package:bidart/domain/repositories/matchmaking_repository.dart';
+import 'package:bidart/features/auth/provider/auth_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final currentUserIdProvider = Provider<String>((ref) => 'usr_001');
+final currentUserIdProvider = Provider<String>((ref) {
+  final authUser = ref.watch(authRepositoryProvider).currentUser;
+  return authUser?.id ?? 'usr_001';
+});
 
 final matchmakingRepositoryProvider = Provider<MatchmakingRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    return FirestoreMatchmakingRepository();
+  }
   return InMemoryMatchmakingRepository();
 });
 

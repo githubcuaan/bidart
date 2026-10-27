@@ -1,4 +1,5 @@
 import 'package:bidart/features/auth/provider/auth_providers.dart';
+import 'package:bidart/features/profile/provider/profile_providers.dart';
 import 'package:bidart/screens/auth/forgot_password_screen.dart';
 import 'package:bidart/screens/auth/register_screen.dart';
 import 'package:bidart/widgets/branding/bidart_logo.dart';
@@ -33,14 +34,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           password: _passwordController.text,
         );
 
-    if (!success && mounted) {
-      final error = ref.read(authControllerProvider).error;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error?.toString().replaceAll('Exception: ', '') ?? 'Đăng nhập thất bại'),
-          backgroundColor: Colors.red.shade700,
-        ),
-      );
+    if (mounted) {
+      if (success) {
+        try {
+          await ref.read(userRepositoryProvider).getCurrentUser();
+        } catch (_) {}
+      } else {
+        final error = ref.read(authControllerProvider).error;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error?.toString().replaceAll('Exception: ', '') ?? 'Đăng nhập thất bại'),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+      }
     }
   }
 
