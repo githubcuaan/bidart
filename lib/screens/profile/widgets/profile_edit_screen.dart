@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileEditScreen extends StatefulWidget {
@@ -93,8 +94,17 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         Uri.parse(_avatarUploadEndpoint),
       );
       request.headers['Authorization'] = 'Bearer $token';
+      final mimeType = image.mimeType ?? 'image/jpeg';
+      final mimeParts = mimeType.split('/');
       request.files.add(
-        http.MultipartFile.fromBytes('avatar', bytes, filename: image.name),
+        http.MultipartFile.fromBytes(
+          'avatar',
+          bytes,
+          filename: image.name.isEmpty ? 'avatar.jpg' : image.name,
+          contentType: mimeParts.length == 2
+              ? MediaType(mimeParts[0], mimeParts[1])
+              : MediaType('image', 'jpeg'),
+        ),
       );
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();

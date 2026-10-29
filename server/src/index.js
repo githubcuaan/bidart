@@ -68,8 +68,13 @@ async function authenticate(req, res, next) {
 }
 
 app.post('/upload-avatar', authenticate, upload.single('avatar'), async (req, res) => {
-  if (!req.file || !req.file.mimetype.startsWith('image/')) {
-    return res.status(400).json({ error: 'Vui lòng gửi một file ảnh.' });
+  if (!req.file) {
+    return res.status(400).json({
+      error: 'Vui lòng gửi một file ảnh với field "avatar".',
+    });
+  }
+  if (!req.file.mimetype?.startsWith('image/')) {
+    return res.status(400).json({ error: 'File gửi lên không phải ảnh.' });
   }
 
   const key = `avatars/${req.user.uid}/profile-${Date.now()}`;
