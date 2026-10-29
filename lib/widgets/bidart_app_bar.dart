@@ -1,15 +1,24 @@
 import 'package:bidart/widgets/branding/bidart_logo.dart';
 import 'package:bidart/widgets/theme_button.dart';
+import 'package:bidart/domain/models/user/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bidart/features/profile/provider/profile_providers.dart';
 
 /// Branded app bar shared by every tab: logo lockup on the left, theme,
 /// notifications and the profile avatar on the right.
-class BidartAppBar extends StatelessWidget implements PreferredSizeWidget {
+class BidartAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const BidartAppBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
+    final profileState = ref.watch(userProfileStreamProvider);
+    final user = profileState is AsyncData<User> ? profileState.value : null;
+    final avatarUrl = user?.avatarUrl;
+    final avatarLetter = user?.name.trim().isNotEmpty == true
+        ? user!.name.trim().characters.first.toUpperCase()
+        : 'U';
 
     return AppBar(
       titleSpacing: 16,
@@ -45,9 +54,23 @@ class BidartAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Builder(
             builder: (ctx) => GestureDetector(
               onTap: () => Scaffold.of(ctx).openEndDrawer(),
-              child: const Tooltip(
+              child: Tooltip(
                 message: 'Mở hồ sơ',
-                child: CircleAvatar(radius: 18, child: Text('TA')),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                      ? NetworkImage(avatarUrl)
+                      : null,
+                  child: avatarUrl == null || avatarUrl.isEmpty
+                      ? Text(
+                          avatarLetter,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
               ),
             ),
           ),
