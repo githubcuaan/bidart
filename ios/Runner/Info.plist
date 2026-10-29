@@ -8,6 +8,8 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Bidart</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bidart cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

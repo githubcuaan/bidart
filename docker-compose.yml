@@ -1,0 +1,30 @@
+services:
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    env_file:
+      - ./server/.env
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  avatar-api:
+    build:
+      context: ./server
+    env_file:
+      - ./server/.env
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      FIREBASE_SERVICE_ACCOUNT_PATH: /app/firebase-service-account.json
+    depends_on:
+      - minio
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./server/firebase-service-account.json:/app/firebase-service-account.json:ro
+    restart: unless-stopped
+
+volumes:
+  minio_data:
