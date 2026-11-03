@@ -376,6 +376,14 @@ class _AddRoomState extends ConsumerState<AddRoom> {
           ),
           const SizedBox(height: 16),
 
+          RuleTemplateSection(
+            templateName: _templateName,
+            enabled: !saving,
+            onSave: _saveTemplate,
+            onApply: _applyTemplate,
+          ),
+          const SizedBox(height: 16),
+
           EndConditionsFields(
             duration: _duration,
             threshold: _threshold,
@@ -405,14 +413,6 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               for (final ball in _balls)
                 ball: _enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt',
             },
-          ),
-          const SizedBox(height: 16),
-
-          RuleTemplateSection(
-            templateName: _templateName,
-            enabled: !saving,
-            onSave: _saveTemplate,
-            onApply: _applyTemplate,
           ),
         ],
       ),
