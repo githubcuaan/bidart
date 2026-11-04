@@ -105,7 +105,7 @@ class ScoreEngine {
     }
     final hasPot = input.balls.isNotEmpty;
     final foul = input.foul != FoulClassification.none;
-    final expectedFoul = hasPot
+    final expectedFoul = hasPot && !game.chainState.hasLegalPotInChain
         ? FoulClassification.potAndFoul
         : game.chainState.hasLegalPotInChain
         ? FoulClassification.th1
@@ -135,7 +135,9 @@ class ScoreEngine {
         ? order.where((id) => id != actor).toList()
         : [game.payerId];
     final transactions = <ScoreTransaction>[];
-    if (amount > 0) {
+    // Once a legal pot has occurred in this chain, a later foul is TH1 even
+    // when balls are recorded on that foul shot. TH1 does not transfer points.
+    if (amount > 0 && input.foul != FoulClassification.th1) {
       for (var i = 0; i < payers.length; i++) {
         transactions.add(
           ScoreTransaction(

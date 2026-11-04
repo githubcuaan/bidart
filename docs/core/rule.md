@@ -41,9 +41,9 @@
 
 ## Lỗi
 
-- **TH1:** đã ăn hợp lệ ở cú trước trong chuỗi giữ cơ, sau đó mắc lỗi ở cú khác. Giữ điểm đã ghi, không đổi thứ tự; người kế tiếp đánh. “Giữ nguyên” là giữ thứ tự, không phải người phạm lỗi đánh tiếp.
+- **TH1:** đã ăn hợp lệ trước đó trong chuỗi giữ cơ, sau đó mắc lỗi ở cơ tiếp theo. Kể cả cơ phạm lỗi có ghi nhận bi ăn, vẫn là TH1 (không áp dụng potAndFoul): không cộng/trừ điểm của bi ở cơ lỗi, không đổi thứ tự; người kế tiếp đánh. “Giữ nguyên” là giữ thứ tự, không phải người phạm lỗi đánh tiếp.
 - **TH2:** chưa ăn hợp lệ trong chuỗi mà mắc lỗi. Đổi vị trí với người chịu đền và chuyển cơ cho người đó. Ví dụ A → B → C → D, B lỗi, A chịu đền: thứ tự B → A → C → D, A đánh tiếp; A không ăn thì C đánh.
-- **Ăn bi và lỗi cùng cú:** không cộng điểm ăn; người phạm lỗi trả tổng điểm các bi có điểm cho người chịu đền và đổi cơ/thứ tự như TH2. Trong chuỗi đề-pa trả cho từng người còn lại.
+- **Ăn bi và lỗi cùng cú trước khi có bi ăn hợp lệ trong chuỗi:** không cộng điểm ăn; người phạm lỗi trả tổng điểm các bi có điểm cho người chịu đền và đổi cơ/thứ tự như TH2. Trong chuỗi đề-pa trả cho từng người còn lại. Nếu chuỗi đã có bi ăn hợp lệ từ cơ trước, áp dụng TH1 thay vì potAndFoul.
 - Không có phạt điểm cố định riêng; chỉ trả điểm khi ăn bi có điểm và lỗi cùng cú.
 - TH2 trong chuỗi đề-pa swap với người chịu đền từ ván trước; ván đầu dùng người chịu đền đã setup trước ván.
 - Bi ăn sớm trong cú lỗi vẫn phải đặt lại theo luật ăn sớm.
