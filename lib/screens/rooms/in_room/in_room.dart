@@ -132,7 +132,7 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
             _draftOwner = owner;
           }
           final foul = _foul
-              ? _balls.isNotEmpty
+              ? _balls.isNotEmpty && !game.chainState.hasLegalPotInChain
                     ? FoulClassification.potAndFoul
                     : game.chainState.hasLegalPotInChain
                     ? FoulClassification.th1

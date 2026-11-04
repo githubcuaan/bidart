@@ -193,14 +193,16 @@ void main() {
     },
   );
   test(
-    'pot plus foul reverses score and swaps even after previous legal pot',
+    'pot plus foul after previous legal pot is TH1 and does not transfer points',
     () {
       final result = run(game(held: true), [
         1,
         2,
-      ], foul: FoulClassification.potAndFoul);
-      expect(result.scores, {'A': 15, 'B': -15, 'C': 0, 'D': 0});
-      expect(result.game.playerOrder, ['B', 'A', 'C', 'D']);
+      ], foul: FoulClassification.th1);
+      expect(result.scores, scores);
+      expect(result.transactions, isEmpty);
+      expect(result.game.playerOrder, ['A', 'B', 'C', 'D']);
+      expect(result.game.currentPlayerId, 'C');
       expect(result.game.remainingBalls, {3, 4, 5, 6, 7, 8, 9});
     },
   );
