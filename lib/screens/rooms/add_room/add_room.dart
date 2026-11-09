@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bidart/domain/models/scoring/ball_point_config.dart';
 import 'package:bidart/domain/models/scoring/end_conditions.dart';
 import 'package:bidart/domain/models/scoring/player_in_game.dart';
@@ -68,8 +70,9 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         ? state.draft
         : CreateRoomDraft();
     _ownerId = saved.ownerId;
+    final defaultRoomName = _todayRoomName();
     _name = TextEditingController(
-      text: saved.name.isNotEmpty ? saved.name : _todayRoomName(),
+      text: saved.name.isNotEmpty ? saved.name : defaultRoomName,
     );
     _templateName = TextEditingController();
     _duration = TextEditingController(
@@ -94,6 +97,9 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         text: '${config?.enabled == false ? ball : config?.points ?? ball}',
       );
     }
+    if (saved.name.isEmpty) {
+      unawaited(_applyUniqueDefaultRoomName(defaultRoomName));
+    }
   }
 
   PlayerInGame _newPlayer() => PlayerInGame(
@@ -106,6 +112,35 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     final today = ref.read(clockProvider)();
     return '${today.day.toString().padLeft(2, '0')}/'
         '${today.month.toString().padLeft(2, '0')}/${today.year}';
+  }
+
+  Future<void> _applyUniqueDefaultRoomName(String baseName) async {
+    try {
+      final now = ref.read(clockProvider)();
+      final rooms = await ref.read(roomServiceProvider).listRooms();
+      if (!mounted || _name.text != baseName) return;
+
+      final usedNames = rooms
+          .where(
+            (room) =>
+                room.createdAt.year == now.year &&
+                room.createdAt.month == now.month &&
+                room.createdAt.day == now.day,
+          )
+          .map((room) => room.name)
+          .toSet();
+
+      var candidate = baseName;
+      for (var suffix = 1; usedNames.contains(candidate); suffix++) {
+        candidate = '$baseName - $suffix';
+      }
+      if (candidate == _name.text) return;
+
+      _name.text = candidate;
+      _changed();
+    } catch (_) {
+      // Keep the date-only default if existing rooms cannot be loaded.
+    }
   }
 
   @override

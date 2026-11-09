@@ -194,6 +194,20 @@ void main() {
     );
   });
 
+  testWidgets('default room name uses the next suffix for today', (
+    tester,
+  ) async {
+    await seed(name: '15/10/2026', status: RoomStatus.finished);
+    await seed(name: '15/10/2026 - 1');
+
+    await pump(tester, const AddRoom());
+
+    expect(
+      tester.widget<TextField>(key('room-name')).controller!.text,
+      '15/10/2026 - 2',
+    );
+  });
+
   testWidgets('form rejects blank and duplicate names; enforces 2–5 guests', (
     tester,
   ) async {
