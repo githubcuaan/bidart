@@ -342,130 +342,151 @@ class _AddRoomState extends ConsumerState<AddRoom> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Phòng local · 2–5 người · điểm cộng dồn qua các ván. '
-            'Tự lưu sau mỗi thao tác; mở lại app để tiếp tục đúng trạng thái.',
+            'Bước ${_step + 1}/4 · ${_stepTitles[_step]}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 30),
-
-          SectionCard(
-            icon: Icons.meeting_room_outlined,
-            title: 'Thông tin phòng',
-            description: 'Nhập tên phòng',
-            child: TextField(
-              key: const ValueKey('room-name'),
-              controller: _name,
-              enabled: !saving,
-              decoration: InputDecoration(
-                labelText: 'Tên phòng',
-                errorText: _name.text.trim().isEmpty ? 'Nhận tên phòng.' : null,
+          const SizedBox(height: 12),
+          LinearProgressIndicator(value: (_step + 1) / _stepTitles.length),
+          const SizedBox(height: 24),
+          if (_step == 0) ...[
+            SectionCard(
+              icon: Icons.meeting_room_outlined,
+              title: 'Thông tin phòng',
+              description: 'Nhập tên phòng',
+              child: TextField(
+                key: const ValueKey('room-name'),
+                controller: _name,
+                enabled: !saving,
+                decoration: InputDecoration(
+                  labelText: 'Tên phòng',
+                  errorText: _name.text.trim().isEmpty
+                      ? 'Nhận tên phòng.'
+                      : null,
+                ),
+                onChanged: (_) => _changed(),
               ),
-              onChanged: (_) => _changed(),
             ),
-          ),
-          if (error != null) ...[
+            if (error != null) ...[
+              const SizedBox(height: 16),
+              CreateRoomErrorPanel(
+                error: error,
+                enabled: !saving,
+                onOpenExisting: _openExisting,
+              ),
+            ],
             const SizedBox(height: 16),
-            CreateRoomErrorPanel(
-              error: error,
+
+            PlayerRosterEditor(
+              players: _players,
+              names: _names,
+              errorFor: (index) => issueFor('participants[$index].displayName'),
               enabled: !saving,
-              onOpenExisting: _openExisting,
+              onChanged: _changed,
+              onMove: _move,
+              onRemove: _remove,
+              onAdd: () => _changed(() {
+                final player = _newPlayer();
+                _players.add(player);
+                _names[player.id] = TextEditingController();
+              }),
+            ),
+            const SizedBox(height: 16),
+
+            RoleSelectors(
+              players: _players,
+              starter: _starter,
+              payer: _payer,
+              labelFor: _label,
+              starterError: issueFor('starterId'),
+              payerError: issueFor('payerId'),
+              enabled: !saving,
+              onChanged: ({required bool starter, String? value}) =>
+                  _changed(() {
+                    if (starter) {
+                      _starter = value ?? '';
+                    } else {
+                      _payer = value ?? '';
+                    }
+                  }),
             ),
           ],
-          const SizedBox(height: 16),
+          if (_step == 1) ...[
+            const SizedBox(height: 16),
 
-          PlayerRosterEditor(
-            players: _players,
-            names: _names,
-            errorFor: (index) => issueFor('participants[$index].displayName'),
-            enabled: !saving,
-            onChanged: _changed,
-            onMove: _move,
-            onRemove: _remove,
-            onAdd: () => _changed(() {
-              final player = _newPlayer();
-              _players.add(player);
-              _names[player.id] = TextEditingController();
-            }),
-          ),
-          const SizedBox(height: 16),
+            BallRulesEditor(
+              enabled: _enabled,
+              fields: _points,
+              errors: ballErrors,
+              editable: !saving,
+              onToggle: (ball) =>
+                  _changed(() => _enabled[ball] = !_enabled[ball]!),
+              onEdit: _changed,
+              title: 'Cấu hình điểm số từng bi',
+              description: 'Chạm ảnh bi để bật/tắt; bi tắt không tạo điểm.',
+              header:
+                  issues.any(
+                    (issue) => issue.code == ValidationCode.noEnabledBall,
+                  )
+                  ? Text(validationMessage(ValidationCode.noEnabledBall))
+                  : null,
+            ),
+            const SizedBox(height: 16),
 
-          RoleSelectors(
-            players: _players,
-            starter: _starter,
-            payer: _payer,
-            labelFor: _label,
-            starterError: issueFor('starterId'),
-            payerError: issueFor('payerId'),
-            enabled: !saving,
-            onChanged: ({required bool starter, String? value}) => _changed(() {
-              if (starter) {
-                _starter = value ?? '';
-              } else {
-                _payer = value ?? '';
-              }
-            }),
-          ),
-          const SizedBox(height: 16),
+            RuleTemplateSection(
+              templateName: _templateName,
+              enabled: !saving,
+              onSave: _saveTemplate,
+              onApply: _applyTemplate,
+            ),
+          ],
+          if (_step == 2) ...[
+            const SizedBox(height: 16),
 
-          BallRulesEditor(
-            enabled: _enabled,
-            fields: _points,
-            errors: ballErrors,
-            editable: !saving,
-            onToggle: (ball) =>
-                _changed(() => _enabled[ball] = !_enabled[ball]!),
-            onEdit: _changed,
-            title: 'Cấu hình điểm số từng bi',
-            description: 'Chạm ảnh bi để bật/tắt; bi tắt không tạo điểm.',
-            header:
-                issues.any(
-                  (issue) => issue.code == ValidationCode.noEnabledBall,
-                )
-                ? Text(validationMessage(ValidationCode.noEnabledBall))
-                : null,
-          ),
-          const SizedBox(height: 16),
+            EndConditionsFields(
+              duration: _duration,
+              threshold: _threshold,
+              enabled: !saving,
+              durationError: invalidDuration
+                  ? 'Nhập số nguyên dương hoặc để trống.'
+                  : null,
+              thresholdError: invalidThreshold
+                  ? 'Nhập số nguyên dương hoặc để trống.'
+                  : null,
+              onChanged: _changed,
+            ),
+          ],
+          if (_step == 3) ...[
+            const SizedBox(height: 16),
 
-          RuleTemplateSection(
-            templateName: _templateName,
-            enabled: !saving,
-            onSave: _saveTemplate,
-            onApply: _applyTemplate,
-          ),
-          const SizedBox(height: 16),
-
-          EndConditionsFields(
-            duration: _duration,
-            threshold: _threshold,
-            enabled: !saving,
-            durationError: invalidDuration
-                ? 'Nhập số nguyên dương hoặc để trống.'
-                : null,
-            thresholdError: invalidThreshold
-                ? 'Nhập số nguyên dương hoặc để trống.'
-                : null,
-            onChanged: _changed,
-          ),
-          const SizedBox(height: 16),
-
-          RoomDraftPreview(
-            order: _players.map(_label).join(' → '),
-            starter:
-                _players
-                    .where((p) => p.id == _starter)
-                    .map(_label)
-                    .firstOrNull ??
-                'Chưa chọn',
-            payer:
-                _players.where((p) => p.id == _payer).map(_label).firstOrNull ??
-                'Chưa chọn',
-            rules: {
-              for (final ball in _balls)
-                ball: _enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt',
-            },
-          ),
+            RoomDraftPreview(
+              order: _players.map(_label).join(' → '),
+              starter:
+                  _players
+                      .where((p) => p.id == _starter)
+                      .map(_label)
+                      .firstOrNull ??
+                  'Chưa chọn',
+              payer:
+                  _players
+                      .where((p) => p.id == _payer)
+                      .map(_label)
+                      .firstOrNull ??
+                  'Chưa chọn',
+              rules: {
+                for (final ball in _balls)
+                  ball: _enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt',
+              },
+            ),
+            Text('Phòng: ${_name.text.trim()}'),
+            const SizedBox(height: 8),
+            Text(
+              'Điều kiện kết thúc: '
+              '${_positive(_duration.text) == null ? 'Không giới hạn thời gian' : '${_positive(_duration.text)} giây'} · '
+              '${_positive(_threshold.text) == null ? 'Không giới hạn điểm' : '${_positive(_threshold.text)} điểm'}',
+            ),
+          ],
         ],
       ),
     );
