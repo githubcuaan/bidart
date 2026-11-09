@@ -130,7 +130,9 @@ void main() {
   }
 
   Future<void> expandRoomInfo(WidgetTester tester) async {
-    await tester.tap(find.text('Thông tin phòng'));
+    await tester.tap(key('room-sections'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('room-menu-info'));
     await tester.pumpAndSettle();
   }
 
@@ -591,6 +593,8 @@ void main() {
     expect(find.text('ĐANG CÓ CƠ'), findsOneWidget);
     expect(tester.widget<Text>(key('room-info-payer')).data, 'Bình');
     expect(key('next-game'), findsNothing);
+    await tester.tap(find.byTooltip('Đóng'));
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.pageBack();
@@ -791,6 +795,7 @@ void main() {
       expect(find.text('Xem kết quả'), findsOneWidget);
       await tester.tap(key('open-room'));
       await tester.pumpAndSettle();
+      await expandRoomInfo(tester);
       expect(
         find.text('Phòng chỉ đọc — không thể thay đổi kết quả.'),
         findsOneWidget,

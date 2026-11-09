@@ -107,17 +107,30 @@ void main() {
   }
 
   Future<void> tap(WidgetTester tester, String name) async {
+    final section = switch (name) {
+      'undo-turn' ||
+      'add-player' ||
+      'edit-rules' ||
+      'edit-order' => 'management',
+      'finish-room' || 'cancel-room' => 'lifecycle',
+      _ when name.startsWith('remove-player-') => 'management',
+      _ => null,
+    };
+    if (section != null) {
+      await tester.tap(key('room-sections'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('room-menu-$section'));
+      await tester.pumpAndSettle();
+    }
     await visible(tester, name);
     await tester.tap(key(name));
     await tester.pumpAndSettle();
   }
 
   Future<void> expandHistory(WidgetTester tester) async {
-    await tester.scrollUntilVisible(
-      find.text('Nhật ký'),
-      220,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.tap(key('room-sections'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('room-menu-history'));
     await tester.pumpAndSettle();
   }
 
@@ -156,6 +169,32 @@ void main() {
       room: room,
     );
   }
+
+  testWidgets('floating menu keeps scoring visible and opens combined info', (
+    tester,
+  ) async {
+    await limits(const EndConditions(scoreThreshold: 100));
+    await show(tester);
+    expect(key('room-sections'), findsOneWidget);
+    expect(key('room-menu-info'), findsNothing);
+    expect(find.text('Quản lý phòng'), findsNothing);
+    expect(key('pot-ball-1'), findsOneWidget);
+
+    await tester.tap(key('room-sections'));
+    await tester.pumpAndSettle();
+    for (final section in ['info', 'management', 'lifecycle', 'history']) {
+      expect(key('room-menu-$section'), findsOneWidget);
+    }
+    await tester.tap(key('room-menu-info'));
+    await tester.pumpAndSettle();
+    expect(find.text('Table'), findsWidgets);
+    expect(key('room-score-threshold'), findsOneWidget);
+    expect(key('room-info-order'), findsOneWidget);
+    expect(key('room-menu-info'), findsNothing);
+    await tester.tap(find.byTooltip('Đóng'));
+    await tester.pumpAndSettle();
+    expect(key('pot-ball-1'), findsOneWidget);
+  });
 
   testWidgets(
     'selection only changes draft/preview; confirmation writes exactly one turn',
@@ -325,8 +364,13 @@ void main() {
       await tester.pumpAndSettle();
       expect((await latest()).activePlayerIds.last, isNotNull);
       expect((await latest()).participants.last.displayName, 'E');
-      await visible(tester, 'undo-turn');
+      await tester.tap(key('room-sections'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('room-menu-management'));
+      await tester.pumpAndSettle();
       expect(tester.widget<OutlinedButton>(key('undo-turn')).onPressed, isNull);
+      await tester.tap(find.byTooltip('Đóng'));
+      await tester.pumpAndSettle();
       await tap(tester, 'edit-order');
       await tester.tap(key('order-down-A'));
       await tester.pumpAndSettle();

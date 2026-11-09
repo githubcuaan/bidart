@@ -17,7 +17,6 @@ import 'package:bidart/screens/rooms/in_room/turn_scores/turn_scores_section.dar
 import 'package:bidart/screens/rooms/in_room/widgets/sections/end_conditions_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/next_game_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_error_section.dart';
-import 'package:bidart/screens/rooms/in_room/widgets/sections/room_header_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_history_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_info_section.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/sections/room_lifecycle_section.dart';
@@ -45,6 +44,7 @@ class InRoom extends ConsumerStatefulWidget {
 class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
   final _balls = <int>{};
   bool _foul = false;
+  bool _menuOpen = false;
   String? _draftOwner;
   late final RoomEndTimer _endTimer = RoomEndTimer(
     roomId: widget.roomId,
@@ -94,16 +94,141 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
     _foul = false;
   });
 
+  void _showSection(_RoomSection section) {
+    setState(() => _menuOpen = false);
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Consumer(
+        builder: (context, ref, _) {
+          final room = ref.watch(roomByIdProvider(widget.roomId)).asData?.value;
+          if (room == null) return const SizedBox.shrink();
+          final busy =
+              ref
+                  .watch(roomActionControllerProvider(widget.roomId))
+                  .isLoading ||
+              ref.watch(nextGameControllerProvider(widget.roomId)).isLoading;
+          final game = room.games.last;
+          final last = game.turns.where((t) => !t.isUndone).lastOrNull;
+          final canUndo =
+              last != null &&
+              !room.events.any(
+                (e) => e.isUndoBarrier && e.revision > last.revision,
+              );
+          void closeThen(VoidCallback action) {
+            Navigator.of(dialogContext).pop();
+            action();
+          }
+
+          final content = switch (section) {
+            _RoomSection.info => RoomInfoSection(
+              room: room,
+              now: () => ref.read(clockProvider)(),
+            ),
+            _RoomSection.management => RoomManagementSection(
+              room: room,
+              enabled: !busy,
+              canUndo: canUndo,
+              canAddPlayer: room.activePlayerIds.length < 5,
+              canRemovePlayers:
+                  game.status == GameStatus.finished &&
+                  room.activePlayerIds.length > 2,
+              onUndo: () => closeThen(() => _undo(room)),
+              onAddPlayer: () =>
+                  closeThen(() => _edit(room, RoomActionKind.add)),
+              onEditRules: () =>
+                  closeThen(() => _edit(room, RoomActionKind.rules)),
+              onEditOrder: () =>
+                  closeThen(() => _edit(room, RoomActionKind.order)),
+              onRemovePlayer: (id) => closeThen(() => _removePlayer(room, id)),
+            ),
+            _RoomSection.lifecycle => RoomLifecycleSection(
+              enabled: !busy,
+              onFinish: () => closeThen(() => _finish(room, cancel: false)),
+              onCancel: () => closeThen(() => _finish(room, cancel: true)),
+            ),
+            _RoomSection.history => RoomHistorySection(room: room),
+          };
+          return Dialog(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        tooltip: 'Đóng',
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ),
+                    Flexible(child: SingleChildScrollView(child: content)),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _sectionMenu(bool active) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      if (_menuOpen) ...[
+        for (final section in _RoomSection.values)
+          if (active ||
+              section != _RoomSection.management &&
+                  section != _RoomSection.lifecycle)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: ActionChip(
+                key: ValueKey('room-menu-${section.name}'),
+                avatar: Icon(section.icon, size: 20),
+                label: Text(section.label),
+                onPressed: () => _showSection(section),
+              ),
+            ),
+      ],
+      FloatingActionButton(
+        key: const ValueKey('room-sections'),
+        tooltip: _menuOpen ? 'Đóng menu phòng' : 'Mở menu phòng',
+        onPressed: () => setState(() => _menuOpen = !_menuOpen),
+        child: Icon(_menuOpen ? Icons.close : Icons.apps),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final action = ref.watch(roomActionControllerProvider(widget.roomId));
     final next = ref.watch(nextGameControllerProvider(widget.roomId));
+    final roomState = ref.watch(roomByIdProvider(widget.roomId));
     final busy = action.isLoading || next.isLoading;
 
     return AppScreen(
-      appBar: AppBar(title: const Text('Trong phòng')),
+      appBar: AppBar(
+        title: Text(
+          roomState.maybeWhen(
+            data: (room) => room.name,
+            orElse: () => 'Trong phòng',
+            skipLoadingOnRefresh: true,
+          ),
+        ),
+      ),
+      floatingActionButton: roomState.maybeWhen(
+        data: (room) => room.games.isEmpty
+            ? null
+            : _sectionMenu(room.status == RoomStatus.active),
+        orElse: () => null,
+        skipLoadingOnRefresh: true,
+      ),
       body: AsyncContent<Room>(
-        value: ref.watch(roomByIdProvider(widget.roomId)),
+        value: roomState,
         // Keep the live board mounted while a command refreshes the room, so
         // turn cards can animate instead of being rebuilt from scratch.
         skipLoadingOnRefresh: true,
@@ -160,14 +285,6 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
               previewError = failure;
             }
           }
-          final last = game.turns.where((t) => !t.isUndone).lastOrNull;
-          final canUndo =
-              active &&
-              last != null &&
-              !room.events.any(
-                (e) => e.isUndoBarrier && e.revision > last.revision,
-              );
-
           return Column(
             children: [
               SizedBox(
@@ -208,15 +325,6 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                       const SizedBox(height: 16),
                     ],
 
-                    RoomHeaderSection(
-                      room: room,
-                      now: () => ref.read(clockProvider)(),
-                    ),
-                    const SizedBox(height: 16),
-
-                    RoomInfoSection(room: room),
-                    const SizedBox(height: 16),
-
                     TurnScoresSection(room: room),
 
                     if (playing) ...[
@@ -253,32 +361,7 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                       ),
                     ],
 
-                    if (active) ...[
-                      const SizedBox(height: 16),
-                      RoomManagementSection(
-                        room: room,
-                        enabled: !busy,
-                        canUndo: canUndo,
-                        canAddPlayer: room.activePlayerIds.length < 5,
-                        canRemovePlayers:
-                            game.status == GameStatus.finished &&
-                            room.activePlayerIds.length > 2,
-                        onUndo: () => _undo(room),
-                        onAddPlayer: () => _edit(room, RoomActionKind.add),
-                        onEditRules: () => _edit(room, RoomActionKind.rules),
-                        onEditOrder: () => _edit(room, RoomActionKind.order),
-                        onRemovePlayer: (id) => _removePlayer(room, id),
-                      ),
-                      const SizedBox(height: 16),
-                      RoomLifecycleSection(
-                        enabled: !busy,
-                        onFinish: () => _finish(room, cancel: false),
-                        onCancel: () => _finish(room, cancel: true),
-                      ),
-                    ],
-
-                    const SizedBox(height: 16),
-                    RoomHistorySection(room: room),
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
@@ -288,4 +371,15 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
       ),
     );
   }
+}
+
+enum _RoomSection {
+  info(Icons.info_outline, 'Thông tin phòng'),
+  management(Icons.tune_outlined, 'Quản lý phòng'),
+  lifecycle(Icons.flag_outlined, 'Kết thúc phòng'),
+  history(Icons.history, 'Nhật ký');
+
+  const _RoomSection(this.icon, this.label);
+  final IconData icon;
+  final String label;
 }
