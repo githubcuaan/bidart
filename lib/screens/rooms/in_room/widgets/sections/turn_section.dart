@@ -11,6 +11,8 @@ class TurnSection extends StatelessWidget {
     required this.room,
     required this.remainingBalls,
     required this.selectedBalls,
+    required this.autoBallPending,
+    required this.saveFailed,
     required this.foul,
     required this.foulLabel,
     required this.busy,
@@ -20,11 +22,15 @@ class TurnSection extends StatelessWidget {
     required this.onToggleFoul,
     required this.onClear,
     required this.onRecord,
+    required this.undoEnabled,
+    required this.onUndo,
   });
 
   final Room room;
   final List<int> remainingBalls;
   final Set<int> selectedBalls;
+  final bool autoBallPending;
+  final bool saveFailed;
   final bool foul;
   final String foulLabel;
   final bool busy;
@@ -34,16 +40,20 @@ class TurnSection extends StatelessWidget {
   final ValueChanged<bool> onToggleFoul;
   final VoidCallback onClear;
   final VoidCallback onRecord;
+  final bool undoEnabled;
+  final VoidCallback onUndo;
 
   @override
   Widget build(BuildContext context) => SectionCard(
     icon: Icons.sports_esports_outlined,
     title: 'Ghi nhận lượt',
-    description: 'Chọn bi đã ăn, thêm lỗi nếu có rồi xác nhận.',
+    description: 'Chạm bi để lưu; bật lỗi rồi xác nhận cú lỗi.',
     child: TurnDraftPanel(
       room: room,
       remainingBalls: remainingBalls,
       selectedBalls: selectedBalls,
+      autoBallPending: autoBallPending,
+      saveFailed: saveFailed,
       foul: foul,
       foulLabel: foulLabel,
       busy: busy,
@@ -53,6 +63,8 @@ class TurnSection extends StatelessWidget {
       onToggleFoul: onToggleFoul,
       onClear: onClear,
       onRecord: onRecord,
+      undoEnabled: undoEnabled,
+      onUndo: onUndo,
     ),
   );
 }

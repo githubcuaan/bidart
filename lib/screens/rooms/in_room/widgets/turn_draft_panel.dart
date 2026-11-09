@@ -7,14 +7,15 @@ import 'package:bidart/screens/rooms/in_room/widgets/turn_actions.dart';
 import 'package:bidart/screens/rooms/in_room/widgets/turn_preview_panel.dart';
 import 'package:flutter/material.dart';
 
-/// Everything the shooter sees for the turn being drafted: chain label, ball
-/// picker, foul switch, score preview and the confirm/clear buttons.
+/// Legal balls save on tap; foul shots stay in a draft until confirmation.
 class TurnDraftPanel extends StatelessWidget {
   const TurnDraftPanel({
     super.key,
     required this.room,
     required this.remainingBalls,
     required this.selectedBalls,
+    required this.autoBallPending,
+    required this.saveFailed,
     required this.foul,
     required this.foulLabel,
     required this.busy,
@@ -24,11 +25,15 @@ class TurnDraftPanel extends StatelessWidget {
     required this.onToggleFoul,
     required this.onClear,
     required this.onRecord,
+    required this.undoEnabled,
+    required this.onUndo,
   });
 
   final Room room;
   final List<int> remainingBalls;
   final Set<int> selectedBalls;
+  final bool autoBallPending;
+  final bool saveFailed;
   final bool foul;
   final String foulLabel;
   final bool busy;
@@ -38,6 +43,8 @@ class TurnDraftPanel extends StatelessWidget {
   final ValueChanged<bool> onToggleFoul;
   final VoidCallback onClear;
   final VoidCallback onRecord;
+  final bool undoEnabled;
+  final VoidCallback onUndo;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -52,14 +59,27 @@ class TurnDraftPanel extends StatelessWidget {
         enabled: !busy,
         onToggle: onToggleBall,
       ),
+      if (selectedBalls.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text(
+          autoBallPending
+              ? '${saveFailed ? 'Chưa lưu' : 'Đang lưu'}: Bi ${selectedBalls.single}'
+              : 'Đã ăn kèm lỗi: Bi ${([...selectedBalls]..sort()).join(', ')}',
+          key: const ValueKey('selected-balls'),
+        ),
+      ],
       TurnFoulToggle(
         foul: foul,
         foulLabel: foulLabel,
         enabled: !busy,
         onChanged: onToggleFoul,
       ),
+      if (!foul && selectedBalls.isEmpty)
+        const Text('Chạm bi để lưu ngay · Xác nhận để chuyển cơ khi đánh hụt.'),
+      if (foul && selectedBalls.isEmpty)
+        const Text('Chọn các bi ăn kèm lỗi, rồi xác nhận cú đánh.'),
       if (previewError != null) Text(roomFailureMessage(previewError!)),
-      if (preview != null)
+      if (foul && preview != null)
         TurnPreviewPanel(
           deltas: _previewDeltas(room, preview!),
           respotted: [
@@ -70,8 +90,13 @@ class TurnDraftPanel extends StatelessWidget {
         ),
       SizedBox(height: 4),
       TurnActions(
-        clearEnabled: !busy,
-        recordEnabled: preview != null,
+        clearEnabled: !busy && foul && selectedBalls.isNotEmpty,
+        showClear: foul && selectedBalls.isNotEmpty,
+        recordEnabled:
+            preview != null && !busy && (foul || selectedBalls.isEmpty),
+        foul: foul,
+        undoEnabled: undoEnabled,
+        onUndo: onUndo,
         saving: busy,
         onClear: onClear,
         onRecord: onRecord,

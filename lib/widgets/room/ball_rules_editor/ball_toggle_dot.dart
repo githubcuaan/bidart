@@ -10,6 +10,7 @@ class BallToggleDot extends StatelessWidget {
     required this.enabled,
     required this.size,
     this.onToggle,
+    this.bright = false,
     this.semanticLabel,
     this.activeTooltip,
     this.inactiveTooltip,
@@ -19,6 +20,9 @@ class BallToggleDot extends StatelessWidget {
   final bool enabled;
   final double size;
   final ValueChanged<int>? onToggle;
+
+  /// Show a vivid ball without marking it as selected (e.g. the shot picker).
+  final bool bright;
   final String? semanticLabel;
 
   /// Tooltips for the toggled/untoggled state. Default to the scoring wording;
@@ -41,9 +45,13 @@ class BallToggleDot extends StatelessWidget {
           onTap: onToggle == null ? null : () => onToggle!(ball),
           child: ClipOval(
             child: AnimatedOpacity(
-              opacity: enabled ? 1 : 0.4,
+              opacity: enabled || bright ? 1 : 0.4,
               duration: const Duration(milliseconds: 150),
-              child: PoolBallIcon(ball: ball, size: size, enabled: enabled),
+              child: PoolBallIcon(
+                ball: ball,
+                size: size,
+                enabled: enabled || bright,
+              ),
             ),
           ),
         ),

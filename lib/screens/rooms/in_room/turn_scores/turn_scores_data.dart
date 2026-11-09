@@ -29,21 +29,22 @@ class TurnScoreboardData {
     required this.endedLabel,
   });
 
-  factory TurnScoreboardData.fromRoom(Room room) {
+  factory TurnScoreboardData.fromRoom(Room room, {Map<String, int>? scores}) {
+    final displayedScores = scores ?? room.scores;
     final game = room.games
         .where((game) => game.id == room.currentGameId)
         .firstOrNull;
     final live = game != null && game.status == GameStatus.inProgress;
     final entries = _entries(room, game: game, live: live);
-    final leaderScore = room.scores.values.fold<int?>(
+    final leaderScore = displayedScores.values.fold<int?>(
       null,
       (max, score) => max == null || score > max ? score : max,
     );
 
     return TurnScoreboardData(
       entries: entries,
-      scores: room.scores,
-      ranks: _ranks(room),
+      scores: displayedScores,
+      ranks: _ranks(room, displayedScores),
       leaderScore: leaderScore,
       currentName: live ? playerName(room, game.currentPlayerId) : null,
       payerName: live && game.payerId != game.currentPlayerId
@@ -139,16 +140,14 @@ class TurnScoreboardData {
     return entries;
   }
 
-  static Map<String, int> _ranks(Room room) {
+  static Map<String, int> _ranks(Room room, Map<String, int> scores) {
     final players = [...room.participants]
-      ..sort(
-        (a, b) => (room.scores[b.id] ?? 0).compareTo(room.scores[a.id] ?? 0),
-      );
+      ..sort((a, b) => (scores[b.id] ?? 0).compareTo(scores[a.id] ?? 0));
     final ranks = <String, int>{};
     int? previousScore;
     var rank = 0;
     for (var index = 0; index < players.length; index++) {
-      final score = room.scores[players[index].id] ?? 0;
+      final score = scores[players[index].id] ?? 0;
       if (score != previousScore) {
         rank = index + 1;
         previousScore = score;

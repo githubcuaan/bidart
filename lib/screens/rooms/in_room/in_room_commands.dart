@@ -70,10 +70,11 @@ extension _InRoomCommands on _InRoomState {
       return;
     }
     if (mounted && !_busy) {
-      await _act(
+      final result = await _act(
         room,
         RoomAction(RoomActionKind.undo, gameId: game.id, confirmed: reopen),
       );
+      if (result != null && mounted) _clearDraft();
     }
   }
 

@@ -77,6 +77,15 @@ class RoomActionController extends Notifier<AsyncValue<Room?>> {
       ? Future.value(null)
       : submit(_lastAction!, expectedRevision: _lastRevision!);
   Future<Room?>? _pending;
+  void discardFailure() {
+    if (_pending != null) return;
+    _lastAction = null;
+    _lastRevision = null;
+    _key = null;
+    _commandId = null;
+    state = const AsyncData(null);
+  }
+
   @override
   AsyncValue<Room?> build() => const AsyncData(null);
 

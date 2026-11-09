@@ -107,17 +107,27 @@ void main() {
   }
 
   Future<void> tap(WidgetTester tester, String name) async {
+    final section = switch (name) {
+      'add-player' || 'edit-rules' || 'edit-order' => 'management',
+      'finish-room' || 'cancel-room' => 'lifecycle',
+      _ when name.startsWith('remove-player-') => 'management',
+      _ => null,
+    };
+    if (section != null) {
+      await tester.tap(key('room-sections'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('room-menu-$section'));
+      await tester.pumpAndSettle();
+    }
     await visible(tester, name);
     await tester.tap(key(name));
     await tester.pumpAndSettle();
   }
 
   Future<void> expandHistory(WidgetTester tester) async {
-    await tester.scrollUntilVisible(
-      find.text('Nhật ký'),
-      220,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.tap(key('room-sections'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('room-menu-history'));
     await tester.pumpAndSettle();
   }
 
@@ -157,43 +167,231 @@ void main() {
     );
   }
 
-  testWidgets(
-    'selection only changes draft/preview; confirmation writes exactly one turn',
-    (tester) async {
-      await show(tester);
-      await tap(tester, 'pot-ball-1');
-      expect((await latest()).games.single.turns, isEmpty);
-      expect(find.text('A ăn Bi 1:'), findsOneWidget);
-      expect(find.text('+30 điểm'), findsOneWidget);
-      expect(find.text('-10 điểm'), findsNWidgets(3));
-      await tap(tester, 'record-turn');
-      final committed = await latest();
-      expect(committed.games.single.turns.length, 1);
-      expect(committed.scores['A'], 30);
-      expect(key('pot-ball-1'), findsNothing);
-      await visible(tester, 'pot-ball-2');
-      expect(tester.widget<BallToggleDot>(key('pot-ball-2')).enabled, isFalse);
-      await expandHistory(tester);
-      expect(key('history-game-1'), findsOneWidget);
-      await tapExpanded(tester, 'history-game-1');
-      final sheet = key('history-game-sheet');
-      expect(sheet, findsOneWidget);
-      expect(
-        find.descendant(of: sheet, matching: find.text('+30')),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: sheet,
-          matching: find.textContaining('đền', findRichText: true),
-        ),
-        findsWidgets,
-      );
-      await tester.tap(key('close-history-game'));
-      await tester.pumpAndSettle();
-      expect(sheet, findsNothing);
-    },
-  );
+  testWidgets('legal ball tap saves score and keeps the cue', (tester) async {
+    await show(tester);
+    expect(key('draft-score-label'), findsNothing);
+    expect(tester.widget<BallToggleDot>(key('pot-ball-1')).bright, isTrue);
+    expect(tester.widget<BallToggleDot>(key('pot-ball-1')).enabled, isFalse);
+    await tap(tester, 'pot-ball-1');
+    expect(key('pot-ball-1'), findsNothing);
+    await visible(tester, 'turn-score-row-A');
+    expect(key('draft-score-label'), findsNothing);
+    expect(
+      find.descendant(of: key('turn-score-row-A'), matching: find.text('+30đ')),
+      findsOneWidget,
+    );
+    expect((await latest()).scores['A'], 30);
+    expect((await latest()).games.single.turns, hasLength(1));
+    expect((await latest()).games.single.currentPlayerId, 'A');
+  });
+
+  testWidgets('undo stays on the board and reverses an accidental pot', (
+    tester,
+  ) async {
+    await show(tester);
+    await visible(tester, 'record-turn');
+    expect(
+      tester.getTopLeft(key('undo-turn')).dy,
+      tester.getTopLeft(key('record-turn')).dy,
+    );
+    expect(tester.widget<OutlinedButton>(key('undo-turn')).onPressed, isNull);
+    await tap(tester, 'pot-ball-1');
+    await visible(tester, 'undo-turn');
+    expect(
+      tester.widget<OutlinedButton>(key('undo-turn')).onPressed,
+      isNotNull,
+    );
+    await tap(tester, 'undo-turn');
+    final saved = await latest();
+    expect(saved.scores['A'], 0);
+    expect(saved.games.single.currentPlayerId, 'A');
+    expect(saved.games.single.turns.single.isUndone, isTrue);
+    await visible(tester, 'pot-ball-1');
+    expect(key('pot-ball-1'), findsOneWidget);
+    await tester.tap(key('room-sections'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('room-menu-management'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: find.byType(Dialog), matching: key('undo-turn')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('undo waits until a drafted foul shot is cleared', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'pot-ball-1');
+    await tap(tester, 'turn-foul');
+    await tap(tester, 'pot-ball-3');
+    await visible(tester, 'undo-turn');
+    expect(tester.widget<OutlinedButton>(key('undo-turn')).onPressed, isNull);
+    await tap(tester, 'clear-turn-draft');
+    await visible(tester, 'undo-turn');
+    expect(
+      tester.widget<OutlinedButton>(key('undo-turn')).onPressed,
+      isNotNull,
+    );
+  });
+
+  testWidgets('foul with multiple balls stays one shot until confirmation', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'turn-foul');
+    await tap(tester, 'pot-ball-1');
+    await tap(tester, 'pot-ball-3');
+    await visible(tester, 'selected-balls');
+    expect(find.text('Đã ăn kèm lỗi: Bi 1, 3'), findsOneWidget);
+    expect(key('pot-ball-1'), findsNothing);
+    expect(key('pot-ball-3'), findsNothing);
+    await visible(tester, 'turn-score-row-A');
+    expect(
+      find.descendant(of: key('turn-score-row-A'), matching: find.text('-60đ')),
+      findsOneWidget,
+    );
+    expect((await latest()).games.single.currentPlayerId, 'A');
+    expect((await latest()).games.single.turns, isEmpty);
+    await tap(tester, 'record-turn');
+    final saved = await latest();
+    expect(saved.games.single.turns, hasLength(1));
+    expect(
+      saved.games.single.turns.single.pottedBalls.map((b) => b.ballNumber),
+      containsAll([1, 3]),
+    );
+    expect(saved.scores['A'], -60);
+    expect(saved.games.single.currentPlayerId, 'B');
+    await visible(tester, 'turn-score-row-B');
+    expect(key('draft-score-label'), findsNothing);
+  });
+
+  testWidgets('confirm with no ball records a miss and hands off the cue', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'record-turn');
+    expect((await latest()).games.single.currentPlayerId, 'B');
+    expect((await latest()).scores['A'], 0);
+  });
+
+  testWidgets('foul with no ball transfers the cue only on confirmation', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'turn-foul');
+    expect((await latest()).games.single.currentPlayerId, 'A');
+    await tap(tester, 'record-turn');
+    expect((await latest()).games.single.currentPlayerId, 'B');
+    expect((await latest()).games.single.turns, hasLength(1));
+  });
+
+  testWidgets('consecutive legal pots save immediately and keep the cue', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'pot-ball-1');
+    await tap(tester, 'pot-ball-3');
+    expect((await latest()).games.single.currentPlayerId, 'A');
+    expect((await latest()).games.single.turns, hasLength(2));
+  });
+
+  testWidgets('B pots then fouls: TH1 passes the cue to C, not payer A', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'record-turn'); // A misses; B shoots, A pays.
+    await tap(tester, 'pot-ball-1');
+    expect((await latest()).games.single.currentPlayerId, 'B');
+    expect((await latest()).games.single.chainState.hasLegalPotInChain, isTrue);
+    await tap(tester, 'turn-foul');
+    await tap(tester, 'record-turn');
+    final saved = await latest();
+    expect(
+      saved.games.single.turns.last.foulClassification,
+      FoulClassification.th1,
+    );
+    expect(saved.games.single.currentPlayerId, 'C');
+    expect(saved.playerOrder, ['A', 'B', 'C', 'D']);
+  });
+
+  testWidgets('B pots then pots with a foul: TH1 still passes to C', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'record-turn');
+    await tap(tester, 'pot-ball-1');
+    final beforeFoul = await latest();
+    await tap(tester, 'turn-foul');
+    await tap(tester, 'pot-ball-3');
+    expect((await latest()).revision, beforeFoul.revision);
+    await tap(tester, 'record-turn');
+    final saved = await latest();
+    expect(
+      saved.games.single.turns.last.foulClassification,
+      FoulClassification.th1,
+    );
+    expect(saved.scores, beforeFoul.scores);
+    expect(saved.games.single.currentPlayerId, 'C');
+  });
+
+  testWidgets('floating menu keeps scoring visible and opens combined info', (
+    tester,
+  ) async {
+    await limits(const EndConditions(scoreThreshold: 100));
+    await show(tester);
+    expect(key('room-sections'), findsOneWidget);
+    expect(key('room-menu-info'), findsNothing);
+    expect(find.text('Quản lý phòng'), findsNothing);
+    expect(key('pot-ball-1'), findsOneWidget);
+
+    await tester.tap(key('room-sections'));
+    await tester.pumpAndSettle();
+    for (final section in ['info', 'management', 'lifecycle', 'history']) {
+      expect(key('room-menu-$section'), findsOneWidget);
+    }
+    await tester.tap(key('room-menu-info'));
+    await tester.pumpAndSettle();
+    expect(find.text('Table'), findsWidgets);
+    expect(key('room-score-threshold'), findsOneWidget);
+    expect(key('room-info-order'), findsOneWidget);
+    expect(key('room-menu-info'), findsNothing);
+    await tester.tap(find.byTooltip('Đóng'));
+    await tester.pumpAndSettle();
+    expect(key('pot-ball-1'), findsOneWidget);
+  });
+
+  testWidgets('one legal tap writes a turn and is visible in history', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'pot-ball-1');
+    final committed = await latest();
+    expect(committed.games.single.turns.length, 1);
+    expect(committed.scores['A'], 30);
+    expect(key('pot-ball-1'), findsNothing);
+    await visible(tester, 'pot-ball-2');
+    expect(tester.widget<BallToggleDot>(key('pot-ball-2')).enabled, isFalse);
+    await expandHistory(tester);
+    expect(key('history-game-1'), findsOneWidget);
+    await tapExpanded(tester, 'history-game-1');
+    final sheet = key('history-game-sheet');
+    expect(sheet, findsOneWidget);
+    expect(
+      find.descendant(of: sheet, matching: find.text('+30')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: sheet,
+        matching: find.textContaining('đền', findRichText: true),
+      ),
+      findsWidgets,
+    );
+    await tester.tap(key('close-history-game'));
+    await tester.pumpAndSettle();
+    expect(sheet, findsNothing);
+  });
   testWidgets(
     'finished history row shows stored winner and opens turn timeline',
     (tester) async {
@@ -221,15 +419,12 @@ void main() {
     'save failure preserves draft, retry keeps command ID and clears draft on commit',
     (tester) async {
       await show(tester);
-      await tap(
-        tester,
-        'pot-ball-9',
-      ); // Early nine stays selectable after commit.
       repo.failNextWrite();
-      await tap(tester, 'record-turn');
+      await tap(tester, 'pot-ball-9'); // Early nine respots after retry.
       expect((await latest()).games.single.turns, isEmpty);
-      await visible(tester, 'pot-ball-9');
-      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isTrue);
+      await visible(tester, 'selected-balls');
+      expect(find.text('Chưa lưu: Bi 9'), findsOneWidget);
+      expect(key('pot-ball-9'), findsNothing);
       final id = repo.commands.last;
       await tap(tester, 'retry-action');
       expect(repo.commands.last, id);
@@ -242,14 +437,13 @@ void main() {
     'in-flight save disables ball picker and confirm; double tap cannot duplicate',
     (tester) async {
       await show(tester);
-      await tap(tester, 'pot-ball-1');
-      await visible(tester, 'record-turn');
       repo.gate = Completer<void>();
-      await tester.tap(key('record-turn'));
+      await visible(tester, 'pot-ball-1');
+      await tester.tap(key('pot-ball-1'));
       await tester.pump();
       expect(tester.widget<FilledButton>(key('record-turn')).onPressed, isNull);
-      expect(tester.widget<BallToggleDot>(key('pot-ball-1')).onToggle, isNull);
-      await tester.tap(key('record-turn'));
+      expect(tester.widget<BallToggleDot>(key('pot-ball-2')).onToggle, isNull);
+      await tester.tap(key('pot-ball-2'));
       await tester.pump();
       expect((await latest()).revision, 0);
       repo.gate!.complete();
@@ -264,8 +458,7 @@ void main() {
       await show(tester);
       await tap(tester, 'pot-ball-1');
       await tap(tester, 'pot-ball-2');
-      await tap(tester, 'record-turn');
-      final turn = (await latest()).games.single.turns.single;
+      final turn = (await latest()).games.single.turns.last;
       expect(turn.pottedBalls.last.points, 0);
       expect(turn.pottedBalls.last.isRespotted, isFalse);
       expect((await latest()).scores['A'], 30);
@@ -317,7 +510,6 @@ void main() {
     (tester) async {
       await show(tester);
       await tap(tester, 'pot-ball-1');
-      await tap(tester, 'record-turn');
       await tap(tester, 'add-player');
       await tester.enterText(key('new-player-name'), 'E');
       await tester.pumpAndSettle();
@@ -351,8 +543,7 @@ void main() {
       await tester.pumpAndSettle();
       expect((await latest()).currentRuleVersion, 2);
       await tap(tester, 'pot-ball-1');
-      expect(find.text('A ăn Bi 1:'), findsOneWidget);
-      expect(find.text('+75 điểm'), findsOneWidget);
+      expect((await latest()).scores['A'], 75);
     },
   );
   testWidgets(
@@ -450,24 +641,25 @@ void main() {
     (tester) async {
       await limits(const EndConditions(durationSeconds: 60));
       await show(tester);
+      await tap(tester, 'turn-foul');
       await tap(tester, 'pot-ball-9');
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       now = start.add(const Duration(seconds: 61));
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
       expect((await latest()).pendingEndReasons, isNotEmpty);
-      await visible(tester, 'pot-ball-9');
-      expect(tester.widget<BallToggleDot>(key('pot-ball-9')).enabled, isTrue);
+      await visible(tester, 'selected-balls');
+      expect(find.text('Đã ăn kèm lỗi: Bi 9'), findsOneWidget);
+      expect(key('pot-ball-9'), findsNothing);
     },
   );
   testWidgets(
     'leaving during save does not update disposed screen or navigate',
     (tester) async {
       await show(tester);
-      await tap(tester, 'pot-ball-1');
-      await visible(tester, 'record-turn');
       repo.gate = Completer<void>();
-      await tester.tap(key('record-turn'));
+      await visible(tester, 'pot-ball-1');
+      await tester.tap(key('pot-ball-1'));
       await tester.pump();
       await tester.pumpWidget(
         const MaterialApp(home: Scaffold(body: Text('Other screen'))),
@@ -498,9 +690,10 @@ void main() {
     },
   );
   testWidgets(
-    'external committed change invalidates preview; clear draft recovers',
+    'external committed change invalidates foul preview; clear draft recovers',
     (tester) async {
       await show(tester);
+      await tap(tester, 'turn-foul');
       await tap(tester, 'pot-ball-1');
       await container
           .read(roomServiceProvider)
@@ -527,8 +720,8 @@ void main() {
     tester,
   ) async {
     await show(tester, size: const Size(320, 640));
-    await tap(tester, 'pot-ball-9');
     await tap(tester, 'turn-foul');
+    await tap(tester, 'pot-ball-9');
     await tap(tester, 'edit-rules');
     expect(tester.takeException(), isNull);
     await tester.tap(find.text('Bỏ qua'));
