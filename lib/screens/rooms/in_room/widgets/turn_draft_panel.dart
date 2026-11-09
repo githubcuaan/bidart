@@ -25,6 +25,8 @@ class TurnDraftPanel extends StatelessWidget {
     required this.onToggleFoul,
     required this.onClear,
     required this.onRecord,
+    required this.undoEnabled,
+    required this.onUndo,
   });
 
   final Room room;
@@ -41,6 +43,8 @@ class TurnDraftPanel extends StatelessWidget {
   final ValueChanged<bool> onToggleFoul;
   final VoidCallback onClear;
   final VoidCallback onRecord;
+  final bool undoEnabled;
+  final VoidCallback onUndo;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -91,6 +95,8 @@ class TurnDraftPanel extends StatelessWidget {
         recordEnabled:
             preview != null && !busy && (foul || selectedBalls.isEmpty),
         foul: foul,
+        undoEnabled: undoEnabled,
+        onUndo: onUndo,
         saving: busy,
         onClear: onClear,
         onRecord: onRecord,

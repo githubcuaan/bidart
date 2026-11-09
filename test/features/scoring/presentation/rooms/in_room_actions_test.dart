@@ -108,10 +108,7 @@ void main() {
 
   Future<void> tap(WidgetTester tester, String name) async {
     final section = switch (name) {
-      'undo-turn' ||
-      'add-player' ||
-      'edit-rules' ||
-      'edit-order' => 'management',
+      'add-player' || 'edit-rules' || 'edit-order' => 'management',
       'finish-room' || 'cancel-room' => 'lifecycle',
       _ when name.startsWith('remove-player-') => 'management',
       _ => null,
@@ -186,6 +183,56 @@ void main() {
     expect((await latest()).scores['A'], 30);
     expect((await latest()).games.single.turns, hasLength(1));
     expect((await latest()).games.single.currentPlayerId, 'A');
+  });
+
+  testWidgets('undo stays on the board and reverses an accidental pot', (
+    tester,
+  ) async {
+    await show(tester);
+    await visible(tester, 'record-turn');
+    expect(
+      tester.getTopLeft(key('undo-turn')).dy,
+      tester.getTopLeft(key('record-turn')).dy,
+    );
+    expect(tester.widget<OutlinedButton>(key('undo-turn')).onPressed, isNull);
+    await tap(tester, 'pot-ball-1');
+    await visible(tester, 'undo-turn');
+    expect(
+      tester.widget<OutlinedButton>(key('undo-turn')).onPressed,
+      isNotNull,
+    );
+    await tap(tester, 'undo-turn');
+    final saved = await latest();
+    expect(saved.scores['A'], 0);
+    expect(saved.games.single.currentPlayerId, 'A');
+    expect(saved.games.single.turns.single.isUndone, isTrue);
+    await visible(tester, 'pot-ball-1');
+    expect(key('pot-ball-1'), findsOneWidget);
+    await tester.tap(key('room-sections'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('room-menu-management'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: find.byType(Dialog), matching: key('undo-turn')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('undo waits until a drafted foul shot is cleared', (
+    tester,
+  ) async {
+    await show(tester);
+    await tap(tester, 'pot-ball-1');
+    await tap(tester, 'turn-foul');
+    await tap(tester, 'pot-ball-3');
+    await visible(tester, 'undo-turn');
+    expect(tester.widget<OutlinedButton>(key('undo-turn')).onPressed, isNull);
+    await tap(tester, 'clear-turn-draft');
+    await visible(tester, 'undo-turn');
+    expect(
+      tester.widget<OutlinedButton>(key('undo-turn')).onPressed,
+      isNotNull,
+    );
   });
 
   testWidgets('foul with multiple balls stays one shot until confirmation', (
@@ -470,13 +517,8 @@ void main() {
       await tester.pumpAndSettle();
       expect((await latest()).activePlayerIds.last, isNotNull);
       expect((await latest()).participants.last.displayName, 'E');
-      await tester.tap(key('room-sections'));
-      await tester.pumpAndSettle();
-      await tester.tap(key('room-menu-management'));
-      await tester.pumpAndSettle();
+      await visible(tester, 'undo-turn');
       expect(tester.widget<OutlinedButton>(key('undo-turn')).onPressed, isNull);
-      await tester.tap(find.byTooltip('Đóng'));
-      await tester.pumpAndSettle();
       await tap(tester, 'edit-order');
       await tester.tap(key('order-down-A'));
       await tester.pumpAndSettle();

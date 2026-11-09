@@ -22,6 +22,8 @@ class TurnSection extends StatelessWidget {
     required this.onToggleFoul,
     required this.onClear,
     required this.onRecord,
+    required this.undoEnabled,
+    required this.onUndo,
   });
 
   final Room room;
@@ -38,6 +40,8 @@ class TurnSection extends StatelessWidget {
   final ValueChanged<bool> onToggleFoul;
   final VoidCallback onClear;
   final VoidCallback onRecord;
+  final bool undoEnabled;
+  final VoidCallback onUndo;
 
   @override
   Widget build(BuildContext context) => SectionCard(
@@ -59,6 +63,8 @@ class TurnSection extends StatelessWidget {
       onToggleFoul: onToggleFoul,
       onClear: onClear,
       onRecord: onRecord,
+      undoEnabled: undoEnabled,
+      onUndo: onUndo,
     ),
   );
 }

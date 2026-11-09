@@ -2,16 +2,14 @@ import 'package:bidart/domain/models/scoring/room.dart';
 import 'package:bidart/core/labels/room_labels.dart';
 import 'package:flutter/material.dart';
 
-/// Undo, roster edits and rule/order dialogs while a room is active.
+/// Roster edits and rule/order dialogs while a room is active.
 class RoomManagementActions extends StatelessWidget {
   const RoomManagementActions({
     super.key,
     required this.room,
     required this.enabled,
-    required this.canUndo,
     required this.canAddPlayer,
     required this.canRemovePlayers,
-    required this.onUndo,
     required this.onAddPlayer,
     required this.onEditRules,
     required this.onEditOrder,
@@ -20,10 +18,8 @@ class RoomManagementActions extends StatelessWidget {
 
   final Room room;
   final bool enabled;
-  final bool canUndo;
   final bool canAddPlayer;
   final bool canRemovePlayers;
-  final VoidCallback onUndo;
   final VoidCallback onAddPlayer;
   final VoidCallback onEditRules;
   final VoidCallback onEditOrder;
@@ -33,11 +29,6 @@ class RoomManagementActions extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      OutlinedButton(
-        key: const ValueKey('undo-turn'),
-        onPressed: enabled && canUndo ? onUndo : null,
-        child: const Text('Hoàn tác cú cuối'),
-      ),
       Wrap(
         spacing: 8,
         children: [

@@ -132,12 +132,6 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                   .isLoading ||
               ref.watch(nextGameControllerProvider(widget.roomId)).isLoading;
           final game = room.games.last;
-          final last = game.turns.where((t) => !t.isUndone).lastOrNull;
-          final canUndo =
-              last != null &&
-              !room.events.any(
-                (e) => e.isUndoBarrier && e.revision > last.revision,
-              );
           void closeThen(VoidCallback action) {
             Navigator.of(dialogContext).pop();
             action();
@@ -151,12 +145,10 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
             _RoomSection.management => RoomManagementSection(
               room: room,
               enabled: !busy,
-              canUndo: canUndo,
               canAddPlayer: room.activePlayerIds.length < 5,
               canRemovePlayers:
                   game.status == GameStatus.finished &&
                   room.activePlayerIds.length > 2,
-              onUndo: () => closeThen(() => _undo(room)),
               onAddPlayer: () =>
                   closeThen(() => _edit(room, RoomActionKind.add)),
               onEditRules: () =>
@@ -272,6 +264,12 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
           final game = room.games.last;
           final active = room.status == RoomStatus.active;
           final playing = active && game.status == GameStatus.inProgress;
+          final last = game.turns.where((t) => !t.isUndone).lastOrNull;
+          final canUndo =
+              last != null &&
+              !room.events.any(
+                (e) => e.isUndoBarrier && e.revision > last.revision,
+              );
           final error = action.error ?? next.error;
 
           final owner = '${game.id}:${game.currentPlayerId}';
@@ -365,6 +363,25 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                           : null,
                     ),
 
+                    if (active && !playing) ...[
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton.icon(
+                          key: const ValueKey('undo-turn'),
+                          onPressed:
+                              canUndo &&
+                                  !busy &&
+                                  !_autoBallPending &&
+                                  !(_foul && _balls.isNotEmpty)
+                              ? () => _undo(room)
+                              : null,
+                          icon: const Icon(Icons.undo),
+                          label: const Text('Hoàn tác cú cuối'),
+                        ),
+                      ),
+                    ],
+
                     if (playing) ...[
                       const SizedBox(height: 16),
                       TurnSection(
@@ -398,6 +415,12 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                           );
                           if (result != null && mounted) _clearDraft();
                         },
+                        undoEnabled:
+                            canUndo &&
+                            !busy &&
+                            !_autoBallPending &&
+                            !(_foul && _balls.isNotEmpty),
+                        onUndo: () => _undo(room),
                       ),
                     ],
 
