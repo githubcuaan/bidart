@@ -10,7 +10,6 @@ import 'package:bidart/core/labels/room_labels.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/create_room_error_panel.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/end_conditions_fields.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/player_roster_editor.dart';
-import 'package:bidart/screens/rooms/add_room/widgets/role_selectors.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/room_draft_preview.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/rule_template_section.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
@@ -40,10 +39,16 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   final _points = <int, TextEditingController>{};
   final _enabled = <int, bool>{};
   late List<PlayerInGame> _players;
-  late String _starter;
-  late String _payer;
   late String _ownerId;
   bool _navigating = false;
+  int _step = 0;
+
+  static const _stepTitles = [
+    'Phòng & người chơi',
+    'Luật & điểm số',
+    'Điều kiện kết thúc',
+    'Xem trước',
+  ];
 
   static final _balls = [
     for (
@@ -79,9 +84,6 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     for (final player in _players) {
       _names[player.id] = TextEditingController(text: player.displayName);
     }
-    _starter = saved.participants.isEmpty ? _players.first.id : saved.starterId;
-    _payer = saved.participants.isEmpty ? _players[1].id : saved.payerId;
-    _fixRoleOrder();
     for (final ball in _balls) {
       final config = saved.ballPoints[ball];
       _enabled[ball] = config?.enabled ?? true;
@@ -121,8 +123,8 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         player.copyWith(displayName: _names[player.id]!.text),
     ],
     playerOrder: _players.map((player) => player.id).toList(),
-    starterId: _starter,
-    payerId: _payer,
+    starterId: _players.firstOrNull?.id ?? '',
+    payerId: _players.length > 1 ? _players[1].id : '',
     ballPoints: {
       for (final ball in _balls)
         ball: BallPointConfig(
@@ -142,49 +144,26 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   }
 
   void _changed([VoidCallback? update]) {
-    setState(() {
-      update?.call();
-      _fixRoleOrder();
-    });
+    setState(() => update?.call());
     ref.read(createRoomControllerProvider.notifier).setDraft(_draft);
-  }
-
-  /// The opening order is always starter, initial payer, then the rest. The
-  /// starter and payer rows stay fixed; only later rows can be reordered.
-  void _fixRoleOrder() {
-    if (_starter.isEmpty ||
-        _payer.isEmpty ||
-        _starter == _payer ||
-        !_players.any((player) => player.id == _starter) ||
-        !_players.any((player) => player.id == _payer)) {
-      return;
-    }
-    final starter = _players.firstWhere((player) => player.id == _starter);
-    final payer = _players.firstWhere((player) => player.id == _payer);
-    _players = [
-      starter,
-      payer,
-      ..._players.where(
-        (player) => player.id != _starter && player.id != _payer,
-      ),
-    ];
   }
 
   void _move(int index, int offset) => _changed(() {
     final target = index + offset;
-    if (index < PlayerRosterEditor.lockedCount ||
-        target < PlayerRosterEditor.lockedCount ||
-        target >= _players.length) {
+    if (target < 0 || target >= _players.length) {
       return;
     }
     final player = _players.removeAt(index);
     _players.insert(target, player);
   });
 
+  void _reorder(int oldIndex, int newIndex) => _changed(() {
+    final player = _players.removeAt(oldIndex);
+    _players.insert(newIndex, player);
+  });
+
   void _remove(String id) => _changed(() {
     _players.removeWhere((player) => player.id == id);
-    if (_starter == id) _starter = '';
-    if (_payer == id) _payer = '';
   });
 
   String _label(PlayerInGame player) {
@@ -385,31 +364,13 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               enabled: !saving,
               onChanged: _changed,
               onMove: _move,
+              onReorder: _reorder,
               onRemove: _remove,
               onAdd: () => _changed(() {
                 final player = _newPlayer();
                 _players.add(player);
                 _names[player.id] = TextEditingController();
               }),
-            ),
-            const SizedBox(height: 16),
-
-            RoleSelectors(
-              players: _players,
-              starter: _starter,
-              payer: _payer,
-              labelFor: _label,
-              starterError: issueFor('starterId'),
-              payerError: issueFor('payerId'),
-              enabled: !saving,
-              onChanged: ({required bool starter, String? value}) =>
-                  _changed(() {
-                    if (starter) {
-                      _starter = value ?? '';
-                    } else {
-                      _payer = value ?? '';
-                    }
-                  }),
             ),
           ],
           if (_step == 1) ...[
@@ -464,13 +425,17 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               order: _players.map(_label).join(' → '),
               starter:
                   _players
-                      .where((p) => p.id == _starter)
+                      .where(
+                        (p) => _players.isNotEmpty && p.id == _players.first.id,
+                      )
                       .map(_label)
                       .firstOrNull ??
                   'Chưa chọn',
               payer:
                   _players
-                      .where((p) => p.id == _payer)
+                      .where(
+                        (p) => _players.length > 1 && p.id == _players[1].id,
+                      )
                       .map(_label)
                       .firstOrNull ??
                   'Chưa chọn',
