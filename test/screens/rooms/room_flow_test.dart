@@ -589,6 +589,23 @@ void main() {
     expect(await repository.getRoom(room.id), room);
   });
 
+  testWidgets('creates a room from the final setup step', (tester) async {
+    await pump(tester, const AddRoom());
+    await fill(tester);
+
+    for (var step = 0; step < 3; step++) {
+      await tester.tap(key('next-step'));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Bước 4/4 · Xem trước'), findsOneWidget);
+    await tester.tap(key('submit-room'));
+    await tester.pumpAndSettle();
+
+    expect(await repository.listRooms(), hasLength(1));
+    expect(find.byType(InRoom), findsOneWidget);
+    expect(find.byType(ChoseRoom), findsNothing);
+  });
+
   testWidgets('AddRoom shell keeps submit bar and template chips', (
     tester,
   ) async {

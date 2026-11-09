@@ -13,6 +13,7 @@ import 'package:bidart/screens/rooms/add_room/widgets/player_roster_editor.dart'
 import 'package:bidart/screens/rooms/add_room/widgets/room_draft_preview.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/rule_template_section.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
+import 'package:bidart/screens/rooms/in_room/in_room.dart';
 import 'package:bidart/widgets/card/section_card.dart';
 import 'package:bidart/widgets/room/ball_rules_editor/ball_rules_editor.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
@@ -214,7 +215,9 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     // A completed save must not navigate after the user has left this route.
     if (ModalRoute.of(context)?.isCurrent != true) return;
     setState(() => _navigating = true);
-    _openExisting(id);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => InRoom(roomId: id)),
+    );
   }
 
   bool _canContinue({
