@@ -230,6 +230,32 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     _openExisting(id);
   }
 
+  bool _canContinue({
+    required List<ValidationIssue> issues,
+    required Map<int, String> ballErrors,
+    required bool invalidDuration,
+    required bool invalidThreshold,
+    required bool hasRoomName,
+  }) {
+    return switch (_step) {
+      0 =>
+        hasRoomName &&
+            !issues.any(
+              (issue) =>
+                  issue.fieldPath == 'participants' ||
+                  issue.fieldPath.startsWith('participants[') ||
+                  issue.fieldPath == 'playerOrder' ||
+                  issue.fieldPath == 'starterId' ||
+                  issue.fieldPath == 'payerId',
+            ),
+      1 =>
+        ballErrors.isEmpty &&
+            !issues.any((issue) => issue.code == ValidationCode.noEnabledBall),
+      2 => !invalidDuration && !invalidThreshold,
+      _ => true,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(createRoomControllerProvider);
@@ -262,22 +288,48 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         _threshold.text.trim().isNotEmpty && _positive(_threshold.text) == null;
     final error = state.result.error;
 
+    final canContinue = _canContinue(
+      issues: issues,
+      ballErrors: ballErrors,
+      invalidDuration: invalidDuration,
+      invalidThreshold: invalidThreshold,
+      hasRoomName: _name.text.trim().isNotEmpty,
+    );
+
     return AppScreen(
       appBar: AppBar(title: const Text('Tạo phòng')),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(16),
-        child: FilledButton(
-          key: const ValueKey('submit-room'),
-          onPressed:
-              issues.isEmpty &&
-                  ballErrors.isEmpty &&
-                  !invalidDuration &&
-                  !invalidThreshold &&
-                  _name.text.trim().isNotEmpty &&
-                  !saving
-              ? _submit
-              : null,
-          child: Text(saving ? 'Đang lưu…' : 'Tạo và bắt đầu'),
+        child: Row(
+          children: [
+            if (_step > 0) ...[
+              OutlinedButton.icon(
+                key: const ValueKey('back-step'),
+                onPressed: saving ? null : () => setState(() => _step--),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Quay lại'),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: FilledButton.icon(
+                key: ValueKey(_step == 3 ? 'submit-room' : 'next-step'),
+                onPressed: saving || !canContinue
+                    ? null
+                    : _step == 3
+                    ? _submit
+                    : () => setState(() => _step++),
+                icon: Icon(_step == 3 ? Icons.check : Icons.arrow_forward),
+                label: Text(
+                  saving
+                      ? 'Đang lưu…'
+                      : _step == 3
+                      ? 'Tạo và bắt đầu'
+                      : 'Tiếp tục',
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: ListView(
