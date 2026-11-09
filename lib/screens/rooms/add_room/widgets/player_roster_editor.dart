@@ -12,12 +12,11 @@ class PlayerRosterEditor extends StatelessWidget {
     required this.enabled,
     required this.onChanged,
     required this.onMove,
+    required this.onReorder,
     required this.onRemove,
     required this.onAdd,
   });
 
-  /// First break player, second initial payer. Their rows never move.
-  static const lockedCount = 2;
   static const _fixedRoles = ['Đề-pa', 'Đền đầu'];
 
   final List<PlayerInGame> players;
@@ -26,6 +25,7 @@ class PlayerRosterEditor extends StatelessWidget {
   final bool enabled;
   final VoidCallback onChanged;
   final void Function(int index, int offset) onMove;
+  final void Function(int oldIndex, int newIndex) onReorder;
   final ValueChanged<String> onRemove;
   final VoidCallback onAdd;
 
@@ -34,15 +34,19 @@ class PlayerRosterEditor extends StatelessWidget {
     icon: Icons.group_outlined,
     title: 'Người chơi (${players.length}/5)',
     description:
-        'Người 1 đề-pa, người 2 đền đầu. Chỉ đổi thứ tự từ người 3 trở đi.',
+        'Kéo thẻ hoặc dùng nút lên/xuống để đổi thứ tự. '
+        'Người đầu đề-pa, người thứ hai đền đầu.',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var index = 0; index < players.length; index++) ...[
-          if (index == lockedCount && players.length > lockedCount)
-            _NextOrderSeparator(key: const ValueKey('next-order-label')),
-          _playerRow(context, index),
-        ],
+        ReorderableListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          itemCount: players.length,
+          onReorderItem: onReorder,
+          itemBuilder: (context, index) => _playerRow(context, index),
+        ),
         const SizedBox(height: 4),
         TextButton.icon(
           key: const ValueKey('add-player'),
@@ -58,79 +62,99 @@ class PlayerRosterEditor extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final player = players[index];
-    final fixed = index < lockedCount;
+    final hasRole = index < _fixedRoles.length;
 
     return Container(
-      key: ValueKey('player-row-${player.id}'),
+      // Keep the switcher attached to the slot so both exchanged cards
+      // animate through their destination positions.
+      key: ValueKey('player-row-$index'),
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: fixed
+        color: hasRole
             ? scheme.primaryContainer.withValues(alpha: 0.28)
             : scheme.surfaceContainerHighest.withValues(alpha: 0.45),
         border: Border.all(
-          color: fixed ? scheme.primary : scheme.outlineVariant,
-          width: fixed ? 1.2 : 1,
+          color: hasRole ? scheme.primary : scheme.outlineVariant,
+          width: hasRole ? 1.2 : 1,
         ),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (fixed) ...[
-            Container(
-              key: ValueKey('role-badge-${player.id}'),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: scheme.primary,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _fixedRoles[index],
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: scheme.onPrimary,
-                  fontWeight: FontWeight.w700,
-                  height: 1.1,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 220),
+        reverseDuration: const Duration(milliseconds: 180),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) {
+          final slide = Tween<Offset>(
+            begin: Offset(0, index.isEven ? 0.85 : -0.85),
+            end: Offset.zero,
+          ).animate(animation);
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(position: slide, child: child),
+          );
+        },
+        child: Column(
+          key: ValueKey('player-content-${player.id}-$index'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (hasRole) ...[
+              Container(
+                key: ValueKey('role-badge-${player.id}'),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
                 ),
-              ),
-            ),
-            const SizedBox(height: 6),
-          ],
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  key: ValueKey('player-name-${player.id}'),
-                  controller: names[player.id],
-                  enabled: enabled,
-                  decoration: InputDecoration(
-                    labelText: 'Người chơi ${index + 1}',
-                    errorText: errorFor(index),
+                decoration: BoxDecoration(
+                  color: scheme.primary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  _fixedRoles[index],
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onPrimary,
+                    fontWeight: FontWeight.w700,
+                    height: 1.1,
                   ),
-                  onChanged: (_) => onChanged(),
                 ),
               ),
-              if (fixed)
-                SizedBox(
-                  width: 44,
-                  height: 48,
-                  child: Center(
+              const SizedBox(height: 6),
+            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ReorderableDragStartListener(
+                  index: index,
+                  child: SizedBox(
+                    width: 36,
+                    height: 48,
                     child: Tooltip(
-                      message: 'Cố định theo vai trò ${_fixedRoles[index]}',
+                      message: 'Kéo để đổi vị trí',
                       child: Icon(
-                        Icons.lock_outline,
-                        key: ValueKey('locked-player-${player.id}'),
-                        color: scheme.primary,
+                        Icons.drag_indicator,
+                        key: ValueKey('drag-player-${player.id}'),
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ),
-                )
-              else ...[
+                ),
+                Expanded(
+                  child: TextField(
+                    key: ValueKey('player-name-${player.id}'),
+                    controller: names[player.id],
+                    enabled: enabled,
+                    decoration: InputDecoration(
+                      labelText: 'Người chơi ${index + 1}',
+                      errorText: errorFor(index),
+                    ),
+                    onChanged: (_) => onChanged(),
+                  ),
+                ),
                 IconButton(
                   key: ValueKey('move-up-${player.id}'),
                   tooltip: 'Đưa lên',
-                  onPressed: enabled && index > lockedCount
+                  onPressed: enabled && index > 0
                       ? () => onMove(index, -1)
                       : null,
                   icon: const Icon(Icons.arrow_upward),
@@ -138,56 +162,23 @@ class PlayerRosterEditor extends StatelessWidget {
                 IconButton(
                   key: ValueKey('move-down-${player.id}'),
                   tooltip: 'Đưa xuống',
-                  onPressed:
-                      enabled &&
-                          index >= lockedCount &&
-                          index != players.length - 1
+                  onPressed: enabled && index < players.length - 1
                       ? () => onMove(index, 1)
                       : null,
                   icon: const Icon(Icons.arrow_downward),
                 ),
+                IconButton(
+                  key: ValueKey('remove-player-${player.id}'),
+                  tooltip: 'Xóa người chơi',
+                  onPressed: enabled && players.length > 2
+                      ? () => onRemove(player.id)
+                      : null,
+                  icon: const Icon(Icons.remove_circle_outline),
+                ),
               ],
-              IconButton(
-                key: ValueKey('remove-player-${player.id}'),
-                tooltip: 'Xóa người chơi',
-                onPressed: enabled && players.length > 2
-                    ? () => onRemove(player.id)
-                    : null,
-                icon: const Icon(Icons.remove_circle_outline),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Divider label between the fixed opening pair and reorderable players.
-class _NextOrderSeparator extends StatelessWidget {
-  const _NextOrderSeparator({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 4, bottom: 12),
-      child: Row(
-        children: [
-          Expanded(child: Divider(color: scheme.outlineVariant)),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              'Thứ tự lượt chơi tiếp theo',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.primary,
-                fontWeight: FontWeight.w700,
-              ),
             ),
-          ),
-          Expanded(child: Divider(color: scheme.outlineVariant)),
-        ],
+          ],
+        ),
       ),
     );
   }

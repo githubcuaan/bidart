@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bidart/domain/models/scoring/ball_point_config.dart';
 import 'package:bidart/domain/models/scoring/end_conditions.dart';
 import 'package:bidart/domain/models/scoring/player_in_game.dart';
@@ -10,10 +12,10 @@ import 'package:bidart/core/labels/room_labels.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/create_room_error_panel.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/end_conditions_fields.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/player_roster_editor.dart';
-import 'package:bidart/screens/rooms/add_room/widgets/role_selectors.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/room_draft_preview.dart';
 import 'package:bidart/screens/rooms/add_room/widgets/rule_template_section.dart';
 import 'package:bidart/screens/rooms/chose_room.dart';
+import 'package:bidart/screens/rooms/in_room/in_room.dart';
 import 'package:bidart/widgets/card/section_card.dart';
 import 'package:bidart/widgets/room/ball_rules_editor/ball_rules_editor.dart';
 import 'package:bidart/features/scoring/provider/create_room_controller.dart';
@@ -40,10 +42,16 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   final _points = <int, TextEditingController>{};
   final _enabled = <int, bool>{};
   late List<PlayerInGame> _players;
-  late String _starter;
-  late String _payer;
   late String _ownerId;
   bool _navigating = false;
+  int _step = 0;
+
+  static const _stepTitles = [
+    'Phòng & người chơi',
+    'Luật & điểm số',
+    'Điều kiện kết thúc',
+    'Xem trước',
+  ];
 
   static final _balls = [
     for (
@@ -62,7 +70,10 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         ? state.draft
         : CreateRoomDraft();
     _ownerId = saved.ownerId;
-    _name = TextEditingController(text: saved.name);
+    final defaultRoomName = _todayRoomName();
+    _name = TextEditingController(
+      text: saved.name.isNotEmpty ? saved.name : defaultRoomName,
+    );
     _templateName = TextEditingController();
     _duration = TextEditingController(
       text: saved.endConditions.durationSeconds?.toString() ?? '',
@@ -79,15 +90,15 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     for (final player in _players) {
       _names[player.id] = TextEditingController(text: player.displayName);
     }
-    _starter = saved.participants.isEmpty ? _players.first.id : saved.starterId;
-    _payer = saved.participants.isEmpty ? _players[1].id : saved.payerId;
-    _fixRoleOrder();
     for (final ball in _balls) {
       final config = saved.ballPoints[ball];
       _enabled[ball] = config?.enabled ?? true;
       _points[ball] = TextEditingController(
         text: '${config?.enabled == false ? ball : config?.points ?? ball}',
       );
+    }
+    if (saved.name.isEmpty) {
+      unawaited(_applyUniqueDefaultRoomName(defaultRoomName));
     }
   }
 
@@ -96,6 +107,41 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     displayName: '',
     joinedAt: ref.read(clockProvider)(),
   );
+
+  String _todayRoomName() {
+    final today = ref.read(clockProvider)();
+    return '${today.day.toString().padLeft(2, '0')}/'
+        '${today.month.toString().padLeft(2, '0')}/${today.year}';
+  }
+
+  Future<void> _applyUniqueDefaultRoomName(String baseName) async {
+    try {
+      final now = ref.read(clockProvider)();
+      final rooms = await ref.read(roomServiceProvider).listRooms();
+      if (!mounted || _name.text != baseName) return;
+
+      final usedNames = rooms
+          .where(
+            (room) =>
+                room.createdAt.year == now.year &&
+                room.createdAt.month == now.month &&
+                room.createdAt.day == now.day,
+          )
+          .map((room) => room.name)
+          .toSet();
+
+      var candidate = baseName;
+      for (var suffix = 1; usedNames.contains(candidate); suffix++) {
+        candidate = '$baseName - $suffix';
+      }
+      if (candidate == _name.text) return;
+
+      _name.text = candidate;
+      _changed();
+    } catch (_) {
+      // Keep the date-only default if existing rooms cannot be loaded.
+    }
+  }
 
   @override
   void dispose() {
@@ -121,8 +167,8 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         player.copyWith(displayName: _names[player.id]!.text),
     ],
     playerOrder: _players.map((player) => player.id).toList(),
-    starterId: _starter,
-    payerId: _payer,
+    starterId: _players.firstOrNull?.id ?? '',
+    payerId: _players.length > 1 ? _players[1].id : '',
     ballPoints: {
       for (final ball in _balls)
         ball: BallPointConfig(
@@ -142,49 +188,26 @@ class _AddRoomState extends ConsumerState<AddRoom> {
   }
 
   void _changed([VoidCallback? update]) {
-    setState(() {
-      update?.call();
-      _fixRoleOrder();
-    });
+    setState(() => update?.call());
     ref.read(createRoomControllerProvider.notifier).setDraft(_draft);
-  }
-
-  /// The opening order is always starter, initial payer, then the rest. The
-  /// starter and payer rows stay fixed; only later rows can be reordered.
-  void _fixRoleOrder() {
-    if (_starter.isEmpty ||
-        _payer.isEmpty ||
-        _starter == _payer ||
-        !_players.any((player) => player.id == _starter) ||
-        !_players.any((player) => player.id == _payer)) {
-      return;
-    }
-    final starter = _players.firstWhere((player) => player.id == _starter);
-    final payer = _players.firstWhere((player) => player.id == _payer);
-    _players = [
-      starter,
-      payer,
-      ..._players.where(
-        (player) => player.id != _starter && player.id != _payer,
-      ),
-    ];
   }
 
   void _move(int index, int offset) => _changed(() {
     final target = index + offset;
-    if (index < PlayerRosterEditor.lockedCount ||
-        target < PlayerRosterEditor.lockedCount ||
-        target >= _players.length) {
+    if (target < 0 || target >= _players.length) {
       return;
     }
     final player = _players.removeAt(index);
     _players.insert(target, player);
   });
 
+  void _reorder(int oldIndex, int newIndex) => _changed(() {
+    final player = _players.removeAt(oldIndex);
+    _players.insert(newIndex, player);
+  });
+
   void _remove(String id) => _changed(() {
     _players.removeWhere((player) => player.id == id);
-    if (_starter == id) _starter = '';
-    if (_payer == id) _payer = '';
   });
 
   String _label(PlayerInGame player) {
@@ -227,7 +250,35 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     // A completed save must not navigate after the user has left this route.
     if (ModalRoute.of(context)?.isCurrent != true) return;
     setState(() => _navigating = true);
-    _openExisting(id);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => InRoom(roomId: id)),
+    );
+  }
+
+  bool _canContinue({
+    required List<ValidationIssue> issues,
+    required Map<int, String> ballErrors,
+    required bool invalidDuration,
+    required bool invalidThreshold,
+    required bool hasRoomName,
+  }) {
+    return switch (_step) {
+      0 =>
+        hasRoomName &&
+            !issues.any(
+              (issue) =>
+                  issue.fieldPath == 'participants' ||
+                  issue.fieldPath.startsWith('participants[') ||
+                  issue.fieldPath == 'playerOrder' ||
+                  issue.fieldPath == 'starterId' ||
+                  issue.fieldPath == 'payerId',
+            ),
+      1 =>
+        ballErrors.isEmpty &&
+            !issues.any((issue) => issue.code == ValidationCode.noEnabledBall),
+      2 => !invalidDuration && !invalidThreshold,
+      _ => true,
+    };
   }
 
   @override
@@ -262,22 +313,48 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         _threshold.text.trim().isNotEmpty && _positive(_threshold.text) == null;
     final error = state.result.error;
 
+    final canContinue = _canContinue(
+      issues: issues,
+      ballErrors: ballErrors,
+      invalidDuration: invalidDuration,
+      invalidThreshold: invalidThreshold,
+      hasRoomName: _name.text.trim().isNotEmpty,
+    );
+
     return AppScreen(
       appBar: AppBar(title: const Text('Tạo phòng')),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(16),
-        child: FilledButton(
-          key: const ValueKey('submit-room'),
-          onPressed:
-              issues.isEmpty &&
-                  ballErrors.isEmpty &&
-                  !invalidDuration &&
-                  !invalidThreshold &&
-                  _name.text.trim().isNotEmpty &&
-                  !saving
-              ? _submit
-              : null,
-          child: Text(saving ? 'Đang lưu…' : 'Tạo và bắt đầu'),
+        child: Row(
+          children: [
+            if (_step > 0) ...[
+              OutlinedButton.icon(
+                key: const ValueKey('back-step'),
+                onPressed: saving ? null : () => setState(() => _step--),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Quay lại'),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: FilledButton.icon(
+                key: ValueKey(_step == 3 ? 'submit-room' : 'next-step'),
+                onPressed: saving || !canContinue
+                    ? null
+                    : _step == 3
+                    ? _submit
+                    : () => setState(() => _step++),
+                icon: Icon(_step == 3 ? Icons.check : Icons.arrow_forward),
+                label: Text(
+                  saving
+                      ? 'Đang lưu…'
+                      : _step == 3
+                      ? 'Tạo và bắt đầu'
+                      : 'Tiếp tục',
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: ListView(
@@ -290,29 +367,13 @@ class _AddRoomState extends ConsumerState<AddRoom> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Phòng local · 2–5 người · điểm cộng dồn qua các ván. '
-            'Tự lưu sau mỗi thao tác; mở lại app để tiếp tục đúng trạng thái.',
+            'Bước ${_step + 1}/4 · ${_stepTitles[_step]}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 30),
-
-          SectionCard(
-            icon: Icons.meeting_room_outlined,
-            title: 'Thông tin phòng',
-            description: 'Nhập tên phòng',
-            child: TextField(
-              key: const ValueKey('room-name'),
-              controller: _name,
-              enabled: !saving,
-              decoration: InputDecoration(
-                labelText: 'Tên phòng',
-                errorText: _name.text.trim().isEmpty ? 'Nhận tên phòng.' : null,
-              ),
-              onChanged: (_) => _changed(),
-            ),
-          ),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(value: (_step + 1) / _stepTitles.length),
           if (error != null) ...[
             const SizedBox(height: 16),
             CreateRoomErrorPanel(
@@ -321,99 +382,122 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               onOpenExisting: _openExisting,
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          if (_step == 0) ...[
+            SectionCard(
+              icon: Icons.meeting_room_outlined,
+              title: 'Thông tin phòng',
+              description: 'Nhập tên phòng',
+              child: TextField(
+                key: const ValueKey('room-name'),
+                controller: _name,
+                enabled: !saving,
+                decoration: InputDecoration(
+                  labelText: 'Tên phòng',
+                  errorText: _name.text.trim().isEmpty
+                      ? 'Nhận tên phòng.'
+                      : null,
+                ),
+                onChanged: (_) => _changed(),
+              ),
+            ),
+            const SizedBox(height: 16),
 
-          PlayerRosterEditor(
-            players: _players,
-            names: _names,
-            errorFor: (index) => issueFor('participants[$index].displayName'),
-            enabled: !saving,
-            onChanged: _changed,
-            onMove: _move,
-            onRemove: _remove,
-            onAdd: () => _changed(() {
-              final player = _newPlayer();
-              _players.add(player);
-              _names[player.id] = TextEditingController();
-            }),
-          ),
-          const SizedBox(height: 16),
+            PlayerRosterEditor(
+              players: _players,
+              names: _names,
+              errorFor: (index) => issueFor('participants[$index].displayName'),
+              enabled: !saving,
+              onChanged: _changed,
+              onMove: _move,
+              onReorder: _reorder,
+              onRemove: _remove,
+              onAdd: () => _changed(() {
+                final player = _newPlayer();
+                _players.add(player);
+                _names[player.id] = TextEditingController();
+              }),
+            ),
+          ],
+          if (_step == 1) ...[
+            const SizedBox(height: 16),
 
-          RoleSelectors(
-            players: _players,
-            starter: _starter,
-            payer: _payer,
-            labelFor: _label,
-            starterError: issueFor('starterId'),
-            payerError: issueFor('payerId'),
-            enabled: !saving,
-            onChanged: ({required bool starter, String? value}) => _changed(() {
-              if (starter) {
-                _starter = value ?? '';
-              } else {
-                _payer = value ?? '';
-              }
-            }),
-          ),
-          const SizedBox(height: 16),
+            BallRulesEditor(
+              enabled: _enabled,
+              fields: _points,
+              errors: ballErrors,
+              editable: !saving,
+              onToggle: (ball) =>
+                  _changed(() => _enabled[ball] = !_enabled[ball]!),
+              onEdit: _changed,
+              title: 'Cấu hình điểm số từng bi',
+              description: 'Chạm ảnh bi để bật/tắt; bi tắt không tạo điểm.',
+              header:
+                  issues.any(
+                    (issue) => issue.code == ValidationCode.noEnabledBall,
+                  )
+                  ? Text(validationMessage(ValidationCode.noEnabledBall))
+                  : null,
+            ),
+            const SizedBox(height: 16),
 
-          BallRulesEditor(
-            enabled: _enabled,
-            fields: _points,
-            errors: ballErrors,
-            editable: !saving,
-            onToggle: (ball) =>
-                _changed(() => _enabled[ball] = !_enabled[ball]!),
-            onEdit: _changed,
-            title: 'Cấu hình điểm số từng bi',
-            description: 'Chạm ảnh bi để bật/tắt; bi tắt không tạo điểm.',
-            header:
-                issues.any(
-                  (issue) => issue.code == ValidationCode.noEnabledBall,
-                )
-                ? Text(validationMessage(ValidationCode.noEnabledBall))
-                : null,
-          ),
-          const SizedBox(height: 16),
+            RuleTemplateSection(
+              templateName: _templateName,
+              enabled: !saving,
+              onSave: _saveTemplate,
+              onApply: _applyTemplate,
+            ),
+          ],
+          if (_step == 2) ...[
+            const SizedBox(height: 16),
 
-          RuleTemplateSection(
-            templateName: _templateName,
-            enabled: !saving,
-            onSave: _saveTemplate,
-            onApply: _applyTemplate,
-          ),
-          const SizedBox(height: 16),
+            EndConditionsFields(
+              duration: _duration,
+              threshold: _threshold,
+              enabled: !saving,
+              durationError: invalidDuration
+                  ? 'Nhập số nguyên dương hoặc để trống.'
+                  : null,
+              thresholdError: invalidThreshold
+                  ? 'Nhập số nguyên dương hoặc để trống.'
+                  : null,
+              onChanged: _changed,
+            ),
+          ],
+          if (_step == 3) ...[
+            const SizedBox(height: 16),
 
-          EndConditionsFields(
-            duration: _duration,
-            threshold: _threshold,
-            enabled: !saving,
-            durationError: invalidDuration
-                ? 'Nhập số nguyên dương hoặc để trống.'
-                : null,
-            thresholdError: invalidThreshold
-                ? 'Nhập số nguyên dương hoặc để trống.'
-                : null,
-            onChanged: _changed,
-          ),
-          const SizedBox(height: 16),
-
-          RoomDraftPreview(
-            order: _players.map(_label).join(' → '),
-            starter:
-                _players
-                    .where((p) => p.id == _starter)
-                    .map(_label)
-                    .firstOrNull ??
-                'Chưa chọn',
-            payer:
-                _players.where((p) => p.id == _payer).map(_label).firstOrNull ??
-                'Chưa chọn',
-            rules: {
-              for (final ball in _balls)
-                ball: _enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt',
-            },
-          ),
+            RoomDraftPreview(
+              order: _players.map(_label).join(' → '),
+              starter:
+                  _players
+                      .where(
+                        (p) => _players.isNotEmpty && p.id == _players.first.id,
+                      )
+                      .map(_label)
+                      .firstOrNull ??
+                  'Chưa chọn',
+              payer:
+                  _players
+                      .where(
+                        (p) => _players.length > 1 && p.id == _players[1].id,
+                      )
+                      .map(_label)
+                      .firstOrNull ??
+                  'Chưa chọn',
+              rules: {
+                for (final ball in _balls)
+                  ball: _enabled[ball]! ? '${_points[ball]!.text}đ' : 'tắt',
+              },
+            ),
+            Text('Phòng: ${_name.text.trim()}'),
+            const SizedBox(height: 8),
+            Text(
+              'Điều kiện kết thúc: '
+              '${_positive(_duration.text) == null ? 'Không giới hạn thời gian' : '${_positive(_duration.text)} giây'} · '
+              '${_positive(_threshold.text) == null ? 'Không giới hạn điểm' : '${_positive(_threshold.text)} điểm'}',
+            ),
+          ],
         ],
       ),
     );

@@ -185,6 +185,29 @@ void main() {
     return receipt.room;
   }
 
+  testWidgets('room name defaults to today', (tester) async {
+    await pump(tester, const AddRoom());
+
+    expect(
+      tester.widget<TextField>(key('room-name')).controller!.text,
+      '15/10/2026',
+    );
+  });
+
+  testWidgets('default room name uses the next suffix for today', (
+    tester,
+  ) async {
+    await seed(name: '15/10/2026', status: RoomStatus.finished);
+    await seed(name: '15/10/2026 - 1');
+
+    await pump(tester, const AddRoom());
+
+    expect(
+      tester.widget<TextField>(key('room-name')).controller!.text,
+      '15/10/2026 - 2',
+    );
+  });
+
   testWidgets('form rejects blank and duplicate names; enforces 2–5 guests', (
     tester,
   ) async {
@@ -578,6 +601,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ChoseRoom), findsOneWidget);
     expect(await repository.getRoom(room.id), room);
+  });
+
+  testWidgets('creates a room from the final setup step', (tester) async {
+    await pump(tester, const AddRoom());
+    await fill(tester);
+
+    for (var step = 0; step < 3; step++) {
+      await tester.tap(key('next-step'));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Bước 4/4 · Xem trước'), findsOneWidget);
+    await tester.tap(key('submit-room'));
+    await tester.pumpAndSettle();
+
+    expect(await repository.listRooms(), hasLength(1));
+    expect(find.byType(InRoom), findsOneWidget);
+    expect(find.byType(ChoseRoom), findsNothing);
   });
 
   testWidgets('AddRoom shell keeps submit bar and template chips', (
