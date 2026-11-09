@@ -336,6 +336,14 @@ class _AddRoomState extends ConsumerState<AddRoom> {
           ),
           const SizedBox(height: 12),
           LinearProgressIndicator(value: (_step + 1) / _stepTitles.length),
+          if (error != null) ...[
+            const SizedBox(height: 16),
+            CreateRoomErrorPanel(
+              error: error,
+              enabled: !saving,
+              onOpenExisting: _openExisting,
+            ),
+          ],
           const SizedBox(height: 24),
           if (_step == 0) ...[
             SectionCard(
@@ -355,14 +363,6 @@ class _AddRoomState extends ConsumerState<AddRoom> {
                 onChanged: (_) => _changed(),
               ),
             ),
-            if (error != null) ...[
-              const SizedBox(height: 16),
-              CreateRoomErrorPanel(
-                error: error,
-                enabled: !saving,
-                onOpenExisting: _openExisting,
-              ),
-            ],
             const SizedBox(height: 16),
 
             PlayerRosterEditor(
