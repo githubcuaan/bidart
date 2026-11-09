@@ -31,14 +31,14 @@ class BallRulesEditor extends StatelessWidget {
 
   /// Base card height without an error line. When a validation error appears
   /// the card grows by [_errorBlock] so the ball and point box do not move.
-  static const _cellHeight = 138.0;
+  static const _cellHeight = 150.0;
   static const _errorBlock = 14.0;
 
   /// Horizontal inset used by the point box and the error line.
   static const _cellPadding = 8.0;
   static const _dotSize = 54.0;
   static const _dotBox = 60.0;
-  static const _fieldHeight = 30.0;
+  static const _fieldHeight = 48.0;
   static const _errorHeight = 12.0;
   static const _spacing = 10.0;
   static const _minCellWidth = 88.0;

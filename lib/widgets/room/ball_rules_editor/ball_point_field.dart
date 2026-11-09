@@ -57,7 +57,15 @@ class BallPointField extends StatelessWidget {
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
           color: scheme.onSurfaceVariant,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
       ),
       onChanged: (_) => onChanged(),
     );
