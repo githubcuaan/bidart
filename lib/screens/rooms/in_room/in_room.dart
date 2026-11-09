@@ -44,6 +44,7 @@ class InRoom extends ConsumerStatefulWidget {
 class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
   final _balls = <int>{};
   bool _foul = false;
+  bool _autoBallPending = false;
   bool _menuOpen = false;
   String? _draftOwner;
   late final RoomEndTimer _endTimer = RoomEndTimer(
@@ -92,7 +93,30 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
   void _clearDraft() => setState(() {
     _balls.clear();
     _foul = false;
+    _autoBallPending = false;
   });
+
+  Future<void> _potBall(Room room, int ball) async {
+    if (_busy || _autoBallPending) return;
+    if (_foul) {
+      setState(() => _balls.add(ball));
+      return;
+    }
+    setState(() {
+      _balls.add(ball);
+      _autoBallPending = true;
+    });
+    final result = await _act(
+      room,
+      RoomAction(
+        RoomActionKind.record,
+        gameId: room.games.last.id,
+        actorId: room.games.last.currentPlayerId,
+        balls: [ball],
+      ),
+    );
+    if (result != null && mounted) _clearDraft();
+  }
 
   void _showSection(_RoomSection section) {
     setState(() => _menuOpen = false);
@@ -254,6 +278,7 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
           if (_draftOwner != owner) {
             _balls.clear();
             _foul = false;
+            _autoBallPending = false;
             _draftOwner = owner;
           }
           final foul = _foul
@@ -313,6 +338,12 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                         fromNextGame: next.hasError,
                         onRetry: _retry,
                         onReload: () {
+                          ref
+                              .read(
+                                roomActionControllerProvider(room.id).notifier,
+                              )
+                              .discardFailure();
+                          _clearDraft();
                           _endTimer.invalidateSchedule();
                           ref.invalidate(roomByIdProvider(room.id));
                         },
@@ -325,7 +356,14 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                       const SizedBox(height: 16),
                     ],
 
-                    TurnScoresSection(room: room),
+                    TurnScoresSection(
+                      room: room,
+                      draftScores:
+                          playing &&
+                              (_foul || _autoBallPending && action.isLoading)
+                          ? preview?.scores
+                          : null,
+                    ),
 
                     if (playing) ...[
                       const SizedBox(height: 16),
@@ -333,19 +371,21 @@ class _InRoomState extends ConsumerState<InRoom> with WidgetsBindingObserver {
                         room: room,
                         remainingBalls: game.remainingBalls.toList()..sort(),
                         selectedBalls: _balls,
+                        autoBallPending: _autoBallPending,
+                        saveFailed: action.hasError,
                         foul: _foul,
                         foulLabel: foul.name,
-                        busy: busy,
+                        busy: busy || _autoBallPending,
                         preview: preview,
                         previewError: previewError,
-                        onToggleBall: (ball) => setState(
-                          () => _balls.contains(ball)
-                              ? _balls.remove(ball)
-                              : _balls.add(ball),
-                        ),
-                        onToggleFoul: (value) => setState(() => _foul = value),
+                        onToggleBall: (ball) => _potBall(room, ball),
+                        onToggleFoul: (value) => setState(() {
+                          _foul = value;
+                          if (!value) _balls.clear();
+                        }),
                         onClear: _clearDraft,
                         onRecord: () async {
+                          if (_busy || _autoBallPending) return;
                           final result = await _act(
                             room,
                             RoomAction(

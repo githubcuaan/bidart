@@ -6,15 +6,19 @@ class TurnActions extends StatelessWidget {
   const TurnActions({
     super.key,
     required this.clearEnabled,
+    required this.showClear,
     required this.recordEnabled,
     required this.saving,
+    required this.foul,
     required this.onClear,
     required this.onRecord,
   });
 
   final bool clearEnabled;
+  final bool showClear;
   final bool recordEnabled;
   final bool saving;
+  final bool foul;
   final VoidCallback onClear;
   final VoidCallback onRecord;
 
@@ -27,13 +31,20 @@ class TurnActions extends StatelessWidget {
       FilledButton(
         key: const ValueKey('record-turn'),
         onPressed: recordEnabled && !saving ? onRecord : null,
-        child: Text(saving ? 'Đang lưu…' : 'Xác nhận cú đánh'),
+        child: Text(
+          saving
+              ? 'Đang lưu…'
+              : foul
+              ? 'Xác nhận cú lỗi'
+              : 'Cơ tiếp (đánh hụt)',
+        ),
       ),
-      TextButton(
-        key: const ValueKey('clear-turn-draft'),
-        onPressed: clearEnabled ? onClear : null,
-        child: const Text('Xoá bản nháp'),
-      ),
+      if (showClear)
+        TextButton(
+          key: const ValueKey('clear-turn-draft'),
+          onPressed: clearEnabled ? onClear : null,
+          child: const Text('Bỏ chọn bi lỗi'),
+        ),
     ],
   );
 }

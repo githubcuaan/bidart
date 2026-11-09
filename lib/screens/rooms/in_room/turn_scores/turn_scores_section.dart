@@ -10,9 +10,12 @@ import 'package:flutter/material.dart';
 /// The first row is the player holding the turn, followed by the rotation.
 /// The payer keeps its natural place with the red risk badge.
 class TurnScoresSection extends StatelessWidget {
-  const TurnScoresSection({super.key, required this.room});
+  const TurnScoresSection({super.key, required this.room, this.draftScores});
 
   final Room room;
+
+  /// Scores calculated from the unsaved shot. Roles still reflect the saved room.
+  final Map<String, int>? draftScores;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,7 @@ class TurnScoresSection extends StatelessWidget {
     final scheme = theme.colorScheme;
     final colors = AppSemanticColors.of(context);
     final green = colors.live;
-    final data = TurnScoreboardData.fromRoom(room);
+    final data = TurnScoreboardData.fromRoom(room, scores: draftScores);
 
     return SectionCard(
       collapsible: false,
@@ -58,6 +61,17 @@ class TurnScoresSection extends StatelessWidget {
           ),
 
           const SizedBox(height: 10),
+          if (draftScores != null) ...[
+            Text(
+              'Điểm tạm tính · Xác nhận cú đánh để lưu',
+              key: const ValueKey('draft-score-label'),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: scheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           TurnScoresReorderColumn(entries: data.entries, data: data),
         ],
       ),

@@ -11,6 +11,8 @@ class TurnSection extends StatelessWidget {
     required this.room,
     required this.remainingBalls,
     required this.selectedBalls,
+    required this.autoBallPending,
+    required this.saveFailed,
     required this.foul,
     required this.foulLabel,
     required this.busy,
@@ -25,6 +27,8 @@ class TurnSection extends StatelessWidget {
   final Room room;
   final List<int> remainingBalls;
   final Set<int> selectedBalls;
+  final bool autoBallPending;
+  final bool saveFailed;
   final bool foul;
   final String foulLabel;
   final bool busy;
@@ -39,11 +43,13 @@ class TurnSection extends StatelessWidget {
   Widget build(BuildContext context) => SectionCard(
     icon: Icons.sports_esports_outlined,
     title: 'Ghi nhận lượt',
-    description: 'Chọn bi đã ăn, thêm lỗi nếu có rồi xác nhận.',
+    description: 'Chạm bi để lưu; bật lỗi rồi xác nhận cú lỗi.',
     child: TurnDraftPanel(
       room: room,
       remainingBalls: remainingBalls,
       selectedBalls: selectedBalls,
+      autoBallPending: autoBallPending,
+      saveFailed: saveFailed,
       foul: foul,
       foulLabel: foulLabel,
       busy: busy,
