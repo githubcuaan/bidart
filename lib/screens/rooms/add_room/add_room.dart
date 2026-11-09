@@ -67,7 +67,9 @@ class _AddRoomState extends ConsumerState<AddRoom> {
         ? state.draft
         : CreateRoomDraft();
     _ownerId = saved.ownerId;
-    _name = TextEditingController(text: saved.name);
+    _name = TextEditingController(
+      text: saved.name.isNotEmpty ? saved.name : _todayRoomName(),
+    );
     _templateName = TextEditingController();
     _duration = TextEditingController(
       text: saved.endConditions.durationSeconds?.toString() ?? '',
@@ -98,6 +100,12 @@ class _AddRoomState extends ConsumerState<AddRoom> {
     displayName: '',
     joinedAt: ref.read(clockProvider)(),
   );
+
+  String _todayRoomName() {
+    final today = ref.read(clockProvider)();
+    return '${today.day.toString().padLeft(2, '0')}/'
+        '${today.month.toString().padLeft(2, '0')}/${today.year}';
+  }
 
   @override
   void dispose() {

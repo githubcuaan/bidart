@@ -185,6 +185,15 @@ void main() {
     return receipt.room;
   }
 
+  testWidgets('room name defaults to today', (tester) async {
+    await pump(tester, const AddRoom());
+
+    expect(
+      tester.widget<TextField>(key('room-name')).controller!.text,
+      '15/10/2026',
+    );
+  });
+
   testWidgets('form rejects blank and duplicate names; enforces 2–5 guests', (
     tester,
   ) async {
