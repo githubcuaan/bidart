@@ -446,6 +446,25 @@ class _AddRoomState extends ConsumerState<AddRoom> {
               enabled: !saving,
               onSave: _saveTemplate,
               onApply: _applyTemplate,
+              onApplyPreset: () => _applyTemplate(
+                RuleTemplate(
+                  id: 'preset-3-6-9',
+                  name: '3-6-9',
+                  createdAt: DateTime.now(),
+                  ballPoints: {
+                    for (final ball in _balls)
+                      ball: BallPointConfig(
+                        enabled: ball == 3 || ball == 6 || ball == 9,
+                        points: switch (ball) {
+                          3 => 1,
+                          6 => 2,
+                          9 => 3,
+                          _ => 0,
+                        },
+                      ),
+                  },
+                ),
+              ),
             ),
           ],
           if (_step == 2) ...[

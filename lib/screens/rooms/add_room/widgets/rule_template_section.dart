@@ -14,6 +14,7 @@ class RuleTemplateSection extends ConsumerWidget {
     required this.enabled,
     required this.onSave,
     required this.onApply,
+    required this.onApplyPreset,
   });
 
   final TextEditingController templateName;
@@ -22,6 +23,7 @@ class RuleTemplateSection extends ConsumerWidget {
   /// Returns the message to show in the snackbar.
   final Future<String> Function() onSave;
   final ValueChanged<RuleTemplate> onApply;
+  final VoidCallback onApplyPreset;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,6 +56,11 @@ class RuleTemplateSection extends ConsumerWidget {
             label: Text(saveState.isLoading ? 'Đang lưu mẫu…' : 'Lưu mẫu luật'),
           ),
           SizedBox(height: 4),
+          ActionChip(
+            key: const ValueKey('apply-preset-3-6-9'),
+            label: const Text('3-6-9 (1-2-3 điểm)'),
+            onPressed: enabled ? onApplyPreset : null,
+          ),
           AsyncContent<List<RuleTemplate>>(
             value: ref.watch(ruleTemplateListProvider),
             loadingBuilder: (_) => const SizedBox.shrink(),
