@@ -53,12 +53,12 @@ void main() {
     expect(find.byType(AppBar), findsOneWidget);
     expect(appBarBrand(), findsOneWidget);
     expect(find.text('BiDART'), findsOneWidget);
-    expect(find.byType(NavigationDestination), findsNWidgets(5));
+    expect(find.byType(NavigationDestination), findsNWidgets(2));
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Phòng'), findsOneWidget);
-    expect(find.text('Tin nhắn'), findsOneWidget);
+    expect(find.text('Tin nhắn'), findsNothing);
 
-    for (final tab in ['Home', 'Phòng', 'Bản đồ', 'Đối thủ', 'Tin nhắn']) {
+    for (final tab in ['Home', 'Phòng']) {
       await openTab(tester, tab);
       expect(find.byType(Scaffold), findsOneWidget);
       expect(find.byType(AppBar), findsOneWidget);
@@ -93,8 +93,8 @@ void main() {
       isNotNull,
     );
 
-    await openTab(tester, 'Bản đồ');
-    expect(find.byType(Maps), findsOneWidget);
+    await openTab(tester, 'Home');
+    expect(find.byType(Home), findsOneWidget);
     expect(appBarBrand(), findsOneWidget);
 
     await openTab(tester, 'Phòng');
@@ -111,7 +111,7 @@ void main() {
 
   testWidgets('Drawer opens profile above the active tab', (tester) async {
     await pumpApp(tester);
-    await openTab(tester, 'Bản đồ');
+    await openTab(tester, 'Phòng');
 
     expect(appBarBrand(), findsOneWidget);
     await tester.tap(find.byTooltip('Mở hồ sơ'));

@@ -16,9 +16,7 @@ class Navibar extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: scheme.outlineVariant),
-        ),
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
       ),
       child: NavigationBar(
         selectedIndex: _selectedIndex,
@@ -34,21 +32,21 @@ class Navibar extends StatelessWidget {
             selectedIcon: Icon(Icons.list_alt),
             label: 'Phòng',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.map_outlined),
-            selectedIcon: Icon(Icons.map),
-            label: 'Bản đồ',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outlined),
-            selectedIcon: Icon(Icons.people),
-            label: 'Đối thủ',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            selectedIcon: Icon(Icons.chat_bubble),
-            label: 'Tin nhắn',
-          ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.map_outlined),
+          //   selectedIcon: Icon(Icons.map),
+          //   label: 'Bản đồ',
+          // ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.people_outlined),
+          //   selectedIcon: Icon(Icons.people),
+          //   label: 'Đối thủ',
+          // ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.chat_bubble_outline),
+          //   selectedIcon: Icon(Icons.chat_bubble),
+          //   label: 'Tin nhắn',
+          // ),
         ],
       ),
     );

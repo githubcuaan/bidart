@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:bidart/screens/chat/chat_list_screen.dart';
 import 'package:bidart/screens/home/home.dart';
-import 'package:bidart/screens/maps.dart';
-import 'package:bidart/screens/people/people.dart';
 import 'package:bidart/screens/profile.dart';
 import 'package:bidart/screens/rooms/add_room/add_room.dart';
 import 'package:bidart/screens/rooms/rooms.dart';
@@ -48,15 +45,15 @@ class _MainscreenState extends State<Mainscreen> {
         children: [
           Home(onOpenRooms: () => setState(() => _indexSelected = 1)),
           const Rooms(),
-          const Maps(),
-          const People(),
-          ChatListScreen(
-            onExplorePeople: () {
-              setState(() {
-                _indexSelected = 2;
-              });
-            },
-          ),
+          // const Maps(),
+          // const People(),
+          // ChatListScreen(
+          //   onExplorePeople: () {
+          //     setState(() {
+          //       _indexSelected = 2;
+          //     });
+          //   },
+          // ),
         ],
       ),
       bottomNavigationBar: Navibar(
